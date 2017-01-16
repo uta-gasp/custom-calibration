@@ -1,0 +1,15 @@
+#include "assets.h"
+
+IDR_BACKGROUND   IMAGE "background.png"
+IDR_FIREFLY_RED  IMAGE "firefly_red.png"
+IDR_FIREFLY_BLUE IMAGE "firefly_blue.png"
+IDR_EYEBOX       IMAGE "eyebox.png"
+IDR_EYE          IMAGE "eye.png"
+IDR_WARNING      IMAGE "warning.png"
+IDR_START        IMAGE "start.png"
+IDR_CLOSE        IMAGE "close.png"
+IDR_CALIBPLOT    IMAGE "calibplot.png"
+IDR_RESTART      IMAGE "restart.png"
+IDR_LAMP         IMAGE "lamp.png"
+IDR_WORM         IMAGE "worm.png"
+
