@@ -1,3 +1,4 @@
-# Reading
+# Custom calibration for kids
 
-Custom calibration UI (BCB/VCL) for myGaze eye tracker.
+Custom calibration UI for myGaze eye tracker.
+For Borland C++ Builder (BCB with VCL)
