@@ -350,6 +350,17 @@ void __fastcall TfrmCalibration::FormMouseMove(TObject *Sender,
 	setSample(	SampleStruct(__int64(0), left, right) );
 
 	iCalibPlot->calibPointHitTest(X, Y);
+
+	if (iEyeBox->IsVisible)
+	{
+		iEyeBox->Start->AnimationIndex = iEyeBox->Start->hitTest(X, Y) ? 1 : 0;
+		iEyeBox->Close->AnimationIndex = iEyeBox->Close->hitTest(X, Y) ? 1 : 0;
+	}
+	else if (iCalibPlot->IsVisible)
+	{
+		iCalibPlot->Restart->AnimationIndex = iCalibPlot->Restart->hitTest(X, Y) ? 1 : 0;
+		iCalibPlot->Close->AnimationIndex = iCalibPlot->Close->hitTest(X, Y) ? 1 : 0;
+	}
 }
 //---------------------------------------------------------------------------
 

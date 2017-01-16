@@ -39,6 +39,7 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 
 	iStart = new TiAnimation();
 	iStart->addFrames(IDR_START, 120, 48);
+	iStart->addFrames(IDR_START_HOVER, 120, 48);
 	iStart->placeTo(
 			iBackground->X - iStart->Width/2 - 4,
 			iBackground->Y + iBackground->Height/2 + 4 + iStart->Height/2
@@ -46,6 +47,7 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 
 	iClose = new TiAnimation();
 	iClose->addFrames(IDR_CLOSE, 120, 48);
+	iClose->addFrames(IDR_CLOSE_HOVER, 120, 48);
 	iClose->placeTo(
 			iBackground->X + iClose->Width/2 + 4,
 			iBackground->Y + iBackground->Height/2 + 4 + iClose->Height/2

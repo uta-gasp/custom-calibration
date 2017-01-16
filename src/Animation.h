@@ -74,7 +74,7 @@ class TiAnimation : public TObject
 		bool __fastcall GetIsPaintRequested();
 		bool __fastcall GetIsVisible();
 
-		void __fastcall SetAnimationIndex(int aIndex);
+		void __fastcall SetAnimationIndex(int aValue);
 		int  __fastcall GetAnimationSpeed();
 		void __fastcall SetAnimationSpeed(int aValue);
 		int  __fastcall GetFadingDuration();

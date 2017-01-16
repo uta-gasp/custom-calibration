@@ -364,13 +364,13 @@ void __fastcall TiAnimation::SetFadingDuration(int aValue)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::SetAnimationIndex(int aIndex)
+void __fastcall TiAnimation::SetAnimationIndex(int aValue)
 {
-	if (aIndex < 0 || aIndex >= iAnimations.Count)
+	if (aValue < 0 || aValue >= iAnimations.Count || aValue == iAnimationIndex)
 		return;
 
-	iAnimationIndex = aIndex;
-	iAnimationFrames = iAnimations[aIndex];
+	iAnimationIndex = aValue;
+	iAnimationFrames = iAnimations[iAnimationIndex];
 	iFrameCount = iAnimationFrames->GetWidth() / iWidth;
 	iFrameIndex = iFrameCount > 0 ? 0 : -1;
 	iAnimationDirection = 1;

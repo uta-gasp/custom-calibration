@@ -37,6 +37,7 @@ __fastcall TiCalibPlot::TiCalibPlot(TiAnimationManager* aManager, TRect aBox,
 
 	iRestart = new TiAnimation(false);
 	iRestart->addFrames(IDR_RESTART, 120, 48);
+	iRestart->addFrames(IDR_RESTART_HOVER, 120, 48);
 	iRestart->placeTo(
 			iBackground->X - iRestart->Width/2 - 4,
 			iBackground->Y + iBackground->Height/2 + 4 + iRestart->Height/2
@@ -44,6 +45,7 @@ __fastcall TiCalibPlot::TiCalibPlot(TiAnimationManager* aManager, TRect aBox,
 
 	iClose = new TiAnimation(false);
 	iClose->addFrames(IDR_CLOSE, 120, 48);
+	iClose->addFrames(IDR_CLOSE_HOVER, 120, 48);
 	iClose->placeTo(
 			iBackground->X + iClose->Width/2 + 4,
 			iBackground->Y + iBackground->Height/2 + 4 + iClose->Height/2
