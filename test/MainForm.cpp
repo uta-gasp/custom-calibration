@@ -60,7 +60,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onCreaturesPaint(TObject* aSender)
+void __fastcall TfrmMainForm::onCreaturesPaint(TObject* aSender, EiUpdateType aUpdateType)
 {
 	Gdiplus::Rect destRect(0, 0, Panel1->Width, Panel1->Height);
 
@@ -168,7 +168,7 @@ void __fastcall TfrmMainForm::CheckBox1Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::FormPaint(TObject *Sender)
 {
-	onCreaturesPaint(Sender);
+	onCreaturesPaint(Sender, updAll);
 }
 
 //---------------------------------------------------------------------------

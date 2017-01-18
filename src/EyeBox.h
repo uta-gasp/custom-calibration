@@ -38,7 +38,7 @@ class TiEyeBox : public TObject
 		void __fastcall right(EyeDataStruct& aEyeData);
 		void __fastcall setTrackingStability(bool aStable);
 
-		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
 		__property TRect Rect = {read = iBox};
 		__property TiAnimation* Background = {read = iBackground};

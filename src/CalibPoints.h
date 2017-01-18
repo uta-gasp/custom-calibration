@@ -20,6 +20,7 @@ class TiCalibPoints
 		bool iIsSinglePointMode;
 
 		int __fastcall GetCount();
+		TiCalibPoint* __fastcall GetCurrent();
 		void __fastcall Rearrange();
 
 	public:
@@ -31,13 +32,14 @@ class TiCalibPoints
 		void __fastcall lightOffCurrent();
 		void __fastcall prepare(int aCalibPointIndex = -1);
 
-		TiCalibPoint* __fastcall TiCalibPoints::next();
+		TiCalibPoint* __fastcall next();
 
-		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
 		TiCalibPoint* operator[](int aIndex);
 
 		__property int Count = {read = GetCount};
+		__property TiCalibPoint* Current = {read = GetCurrent};
 		__property int CurrentPointIndex = {read = iCurrentPointIndex};
 		__property bool IsSinglePointMode = {read = iIsSinglePointMode};
 };

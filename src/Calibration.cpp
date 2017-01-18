@@ -20,6 +20,7 @@ const int KEyeBoxHeight = 120;
 __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
+		iStaticBitmap(NULL),
 		FOnDebug(NULL),
 		FOnStart(NULL),
 		FOnRecalibrateSinglePoint(NULL),
@@ -34,6 +35,9 @@ __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 //---------------------------------------------------------------------------
 __fastcall TfrmCalibration::~TfrmCalibration()
 {
+	if (iStaticBitmap)
+		delete iStaticBitmap;
+
 	Gdiplus::GdiplusShutdown(m_gdiplusToken);
 }
 
@@ -52,30 +56,50 @@ void __fastcall TfrmCalibration::setTrackingStability(bool aStable)
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender)
+void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aUpdateType)
 {
 	Gdiplus::Rect destRect(0, 0, Width, Height);
 
-//	Gdiplus::Bitmap* background;
-//	loadBitmapFromPNG(IDR_BACKGROUND, &background);
-//	Gdiplus::Graphics g(background);
+	if (!iStaticBitmap)
+	{
+		aUpdateType = updAll;
+		iStaticBitmap = new Gdiplus::Bitmap(
+				Width,//iBackground->GetWidth(),
+				Height,//iBackground->GetHeight(),
+				iGraphics);
+	}
 
-	Gdiplus::Bitmap buffer(Width, Height, iGraphics);
-	Gdiplus::Graphics g(&buffer);
+	if (aUpdateType & updStatic)
+	{
+		Gdiplus::Graphics g(iStaticBitmap);
+		Gdiplus::Graphics* graphics = &g;
 
-	g.DrawImage(iBackground, destRect);
+		graphics->DrawImage(iBackground, 0, 0);
+		iCalibPoints->paintTo(graphics, updStatic);
+		iEyeBox->paintTo(graphics, updStatic);
 
-	iCalibPoints->paintTo(&g);
+		iCalibPlot->paintTo(graphics);
+		iTarget->paintTo(graphics);
 
-	iEyeBox->paintTo(&g);
-	iCalibPlot->paintTo(&g);
-	iFireFly->paintTo(&g);
+		if (aUpdateType == updStatic)
+			iGraphics->DrawImage(iStaticBitmap, destRect);
+	}
 
-//	iGraphics->DrawImage(background, destRect,
-//			0, 0, Width, Height,
-//			Gdiplus::UnitPixel);
-	iGraphics->DrawImage(&buffer, destRect);
-//	delete background;
+	if (aUpdateType & updNonStatic)
+	{
+		Gdiplus::Bitmap buffer(Width, Height, iGraphics);
+		Gdiplus::Graphics g(&buffer);
+		Gdiplus::Graphics* graphics = &g;
+
+		graphics->DrawImage(iStaticBitmap, destRect);
+
+		iCalibPoints->paintTo(graphics, updNonStatic);
+		iEyeBox->paintTo(graphics, updNonStatic);
+
+		iFireFly->paintTo(graphics);
+
+		iGraphics->DrawImage(&buffer, 0, 0);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -120,6 +144,9 @@ void __fastcall TfrmCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmCalibration::onCalibPointTimeout(TObject* aSender)
 {
+	if (iTarget->IsVisible)
+		iTarget->hide();
+
 	if (iFireFly->IsVisible)
 	{
 		if (FOnDebug)
@@ -177,6 +204,9 @@ void __fastcall TfrmCalibration::MoveToNextPoint()
 	{
 		iFireFly->moveTo(calibPoint->X, calibPoint->Y);
 		iFireFly->AnimationIndex = 0;
+
+		iTarget->placeTo(calibPoint->X, calibPoint->Y);
+		iTarget->show();
 	}
 	else
 	{
@@ -196,6 +226,9 @@ void __fastcall TfrmCalibration::Finish()
 {
 	iFireFly->moveTo(Width / 2, 32);
 	iFireFly->fadeOut();
+
+	if (iTarget->IsVisible)
+		iTarget->hide();
 }
 
 //---------------------------------------------------------------------------
@@ -263,7 +296,11 @@ void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 		(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
 	), Width, Height);
 
-	iFireFly = new TiAnimation(false);
+	iTarget = new TiAnimation(false);
+	iTarget->addFrames(IDR_TARGET, 45);
+	iObjects->add(iTarget);
+
+	iFireFly = new TiAnimation(false, false);
 	iFireFly->addFrames(IDR_FIREFLY_RED, 64);
 	iFireFly->addFrames(IDR_FIREFLY_BLUE, 64);
 	iFireFly->LoopAnimation = true;

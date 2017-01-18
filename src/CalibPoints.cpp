@@ -90,10 +90,10 @@ TiCalibPoint* __fastcall TiCalibPoints::next()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoints::paintTo(Gdiplus::Graphics* aGraphics)
+void __fastcall TiCalibPoints::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType)
 {
 	for (int i = 0; i < iPoints.Count; i++)
-		iPoints[i]->paintTo(aGraphics);
+		iPoints[i]->paintTo(aGraphics, aUpdateType);
 }
 
 //---------------------------------------------------------------------------
@@ -107,6 +107,12 @@ TiCalibPoint* TiCalibPoints::operator[](int aIndex)
 int __fastcall TiCalibPoints::GetCount()
 {
 	return iPoints.Count;
+}
+
+//---------------------------------------------------------------------------
+TiCalibPoint* __fastcall TiCalibPoints::GetCurrent()
+{
+	return iCurrentPointIndex < 0 || iCurrentPointIndex >= iPoints.Count ? NULL : iPoints[iCurrentPointIndex];
 }
 
 //---------------------------------------------------------------------------

@@ -26,10 +26,10 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 	iBackground->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + aBox.Height()/2);
 	iBackground->OnFadingFinished = onBackgroundFadingFinished;
 
-	iLeft = new TiAnimation(false);
+	iLeft = new TiAnimation(false, false);
 	iLeft->addFrames(IDR_EYE, 32);
 
-	iRight = new TiAnimation(false);
+	iRight = new TiAnimation(false, false);
 	iRight->addFrames(IDR_EYE, 32);
 
 	iWarning = new TiAnimation(false);
@@ -104,14 +104,23 @@ void __fastcall TiEyeBox::setTrackingStability(bool aStable)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics)
+void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType)
 {
-	iBackground->paintTo(aGraphics);
-	iLeft->paintTo(aGraphics);
-	iRight->paintTo(aGraphics);
-	iWarning->paintTo(aGraphics);
-	iStart->paintTo(aGraphics);
-	iClose->paintTo(aGraphics);
+	if (aUpdateType & updStatic)
+		iBackground->paintTo(aGraphics);
+
+	if (aUpdateType & updNonStatic)
+	{
+		iLeft->paintTo(aGraphics);
+		iRight->paintTo(aGraphics);
+	}
+
+	if (aUpdateType & updStatic)
+	{
+		iWarning->paintTo(aGraphics);
+		iStart->paintTo(aGraphics);
+		iClose->paintTo(aGraphics);
+	}
 }
 
 //---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #define IDR_BACKGROUND    1000
 #define IDR_FIREFLY_RED   1100
 #define IDR_FIREFLY_BLUE  1101
+#define IDR_TARGET        1110
 #define IDR_EYEBOX        1200
 #define IDR_EYE           1201
 #define IDR_WARNING       1202

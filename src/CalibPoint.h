@@ -45,7 +45,7 @@ class TiCalibPoint
 		void __fastcall lightOn();
 		void __fastcall lightOff();
 
-		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
 		__property int X = {read = iX};
 		__property int Y = {read = iY};

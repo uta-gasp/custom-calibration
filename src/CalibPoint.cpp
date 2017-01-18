@@ -10,9 +10,9 @@
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
-const int KWormCountMin = 1;
-const int KWormCountMax = 3;
-const int KWormDistanceMin = 50;
+const int KWormCountMin = 3;
+const int KWormCountMax = 6;
+const int KWormDistanceMin = 70;
 const int KWormDistanceMax = 200;
 const int KWormAnimSpeedMin = 15;
 const int KWormAnimSpeedMax = 25;
@@ -21,7 +21,7 @@ const int KWormAnimSpeedMax = 25;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 __fastcall TiCalibPoint::TiWorm::TiWorm(int aLampX, int aLampY) :
-		TiAnimation(),
+		TiAnimation(true, false),
 		iLampX(aLampX),
 		iLampY(aLampY)
 {
@@ -72,7 +72,8 @@ __fastcall TiCalibPoint::TiCalibPoint(TiAnimationManager* aManager, int aX, int 
 	iWorms.DeleteContent = false;
 
 	iLamp = new TiAnimation();
-	iLamp->addFrames(IDR_LAMP, 128);
+	iLamp->Center = TPoint(100, 100);
+	iLamp->addFrames(IDR_LAMP, 200, 275);
 	iLamp->LoopAnimation = false;
 	iLamp->RewindAnimationAfterStop = false;
 	iLamp->AllowAnimationReversion = true;
@@ -118,11 +119,14 @@ void __fastcall TiCalibPoint::lightOff()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoint::paintTo(Gdiplus::Graphics* aGraphics)
+void __fastcall TiCalibPoint::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType)
 {
-	iLamp->paintTo(aGraphics);
-	for (int i = 0; i < iWorms.Count; i++)
-		iWorms[i]->paintTo(aGraphics);
+	if (aUpdateType & updStatic)
+		iLamp->paintTo(aGraphics);
+
+	if (aUpdateType & updNonStatic)
+		for (int i = 0; i < iWorms.Count; i++)
+			iWorms[i]->paintTo(aGraphics);
 }
 
 //---------------------------------------------------------------------------

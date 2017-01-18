@@ -43,6 +43,7 @@ class TiAnimation : public TObject
 		int iAnimationIndex;
 		int iFrameIndex;
 		int iFrameCount;
+		bool iIsStatic;
 		bool iLoopAnimation;
 		bool iRewindAnimationAfterStop;
 		bool iAllowAnimationReversion;
@@ -91,7 +92,7 @@ class TiAnimation : public TObject
 		void __fastcall onUpdateTimer(TObject* aSender);
 
 	public:
-		__fastcall TiAnimation(bool aVisible = true);
+		__fastcall TiAnimation(bool aVisible = true, bool aIsStatic = true);
 		__fastcall ~TiAnimation();
 
 		void __fastcall addFrames(const wchar_t* aPath, const wchar_t* aFileName, int aWidth, int aHeight = 0);
@@ -105,6 +106,9 @@ class TiAnimation : public TObject
 
 		void __fastcall fadeOut();
 		void __fastcall fadeIn();
+
+		void __fastcall show();
+		void __fastcall hide();
 
 		void __fastcall placeTo(int aX, int aY);
 		void __fastcall moveTo(int aX, int aY);
@@ -124,6 +128,7 @@ class TiAnimation : public TObject
 		__property int Y = {read = iY};
 		__property int Width = {read = iWidth};
 		__property int Height = {read = iHeight};
+		__property bool IsStatic = {read = iIsStatic};
 		__property bool IsAnimating = {read = GetIsAnimating};
 		__property bool IsMoving = {read = GetIsMoving};
 		__property bool IsRotating = {read = GetIsRotating};
@@ -153,15 +158,27 @@ class TiAnimation : public TObject
 };
 
 //---------------------------------------------------------------------------
+enum EiUpdateType
+{
+	updNone = 0,
+	updStatic = 1,
+	updNonStatic = 2,
+	updAll = 3
+};
+
+//---------------------------------------------------------------------------
 class TiAnimationManager : public TObject
 {
 	typedef TiDynArray<TiAnimation> TiAnimations;
+
+	public:
+		typedef void __fastcall (__closure *FiOnPaint)(System::TObject* Sender, EiUpdateType aUpdateType);
 
 	private:
 		TiAnimations iAnimations;
 		TTimer* iUpdateTimer;
 
-		TNotifyEvent FOnPaint;
+		FiOnPaint FOnPaint;
 
 		int  _fastcall GetAnimationCount();
 
@@ -189,7 +206,7 @@ class TiAnimationManager : public TObject
 
 		__property int AnimationCount = {read = GetAnimationCount};
 
-		__property TNotifyEvent OnPaint = {read = FOnPaint, write = FOnPaint};
+		__property FiOnPaint OnPaint = {read = FOnPaint, write = FOnPaint};
 };
 
 //---------------------------------------------------------------------------

@@ -14,7 +14,7 @@ const int KFadingStepCount = 10;
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-__fastcall TiAnimation::TiAnimation(bool aVisible) :
+__fastcall TiAnimation::TiAnimation(bool aVisible, bool aIsStatic) :
 	TObject(),
 	iWidth(16),
 	iHeight(16),
@@ -27,6 +27,7 @@ __fastcall TiAnimation::TiAnimation(bool aVisible) :
 	iCenter(-1, -1),
 	iAnimationIndex(-1),
 	iFrameIndex(-1),
+	iIsStatic(aIsStatic),
 	iLoopAnimation(true),
 	iRewindAnimationAfterStop(true),
 	iAllowAnimationReversion(false),
@@ -169,6 +170,26 @@ void __fastcall TiAnimation::fadeIn()
 	iFadingDirection = 1;
 	if (!iFadingTimer->Enabled)
 		iFadingTimer->Enabled = true;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiAnimation::show()
+{
+	if (iAlpha < 1.0)
+	{
+		iAlpha = 1.0;
+		iIsPaintRequested = true;
+	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiAnimation::hide()
+{
+	if (iAlpha > 0.0)
+	{
+		iAlpha = 0.0;
+		iIsPaintRequested = true;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -663,10 +684,18 @@ void __fastcall TiAnimationManager::onUpdateTimer(TObject* aSender)
 		return;
 
 	bool updateRequested = false;
+	bool onlyNonStatic = true;
 	for (int i = 0; i < iAnimations.Count; i++)
-		updateRequested = iAnimations[i]->IsPaintRequested || updateRequested;
+	{
+		TiAnimation* animation = iAnimations[i];
+		bool animationToUpdate = animation->IsPaintRequested;
+		updateRequested = animationToUpdate || updateRequested;
+
+		if (animationToUpdate && onlyNonStatic)
+			onlyNonStatic = !animation->IsStatic;
+	}
 
 	if (updateRequested)
-		FOnPaint(this);
+		FOnPaint(this, onlyNonStatic ? updNonStatic : updAll);
 }
 

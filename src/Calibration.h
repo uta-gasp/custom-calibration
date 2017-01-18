@@ -34,10 +34,12 @@ class TfrmCalibration : public TForm
 	private:
 		Gdiplus::Graphics* iGraphics;
 		Gdiplus::Bitmap* iBackground;
+		Gdiplus::Bitmap* iStaticBitmap;
 
 		TiEyeBox* iEyeBox;
 		TiCalibPlot* iCalibPlot;
 		TiAnimationManager* iObjects;
+		TiAnimation* iTarget;
 		TiAnimation* iFireFly;
 		TiTimeout* iTimeout;
 
@@ -51,7 +53,7 @@ class TfrmCalibration : public TForm
 		TNotifyEvent FOnFinished;
 		TNotifyEvent FOnAborted;
 
-		void __fastcall onObjectPaint(TObject* aSender);
+		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
 		void __fastcall onEyeBoxHidden(TObject* aSender);
 		void __fastcall onFireFlyFadingFisnihed(TObject* aSender);
 		void __fastcall onFireFlyMoveFisnihed(TObject* aSender);
