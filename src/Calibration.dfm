@@ -1,10 +1,10 @@
 object frmCalibration: TfrmCalibration
-  Left = 312
-  Top = 91
+  Left = 169
+  Top = 27
   BorderIcons = []
   BorderStyle = bsNone
-  ClientHeight = 591
-  ClientWidth = 783
+  ClientHeight = 700
+  ClientWidth = 926
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
