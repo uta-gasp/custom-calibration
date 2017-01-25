@@ -12,6 +12,7 @@
 #include "EyeBox.h"
 #include "CalibPlot.h"
 #include "CalibPoints.h"
+#include "Game.h"
 #include "utils.h"
 
 //---------------------------------------------------------------------------
@@ -38,6 +39,7 @@ class TfrmCalibration : public TForm
 
 		TiEyeBox* iEyeBox;
 		TiCalibPlot* iCalibPlot;
+		TiGame* iGame;
 		TiAnimationManager* iObjects;
 		TiAnimation* iBackground;
 		TiAnimation* iTarget;
@@ -60,6 +62,8 @@ class TfrmCalibration : public TForm
 		void __fastcall onFireFlyFadingFisnihed(TObject* aSender);
 		void __fastcall onFireFlyMoveFisnihed(TObject* aSender);
 		void __fastcall onCalibPointTimeout(TObject* aSender);
+		void __fastcall onBackgroundFadingFisnihed(TObject* aSender);
+		void __fastcall onGameFisnihed(TObject* aSender);
 
 		void __fastcall StartCalibration();
 		void __fastcall RestartCalibration(int aRecalibrationPointIndex = -1);

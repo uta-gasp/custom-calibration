@@ -26,6 +26,7 @@ __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
+		iGame(NULL),
 		iStaticBitmap(NULL),
 		FOnDebug(NULL),
 		FOnStart(NULL),
@@ -93,6 +94,9 @@ void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aU
 
 		if (aUpdateType == updStatic)
 			iGraphics->DrawImage(iStaticBitmap, destRect);
+
+		if (iGame)
+			iGame->paintTo(graphics);
 	}
 
 	if (aUpdateType & updNonStatic)
@@ -164,6 +168,25 @@ void __fastcall TfrmCalibration::onCalibPointTimeout(TObject* aSender)
 
 		iIsWaitingToAcceptPoint = true;
 	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCalibration::onBackgroundFadingFisnihed(TObject* aSender)
+{
+	if (iBackground->IsVisible)
+	{
+		if (!iGame)
+		{
+			iGame = new TiGame(iObjects);
+			iGame->start(10);
+		}
+	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCalibration::onGameFisnihed(TObject* aSender)
+{
+	Done();
 }
 
 //---------------------------------------------------------------------------
@@ -305,6 +328,7 @@ void __fastcall TfrmCalibration::UpdateCalibPlot()
 	else
 	{
 		iBackground->fadeIn();
+
 		//iCalibPlot->IsVisible = true;
 	}
 }
@@ -325,6 +349,7 @@ void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 	iBackground = new TiAnimation(false);
 	iBackground->addFrames(IDR_BACKGROUND, 1366, 768);
 	iBackground->placeTo(Width / 2, Height / 2);
+	iBackground->OnFadingFinished = onBackgroundFadingFisnihed;
 	iObjects->add(iBackground);
 
 	iCalibPoints = new TiCalibPoints(iObjects, Width, Height);
@@ -361,6 +386,9 @@ void __fastcall TfrmCalibration::FormDestroy(TObject *Sender)
 	delete iCalibPoints;
 	delete iEyeBox;
 	delete iCalibPlot;
+	if (iGame)
+		delete iGame;
+
 	//delete iBackground;
 	delete iObjects;
 	delete iGraphics;
@@ -391,6 +419,12 @@ void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
 			Done();
 		else if (CalibrationPointQualityStruct* focusedCalibPoint = iCalibPlot->calibPointHitTest(X, Y))
 			RestartCalibration(focusedCalibPoint->number);
+	}
+	else if (iGame && !iTimeout)
+	{
+		bool isFinished = iGame->click(X, Y);
+		if (isFinished)
+			TiTimeout::run(2500, onGameFisnihed, &iTimeout);
 	}
 }
 
