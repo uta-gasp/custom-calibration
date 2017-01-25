@@ -11,37 +11,47 @@
 //---------------------------------------------------------------------------
 class TiCalibPoint
 {
-	class TiWorm : public TiAnimation
+	class TiOlio;
+	typedef TiDynArray<TiOlio> TiOlios;
+
+	class TiOlio : public TiAnimation
 	{
 		private:
 			int iLampX;
 			int iLampY;
-			
+
 			double iDistanceToLamp;
-			double iOriginalAngle;
+			double iDirection;
+
+			void __fastcall onAnimationFinished(TObject* aSender);
 
 		public:
-			__fastcall TiWorm(int aLampX, int aLampY);
+			__fastcall TiOlio(int aLampX, int aLampY, double aDirectionFromLamp = -1);
 
-			void __fastcall moveAway();
-			void __fastcall moveClose();
+			static double __fastcall getDirectionFromLamp(TiOlios* aOthers, int aMaxCount); // in degrees
+
+			void __fastcall appear();
+			void __fastcall disappear();
+			//void __fastcall moveAway();
+			//void __fastcall moveClose();
+			__property double Direction = {read = iDirection};
 	};
-
-	typedef TiDynArray<TiWorm> TiWorms;
 
 	private:
 		int iX;
 		int iY;
 		bool iEnabled;
 		TiAnimation* iLamp;
-		TiWorms iWorms;
+		TiOlios iOlios;
 
-		void __fastcall onWormsHideRequest(TObject* aSender);
-		void __fastcall onWormFadingFinished(TObject* aSender);
+		//void __fastcall onOlioHideRequest(TObject* aSender);
+		//void __fastcall onOlioFadingFinished(TObject* aSender);
 
 	public:
 		__fastcall TiCalibPoint(TiAnimationManager* aManager, int aX, int aY);
 
+		void __fastcall show();
+		void __fastcall hide();
 		void __fastcall lightOn();
 		void __fastcall lightOff();
 

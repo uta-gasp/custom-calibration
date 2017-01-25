@@ -1,6 +1,5 @@
 #define IDR_BACKGROUND    1000
-#define IDR_FIREFLY_RED   1100
-#define IDR_FIREFLY_BLUE  1101
+#define IDR_FIREFLY       1100
 #define IDR_TARGET        1110
 #define IDR_EYEBOX        1200
 #define IDR_EYE           1201
@@ -13,5 +12,7 @@
 #define IDR_CLOSE         1320
 #define IDR_CLOSE_HOVER   1321
 #define IDR_LAMP          1400
-#define IDR_WORM          1410
+#define IDR_OLIO_IDLE     1410
+#define IDR_OLIO_FADEIN   1411
+#define IDR_OLIO_FADEOUT  1412
 

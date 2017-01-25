@@ -4,6 +4,9 @@
 #include "fakeMyGaze.h"
 
 //---------------------------------------------------------------------------
+#include <math.h>
+
+//---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
@@ -16,10 +19,13 @@ TfrmCalibration* frmCalibration;
 const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
+const int KMaxAllowedCalibQualityOffset = 22;
+
 //---------------------------------------------------------------------------
 __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
+		iIsWaitingToAcceptPoint(false),
 		iStaticBitmap(NULL),
 		FOnDebug(NULL),
 		FOnStart(NULL),
@@ -30,6 +36,8 @@ __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 		FOnAborted(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
+	randomize();
 }
 
 //---------------------------------------------------------------------------
@@ -63,10 +71,7 @@ void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aU
 	if (!iStaticBitmap)
 	{
 		aUpdateType = updAll;
-		iStaticBitmap = new Gdiplus::Bitmap(
-				Width,//iBackground->GetWidth(),
-				Height,//iBackground->GetHeight(),
-				iGraphics);
+		iStaticBitmap = new Gdiplus::Bitmap(Width, Height, iGraphics);
 	}
 
 	if (aUpdateType & updStatic)
@@ -74,7 +79,12 @@ void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aU
 		Gdiplus::Graphics g(iStaticBitmap);
 		Gdiplus::Graphics* graphics = &g;
 
-		graphics->DrawImage(iBackground, 0, 0);
+		//graphics->DrawImage(iBackground, 0, 0);
+		Gdiplus::SolidBrush blackBrush(Gdiplus::Color(255, 0, 0, 0));
+		Gdiplus::Rect fillRect(0, 0, Width, Height);
+		graphics->FillRectangle(&blackBrush, fillRect);
+
+		iBackground->paintTo(graphics);
 		iCalibPoints->paintTo(graphics, updStatic);
 		iEyeBox->paintTo(graphics, updStatic);
 
@@ -136,8 +146,8 @@ void __fastcall TfrmCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 		if (FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
 			FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
-		iFireFly->AnimationIndex = 1;
-		TiTimeout::run(2000, onCalibPointTimeout, &iTimeout);
+		iFireFly->stopAnimation();
+		TiTimeout::run(500, onCalibPointTimeout, &iTimeout);
 	}
 }
 
@@ -150,11 +160,9 @@ void __fastcall TfrmCalibration::onCalibPointTimeout(TObject* aSender)
 	if (iFireFly->IsVisible)
 	{
 		if (FOnDebug)
-			FOnDebug(this, "point accepted");
-		if (FOnPointAccept && iCalibPoints->CurrentPointIndex >= 0)
-			FOnPointAccept(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+			FOnDebug(this, "point ready - 2");
 
-		MoveToNextPoint();
+		iIsWaitingToAcceptPoint = true;
 	}
 }
 
@@ -176,22 +184,34 @@ void __fastcall TfrmCalibration::StartCalibration()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::RestartCalibration(CalibrationPointQualityStruct* aCalibPoint)
+void __fastcall TfrmCalibration::RestartCalibration(int aRecalibrationPointIndex)
 {
 	if (FOnDebug)
 		FOnDebug(this, "restart");
 
 	iCalibPlot->IsVisible = false;
 
-	if (!aCalibPoint)
+	bool isSinglePoint = aRecalibrationPointIndex >= 0;
+	if (!isSinglePoint)
 		iEyeBox->IsVisible = true;
 	else
 		iFireFly->fadeIn();
 
-	iCalibPoints->prepare(aCalibPoint ? aCalibPoint->number : -1);
+	iCalibPoints->prepare(aRecalibrationPointIndex);
 
-	if (iCalibPoints->IsSinglePointMode && FOnRecalibrateSinglePoint)
+	if (isSinglePoint && FOnRecalibrateSinglePoint)
 		FOnRecalibrateSinglePoint(this);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCalibration::PointDone()
+{
+	iIsWaitingToAcceptPoint = false;
+
+	if (FOnPointAccept && iCalibPoints->CurrentPointIndex >= 0)
+		FOnPointAccept(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+
+	MoveToNextPoint();
 }
 
 //---------------------------------------------------------------------------
@@ -202,11 +222,14 @@ void __fastcall TfrmCalibration::MoveToNextPoint()
 	TiCalibPoint* calibPoint = iCalibPoints->next();
 	if (calibPoint)
 	{
+		iFireFly->setOrientation(calibPoint->X - iFireFly->X, calibPoint->Y - iFireFly->Y);
 		iFireFly->moveTo(calibPoint->X, calibPoint->Y);
-		iFireFly->AnimationIndex = 0;
+		iFireFly->startAnimation();
 
 		iTarget->placeTo(calibPoint->X, calibPoint->Y);
 		iTarget->show();
+
+		calibPoint->show();
 	}
 	else
 	{
@@ -224,8 +247,12 @@ void __fastcall TfrmCalibration::MoveToNextPoint()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCalibration::Finish()
 {
+	iIsWaitingToAcceptPoint = false;
+
+	iFireFly->setOrientation(Width / 2 - iFireFly->X, 32 - iFireFly->Y);
 	iFireFly->moveTo(Width / 2, 32);
 	iFireFly->fadeOut();
+	iFireFly->startAnimation();
 
 	if (iTarget->IsVisible)
 		iTarget->hide();
@@ -243,7 +270,7 @@ void __fastcall TfrmCalibration::Abort()
 		iTimeout->kill();
 
 	Finish();
-	
+
 	iCalibPoints->lightOff();
 
 	iEyeBox->IsVisible = true;
@@ -269,19 +296,36 @@ void __fastcall TfrmCalibration::UpdateCalibPlot()
 				randInRange(10, 15), randInRange(10, 15),
 				0, 0));
 	}
-	iCalibPlot->IsVisible = true;
+
+	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
+	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset)
+	{
+		RestartCalibration(worstCalibPoint.ID);
+	}
+	else
+	{
+		iBackground->fadeIn();
+		//iCalibPlot->IsVisible = true;
+	}
 }
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 {
+	SetBounds(0, 0, Screen->Width, Screen->Height);
+
 	iGraphics = new Gdiplus::Graphics(Handle, false);
 
-	loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
+	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
 
 	iObjects = new TiAnimationManager();
 	iObjects->OnPaint = onObjectPaint;
+
+	iBackground = new TiAnimation(false);
+	iBackground->addFrames(IDR_BACKGROUND, 1366, 768);
+	iBackground->placeTo(Width / 2, Height / 2);
+	iObjects->add(iBackground);
 
 	iCalibPoints = new TiCalibPoints(iObjects, Width, Height);
 
@@ -301,10 +345,10 @@ void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 	iObjects->add(iTarget);
 
 	iFireFly = new TiAnimation(false, false);
-	iFireFly->addFrames(IDR_FIREFLY_RED, 64);
-	iFireFly->addFrames(IDR_FIREFLY_BLUE, 64);
+	iFireFly->addFrames(IDR_FIREFLY, 45);
 	iFireFly->LoopAnimation = true;
-	iFireFly->MoveSpeed = 1000;
+	iFireFly->RewindAnimationAfterStop = false;
+	iFireFly->MoveSpeed = 650;
 	iFireFly->placeTo(Width / 2, 32);
 	iFireFly->OnFadingFinished = onFireFlyFadingFisnihed;
 	iFireFly->OnMoveFinished = onFireFlyMoveFisnihed;
@@ -317,7 +361,7 @@ void __fastcall TfrmCalibration::FormDestroy(TObject *Sender)
 	delete iCalibPoints;
 	delete iEyeBox;
 	delete iCalibPlot;
-	delete iBackground;
+	//delete iBackground;
 	delete iObjects;
 	delete iGraphics;
 
@@ -346,7 +390,7 @@ void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
 		else if (iCalibPlot->Close->hitTest(X, Y))
 			Done();
 		else if (CalibrationPointQualityStruct* focusedCalibPoint = iCalibPlot->calibPointHitTest(X, Y))
-			RestartCalibration(focusedCalibPoint);
+			RestartCalibration(focusedCalibPoint->number);
 	}
 }
 
@@ -370,8 +414,18 @@ void __fastcall TfrmCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 	}
 	else
 	{
-		if (Key == VK_ESCAPE)
-			Abort();
+		if (Key == VK_SPACE)
+		{
+			if (iIsWaitingToAcceptPoint)
+				PointDone();
+		}
+		else if (Key == VK_ESCAPE)
+		{
+			if (iCalibPoints->Current)
+				Abort();
+			else
+				Done();
+		}
 	}
 }
 

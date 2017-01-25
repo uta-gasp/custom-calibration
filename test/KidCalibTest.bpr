@@ -6,7 +6,7 @@
     <PROJECT value="bin\KidCalibTest.exe"/>
     <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\Animation.obj 
       build\utils.obj build\Calibration.obj build\EyeBox.obj build\CalibPlot.obj 
-      build\CalibPoint.obj build\CalibPoints.obj"/>
+      build\CalibPoint.obj build\CalibPoints.obj build\Game.obj"/>
     <RESFILES value="KidCalibTest.res build\assets.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\src\Calibration.dfm"/>
@@ -27,8 +27,8 @@
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
-    <INCLUDEPATH value="..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include"/>
-    <LIBPATH value="..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include"/>
+    <LIBPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>

@@ -33,15 +33,17 @@ class TfrmCalibration : public TForm
 
 	private:
 		Gdiplus::Graphics* iGraphics;
-		Gdiplus::Bitmap* iBackground;
+		//Gdiplus::Bitmap* iBackground;
 		Gdiplus::Bitmap* iStaticBitmap;
 
 		TiEyeBox* iEyeBox;
 		TiCalibPlot* iCalibPlot;
 		TiAnimationManager* iObjects;
+		TiAnimation* iBackground;
 		TiAnimation* iTarget;
 		TiAnimation* iFireFly;
 		TiTimeout* iTimeout;
+		bool iIsWaitingToAcceptPoint;
 
 		TiCalibPoints* iCalibPoints;
 
@@ -60,7 +62,8 @@ class TfrmCalibration : public TForm
 		void __fastcall onCalibPointTimeout(TObject* aSender);
 
 		void __fastcall StartCalibration();
-		void __fastcall RestartCalibration(CalibrationPointQualityStruct* aCalibPoint = NULL);
+		void __fastcall RestartCalibration(int aRecalibrationPointIndex = -1);
+		void __fastcall PointDone();
 		void __fastcall MoveToNextPoint();
 		void __fastcall Abort();
 		void __fastcall Finish();

@@ -15,6 +15,16 @@ class TiCalibPlot : public TObject
 	public:
 		typedef TiDynArray<CalibrationPointQualityStruct> TiCalibQualityData;
 
+		struct Point
+		{
+			double Offset;
+			int X;
+			int Y;
+			int ID;
+
+			Point() : Offset(0) { }
+		};
+
 	private:
 		TRect iBox;
 		TiAnimation* iBackground;
@@ -36,6 +46,7 @@ class TiCalibPlot : public TObject
 
 		void __fastcall SetVisible(bool aValue);
 		void __fastcall DrawQualityData(Gdiplus::Graphics* aGraphics);
+		Point __fastcall GetWorstPoint();
 
 	public:
 		__fastcall TiCalibPlot(TiAnimationManager* aManager, TRect aBox, int aWindowWidth, int aWindowHeight);
@@ -53,6 +64,8 @@ class TiCalibPlot : public TObject
 		__property TiAnimation* Plot = {read = iPlot};
 		__property TiAnimation* Restart = {read = iRestart};
 		__property TiAnimation* Close = {read = iClose};
+
+		__property TiCalibPlot::Point WorstPoint = {read = GetWorstPoint};
 
 		__property bool IsVisible = {read = iVisible, write = SetVisible};
 

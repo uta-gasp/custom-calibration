@@ -2,6 +2,8 @@
 #include "CalibPlot.h"
 #include "assets.h"
 
+#include <math.h>
+
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
@@ -201,5 +203,39 @@ void __fastcall TiCalibPlot::DrawQualityData(Gdiplus::Graphics* aGraphics)
 				KTargetSize, KTargetSize
 		);
 	}
+}
+
+//---------------------------------------------------------------------------
+TiCalibPlot::Point __fastcall TiCalibPlot::GetWorstPoint()
+{
+	TiCalibPlot::Point result;
+
+	for (int i = 0; i < iCalibQualityData.Count; i++)
+	{
+		CalibrationPointQualityStruct* point = iCalibQualityData[i];
+		if (point->usageStatus == 0)
+		{
+			double dx = point->positionX - point->correctedPorX;
+			double dy = point->positionY - point->correctedPorY;
+			double offset = sqrt(dx * dx + dy * dy);
+			if (offset > result.Offset)
+			{
+				result.X = point->positionX;
+				result.Y = point->positionY;
+				result.ID = point->number;
+				result.Offset = offset;
+			}
+		}
+		else
+		{
+			result.X = point->positionX;
+			result.Y = point->positionY;
+			result.ID = point->number;
+			result.Offset = 10000;
+			return result;
+		}
+	}
+
+	return result;
 }
 

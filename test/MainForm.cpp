@@ -39,8 +39,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	for (int i = 0; i < 2; i++)
 	{
 		TiAnimation* animation = new TiAnimation();
-		animation->addFrames(IDR_FIREFLY_RED, 64);
-		animation->addFrames(IDR_FIREFLY_BLUE, 64);
+		animation->addFrames(IDR_FIREFLY, 64);
 		animation->LoopAnimation = false;
 		animation->placeTo(32, 32 + 64*i);
 		iCreatures->add(animation);

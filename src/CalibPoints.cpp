@@ -37,7 +37,7 @@ void __fastcall TiCalibPoints::lightOnCurrent()
 void __fastcall TiCalibPoints::lightOff()
 {
 	for (int i = 0; i < iPoints.Count; i++)
-		iPoints[i]->lightOff();
+		iPoints[i]->hide();
 }
 
 //---------------------------------------------------------------------------

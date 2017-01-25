@@ -238,6 +238,27 @@ void __fastcall TiAnimation::stopRotation()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiAnimation::setOrientation(double aDX, double aDY)
+{
+	double angle = 0;
+	if (aDX == 0.0 || aDY == 0.0)
+	{
+		if (aDX == 0.0)
+			angle = aDY > 0 ? 180 : 0;
+		else if (aDY == 0.0)
+			angle = aDX > 0 ? 90 : 270;
+	}
+	else
+	{
+		angle = 180 * atan2(aDY, aDX) / M_PI + 90;
+		while (angle < 0)
+			angle += 360;
+	}
+
+	Angle = angle;
+}
+
+//---------------------------------------------------------------------------
 bool __fastcall TiAnimation::hitTest(int aX, int aY)
 {
 	double w = iScale * iWidth;

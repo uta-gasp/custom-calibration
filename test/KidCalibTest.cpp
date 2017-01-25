@@ -13,6 +13,7 @@ USEUNIT("..\src\EyeBox.cpp");
 USEUNIT("..\src\CalibPlot.cpp");
 USEUNIT("..\src\CalibPoint.cpp");
 USEUNIT("..\src\CalibPoints.cpp");
+USEUNIT("..\src\Game.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
