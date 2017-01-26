@@ -64,6 +64,18 @@ void __fastcall TfrmCalibration::setTrackingStability(bool aStable)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmCalibration::loadSettings(TiXML_INI* aStorage)
+{
+	iGame->BestTime = aStorage->getValue("Game", "BestTime", iGame->BestTime);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCalibration::saveSettings(TiXML_INI* aStorage)
+{
+	aStorage->putValue("Game", "BestTime", iGame->BestTime);
+}
+
+//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aUpdateType)
 {
@@ -95,8 +107,7 @@ void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aU
 		if (aUpdateType == updStatic)
 			iGraphics->DrawImage(iStaticBitmap, destRect);
 
-		if (iGame)
-			iGame->paintTo(graphics);
+		iGame->paintTo(graphics);
 	}
 
 	if (aUpdateType & updNonStatic)
@@ -175,18 +186,20 @@ void __fastcall TfrmCalibration::onBackgroundFadingFisnihed(TObject* aSender)
 {
 	if (iBackground->IsVisible)
 	{
-		if (!iGame)
-		{
-			iGame = new TiGame(iObjects);
-			iGame->start(10);
-		}
+		iGame->start(10);
+	}
+	else
+	{
+		Done();
 	}
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCalibration::onGameFisnihed(TObject* aSender)
 {
-	Done();
+	iBackground->FadingDuration = 400;
+	iBackground->fadeOut();
+	iCalibPoints->fadeOut();
 }
 
 //---------------------------------------------------------------------------
@@ -214,13 +227,16 @@ void __fastcall TfrmCalibration::RestartCalibration(int aRecalibrationPointIndex
 
 	iCalibPlot->IsVisible = false;
 
+	iCalibPoints->prepare(aRecalibrationPointIndex);
+
 	bool isSinglePoint = aRecalibrationPointIndex >= 0;
 	if (!isSinglePoint)
 		iEyeBox->IsVisible = true;
 	else
-		iFireFly->fadeIn();
-
-	iCalibPoints->prepare(aRecalibrationPointIndex);
+	{
+		if (!iFireFly->fadeIn())
+			MoveToNextPoint();
+	}
 
 	if (isSinglePoint && FOnRecalibrateSinglePoint)
 		FOnRecalibrateSinglePoint(this);
@@ -245,14 +261,22 @@ void __fastcall TfrmCalibration::MoveToNextPoint()
 	TiCalibPoint* calibPoint = iCalibPoints->next();
 	if (calibPoint)
 	{
-		iFireFly->setOrientation(calibPoint->X - iFireFly->X, calibPoint->Y - iFireFly->Y);
-		iFireFly->moveTo(calibPoint->X, calibPoint->Y);
-		iFireFly->startAnimation();
+		bool isAtPlaceAlready = !iFireFly->moveTo(calibPoint->X, calibPoint->Y);
+		if (!isAtPlaceAlready)
+		{
+			iFireFly->setOrientation(calibPoint->X - iFireFly->X, calibPoint->Y - iFireFly->Y);
+			iFireFly->startAnimation();
+		}
+		else
+		{
+			iCalibPoints->lightOffCurrent();
+			onFireFlyMoveFisnihed(NULL);
+		}
 
 		iTarget->placeTo(calibPoint->X, calibPoint->Y);
 		iTarget->show();
 
-		calibPoint->show();
+		calibPoint->show(isAtPlaceAlready);
 	}
 	else
 	{
@@ -304,6 +328,7 @@ void __fastcall TfrmCalibration::Done()
 {
 	if (FOnDebug)
 		FOnDebug(this, "close");
+		
 	Close();
 }
 
@@ -378,6 +403,8 @@ void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 	iFireFly->OnFadingFinished = onFireFlyFadingFisnihed;
 	iFireFly->OnMoveFinished = onFireFlyMoveFisnihed;
 	iObjects->add(iFireFly);
+
+	iGame = new TiGame(iObjects);
 }
 
 //---------------------------------------------------------------------------
@@ -386,9 +413,7 @@ void __fastcall TfrmCalibration::FormDestroy(TObject *Sender)
 	delete iCalibPoints;
 	delete iEyeBox;
 	delete iCalibPlot;
-	if (iGame)
-		delete iGame;
-
+	delete iGame;
 	//delete iBackground;
 	delete iObjects;
 	delete iGraphics;
@@ -420,11 +445,11 @@ void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
 		else if (CalibrationPointQualityStruct* focusedCalibPoint = iCalibPlot->calibPointHitTest(X, Y))
 			RestartCalibration(focusedCalibPoint->number);
 	}
-	else if (iGame && !iTimeout)
+	else if (iGame->IsRunning && !iTimeout)
 	{
 		bool isFinished = iGame->click(X, Y);
 		if (isFinished)
-			TiTimeout::run(2500, onGameFisnihed, &iTimeout);
+			TiTimeout::run(5000, onGameFisnihed, &iTimeout);
 	}
 }
 

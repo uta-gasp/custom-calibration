@@ -72,20 +72,24 @@ __fastcall TiCalibPoint::TiOlio::TiOlio(int aLampX, int aLampY, double aDirectio
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoint::TiOlio::disappear()
+void __fastcall TiCalibPoint::TiOlio::idle()
 {
-	stopAnimation();
+	if (AnimationIndex == 0)
+		return;
 
-	LoopAnimation = false;
-	AnimationSpeed = KOlioFadeSpeed;
-	AnimationIndex = 2;
-
-	startAnimation();
+	show();
+	StartIdle(false);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiCalibPoint::TiOlio::appear()
 {
+	if (AnimationIndex == 1)
+	{
+//		StartIdle();
+		return;
+	}
+
 	LoopAnimation = false;
 	AnimationSpeed = KOlioFadeSpeed;
 	AnimationIndex = 1;
@@ -96,21 +100,44 @@ void __fastcall TiCalibPoint::TiOlio::appear()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiCalibPoint::TiOlio::disappear()
+{
+	if (Opacity == 0.0)
+		return;
+
+	stopAnimation();
+
+	LoopAnimation = false;
+	AnimationSpeed = KOlioFadeSpeed;
+	AnimationIndex = 2;
+
+	startAnimation();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiCalibPoint::TiOlio::onAnimationFinished(TObject* aSender)
 {
-	if (AnimationIndex == 1)
+	if (AnimationIndex == 1) // has just appeared
 	{
-		LoopAnimation = true;
-		AnimationSpeed = randInRange(KOlioIdleSpeedMin, KOlioIdleSpeedMax);
-		AnimationIndex = 0;
-
-		startAnimation();
+		StartIdle();
 	}
-	else if (AnimationIndex == 2)
+	else if (AnimationIndex == 2) // has just disappeared
 	{
 		stopAnimation();
 		hide();
 	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiCalibPoint::TiOlio::StartIdle(bool aNewSpeed)
+{
+	LoopAnimation = true;
+	AnimationIndex = 0;
+
+	if (aNewSpeed)
+		AnimationSpeed = randInRange(KOlioIdleSpeedMin, KOlioIdleSpeedMax);
+
+	startAnimation();
 }
 
 //---------------------------------------------------------------------------
@@ -170,11 +197,14 @@ __fastcall TiCalibPoint::TiCalibPoint(TiAnimationManager* aManager, int aX, int 
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoint::show()
+void __fastcall TiCalibPoint::show(bool aSetOliosOnIdle)
 {
 	iLamp->fadeIn();
 	for (int i = 0; i < iOlios.Count; i++)
-		iOlios[i]->appear();
+		if (aSetOliosOnIdle)
+			iOlios[i]->idle();
+		else
+			iOlios[i]->appear();
 
 	//TiTimeout::run(500, onWormsHideRequest);
 }
@@ -200,10 +230,7 @@ void __fastcall TiCalibPoint::lightOn()
 //---------------------------------------------------------------------------
 void __fastcall TiCalibPoint::lightOff()
 {
-	if (iLamp->FrameIndex == 0)
-		return;
-
-	iLamp->startAnimation();
+	iLamp->resetAnimation();
 
 	for (int i = 0; i < iOlios.Count; i++)
 	{

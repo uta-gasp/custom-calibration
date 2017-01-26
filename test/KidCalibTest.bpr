@@ -10,7 +10,7 @@
     <RESFILES value="KidCalibTest.res build\assets.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\src\Calibration.dfm"/>
-    <LIBFILES value="GdiPlus.lib"/>
+    <LIBFILES value="GdiPlus.lib ..\..\XML\XML.lib"/>
     <LIBRARIES value="Vcl50.lib"/>
     <SPARELIBS value="Vcl50.lib"/>
     <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Qrpt50.bpi Vcldb50.bpi Vclbde50.bpi 
@@ -27,8 +27,8 @@
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
-    <INCLUDEPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include"/>
-    <LIBPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="..\src;..\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
@@ -73,16 +73,22 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=3
-Item0=..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include
-Item1=$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include
-Item2=..\src;..\;..\assets;..assets;.assets;assets;..\..\ETUDriver\Drivers\myGaze\assets;$(BCB)\include;$(BCB)\include\vcl
+Count=7
+Item0=..\src;..\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
+Item1=C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include;..\..\XML
+Item2=C:\Program Files (x86)\Borland\CBuilder5\Projects;..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include;..\..\XML
+Item3=C:\Program Files (x86)\Borland\CBuilder5\Projects;..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include
+Item4=..\src;..\assets;$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include
+Item5=$(BCB)\include;$(BCB)\include\vcl;..\..\GDI+\Include
+Item6=..\src;..\;..\assets;..assets;.assets;assets;..\..\ETUDriver\Drivers\myGaze\assets;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=3
+Count=5
 Item0=..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
-Item1=$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
-Item2=..\src;..\;..\assets;..assets;.assets;assets;..\..\ETUDriver\Drivers\myGaze\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item1=C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item2=C:\Program Files (x86)\Borland\CBuilder5\Projects;..\src;..\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item3=$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item4=..\src;..\;..\assets;..assets;.assets;assets;..\..\ETUDriver\Drivers\myGaze\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

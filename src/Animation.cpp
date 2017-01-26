@@ -154,22 +154,40 @@ void __fastcall TiAnimation::resetAnimation()
 		if (IsVisible)
 			iIsPaintRequested = true;
 	}
+
+	iAnimationTimer->Enabled = false;
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::fadeOut()
+bool __fastcall TiAnimation::fadeOut()
 {
+	if (iAlpha == 0.0)
+	{
+		iFadingTimer->Enabled = false;
+		return false;
+	}
+
 	iFadingDirection = -1;
 	if (!iFadingTimer->Enabled)
 		iFadingTimer->Enabled = true;
+
+	return true;
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::fadeIn()
+bool __fastcall TiAnimation::fadeIn()
 {
+	if (iAlpha == 1.0)
+	{
+		iFadingTimer->Enabled = false;
+		return false;
+	}
+
 	iFadingDirection = 1;
 	if (!iFadingTimer->Enabled)
 		iFadingTimer->Enabled = true;
+
+	return true;
 }
 
 //---------------------------------------------------------------------------
@@ -203,14 +221,22 @@ void __fastcall TiAnimation::placeTo(int aX, int aY)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::moveTo(int aX, int aY)
+bool __fastcall TiAnimation::moveTo(int aX, int aY)
 {
+	if (X == aX && Y == aY)
+	{
+		iMoveTimer->Enabled = false;
+		return false;
+	}
+
 	iDestinationLocation = TPoint(aX, aY);
 	iStartX = iMoveX = iX;
 	iStartY = iMoveY = iY;
 
 	if (!iMoveTimer->Enabled)
 		iMoveTimer->Enabled = true;
+
+	return true;
 }
 
 //---------------------------------------------------------------------------

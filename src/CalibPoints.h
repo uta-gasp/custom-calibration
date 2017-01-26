@@ -30,6 +30,7 @@ class TiCalibPoints
 		void __fastcall lightOff();
 		void __fastcall lightOnCurrent();
 		void __fastcall lightOffCurrent();
+		void __fastcall fadeOut();
 		void __fastcall prepare(int aCalibPointIndex = -1);
 
 		TiCalibPoint* __fastcall next();

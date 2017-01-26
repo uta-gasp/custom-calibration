@@ -48,6 +48,13 @@ void __fastcall TiCalibPoints::lightOffCurrent()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::fadeOut()
+{
+	for (int i = 0; i < iPoints.Count; i++)
+		iPoints[i]->hide();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiCalibPoints::prepare(int aCalibPointIndex)
 {
 	iCurrentPointIndex = -1;

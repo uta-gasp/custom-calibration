@@ -30,9 +30,15 @@ const TiGame::SiOlioRect KOlioRects[] = {
 	TiGame::SiOlioRect(450, 550, 100, 100),
 };
 
+const int KWidth = 1377;
+const int KHeight = 200;
+
 //---------------------------------------------------------------------------
 __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
-	iDuration(0.0)
+	iDuration(0.0),
+	iBestTime(10000000),
+	iIsBestTime(false),
+	iStartTime(0)
 {
 	iHidingOlios.DeleteContent = false;
 	
@@ -50,6 +56,25 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 		aManager->add(olio);
 	}
 
+	iResultBackground = new TiAnimation();
+	iResultBackground->FadingDuration = 400;
+	iResultBackground->addFrames(IDR_GAME_BACK, 700, 200);
+	iResultBackground->placeTo(KWidth / 2, KHeight / 2);
+	iResultBackground->hide();
+	aManager->add(iResultBackground);
+
+	iBestTimeLogo1 = new TiAnimation();
+	iBestTimeLogo1->addFrames(IDR_GAME_BEST, 128, 128);
+	iBestTimeLogo1->placeTo(KWidth - 200, KHeight / 2);
+	iBestTimeLogo1->hide();
+	aManager->add(iBestTimeLogo1);
+
+	iBestTimeLogo2 = new TiAnimation();
+	iBestTimeLogo2->addFrames(IDR_GAME_BEST, 128, 128);
+	iBestTimeLogo2->placeTo(200, KHeight / 2);
+	iBestTimeLogo2->hide();
+	aManager->add(iBestTimeLogo2);
+
 	LARGE_INTEGER fr;
 	::QueryPerformanceFrequency(&fr);
 
@@ -57,11 +82,26 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 }
 
 //---------------------------------------------------------------------------
+bool __fastcall TiGame::GetIsRunning()
+{
+	return iStartTime != 0;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGame::onBestTimeLogoShow(TObject* aSender)
+{
+	iBestTimeLogo1->fadeIn();
+	iBestTimeLogo2->fadeIn();
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 void __fastcall TiGame::start(int aOliosToShow)
 {
+	int oliosToShow = min(aOliosToShow, (int)iHidingOlios.Count);
 	int visibleCount = 0;
 
-	while (visibleCount < aOliosToShow)
+	while (visibleCount < oliosToShow)
 	{
 		int id = randInRange(0, 19);
 		iHidingOlios[id]->show();
@@ -99,7 +139,18 @@ bool __fastcall TiGame::click(int aX, int aY)
 	{
 		LARGE_INTEGER li;
 		::QueryPerformanceCounter(&li);
+
 		iDuration = double(li.QuadPart - iStartTime)/iSysTimerFreq;
+
+		if (iDuration < iBestTime)
+		{
+			iBestTime = iDuration;
+			iIsBestTime = true;
+			TiTimeout::run(1000, onBestTimeLogoShow);
+		}
+
+		iResultBackground->fadeIn();
+		iStartTime = 0;
 	}
 
 	return finished;
@@ -111,19 +162,23 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
 	for (int i = 0; i < iHidingOlios.Count; i++)
 		iHidingOlios[i]->paintTo(aGraphics);
 
-	if (iDuration > 0.0)
+	if (!IsRunning && iDuration > 0.0)
 	{
-		WideString str(String("Time: ") + String(iDuration) + " seconds");
+		String str = String("Congratulations!\nYour time: ") + String((int)iDuration) + " seconds";
+		WideString bstr(str);
 
 		Gdiplus::Font font(L"Arial", 26);
-		Gdiplus::RectF rect(0, 0, 1377, 768);
+		Gdiplus::RectF rect(0, 0, KWidth, KHeight);
 		Gdiplus::StringFormat format;
 		format.SetAlignment(Gdiplus::StringAlignmentCenter);
 		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 
 		Gdiplus::SolidBrush brush(Gdiplus::Color(255, 255, 255, 255));
 
-		aGraphics->DrawString(str.c_bstr(), -1, &font, rect, &format, &brush);
-		//aGraphics->DrawString(L"", -1, &font, rect, &format, &brush);
+		iResultBackground->paintTo(aGraphics);
+		aGraphics->DrawString(bstr.c_bstr(), -1, &font, rect, &format, &brush);
+
+		iBestTimeLogo1->paintTo(aGraphics);
+		iBestTimeLogo2->paintTo(aGraphics);
 	}
 }

@@ -44,6 +44,7 @@ __published:	// IDE-managed Components
           int Y);
 	void __fastcall Button3Click(TObject *Sender);
 	void __fastcall TrackBar3Change(TObject *Sender);
+	void __fastcall FormDestroy(TObject *Sender);
 
 private:	// User declarations
 	TfrmCalibration* iCalibration;

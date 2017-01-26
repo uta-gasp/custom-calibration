@@ -3,12 +3,18 @@
 #include "assets.h"
 #include "utils.h"
 
+#include "XML.h"
+
+#include <Sysutils.hpp>
+
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
 
 //---------------------------------------------------------------------------
 TfrmMainForm *frmMainForm;
+
+const String KIniFileName = "settings.ini";
 
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
@@ -31,6 +37,15 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	iCalibration->OnPointAccept = onCalibrationPointAccept;
 	iCalibration->OnFinished = onCalibrationFinished;
 	iCalibration->OnAborted = onCalibrationAborted;
+
+	if (FileExists(KIniFileName))
+	{
+		String fileName = ExtractFilePath(Application->ExeName);
+		TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", false);
+		iCalibration->loadSettings(ini);
+		delete ini;
+	}
+
 	iCalibration->Show();
 
 	iCreatures = new TiAnimationManager();
@@ -187,11 +202,21 @@ void __fastcall TfrmMainForm::Panel1MouseUp(TObject *Sender, TMouseButton Button
 	else if (Button ==  mbRight)
 		iFly->AnimationIndex = 1 - iFly->AnimationIndex;
 }
-//---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::FormCreate(TObject *Sender)
 {
 	iGraphics = new Gdiplus::Graphics(Panel1->Handle, false);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::FormDestroy(TObject *Sender)
+{
+	String fileName = ExtractFilePath(Application->ExeName);
+	TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", true);
+	iCalibration->saveSettings(ini);
+	ini->save(false);
+	delete ini;
 }
 
 //---------------------------------------------------------------------------

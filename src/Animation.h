@@ -104,14 +104,14 @@ class TiAnimation : public TObject
 		void __fastcall toggleAnimation();
 		void __fastcall resetAnimation();
 
-		void __fastcall fadeOut();
-		void __fastcall fadeIn();
+		bool __fastcall fadeOut();
+		bool __fastcall fadeIn();
 
 		void __fastcall show();
 		void __fastcall hide();
 
 		void __fastcall placeTo(int aX, int aY);
-		void __fastcall moveTo(int aX, int aY);
+		bool __fastcall moveTo(int aX, int aY);
 		void __fastcall stopMove();
 
 		void __fastcall rotateBy(double aAngle);

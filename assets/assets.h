@@ -36,4 +36,6 @@
 #define IDR_GAME_OLIO_17  1517
 #define IDR_GAME_OLIO_18  1518
 #define IDR_GAME_OLIO_19  1519
+#define IDR_GAME_BEST     1580
+#define IDR_GAME_BACK     1590
 

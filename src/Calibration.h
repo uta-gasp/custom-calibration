@@ -15,6 +15,8 @@
 #include "Game.h"
 #include "utils.h"
 
+#include "XML.h"
+
 //---------------------------------------------------------------------------
 class TfrmCalibration : public TForm
 {
@@ -81,6 +83,9 @@ class TfrmCalibration : public TForm
 
 		void __fastcall setSample(SampleStruct& aSample);
 		void __fastcall setTrackingStability(bool aStable);
+
+		void __fastcall loadSettings(TiXML_INI* aStorage);
+		void __fastcall saveSettings(TiXML_INI* aStorage);
 
 		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
 		__property TNotifyEvent OnStart = {read = FOnStart, write = FOnStart};

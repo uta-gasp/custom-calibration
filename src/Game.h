@@ -25,10 +25,19 @@ class TiGame
 
 	private:
 		TiAnimations iHidingOlios;
+		TiAnimation* iResultBackground;
+		TiAnimation* iBestTimeLogo1;
+		TiAnimation* iBestTimeLogo2;
 
+		double iBestTime;
 		__int64 iStartTime;
-		double iDuration;
 		DWORD iSysTimerFreq;
+		double iDuration;
+		bool iIsBestTime;
+
+		bool __fastcall GetIsRunning();
+
+		void __fastcall onBestTimeLogoShow(TObject* aSender);
 
 	public:
 		__fastcall TiGame(TiAnimationManager* aManager);
@@ -37,6 +46,9 @@ class TiGame
 		bool __fastcall click(int aX, int aY); // return true if all done
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+
+		__property bool IsRunning = {read = GetIsRunning};
+		__property double BestTime = {read = iBestTime, write = iBestTime};
 };
 
 //---------------------------------------------------------------------------

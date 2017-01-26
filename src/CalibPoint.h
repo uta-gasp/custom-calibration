@@ -23,6 +23,8 @@ class TiCalibPoint
 			double iDistanceToLamp;
 			double iDirection;
 
+			void __fastcall StartIdle(bool aNewSpeed = true);
+
 			void __fastcall onAnimationFinished(TObject* aSender);
 
 		public:
@@ -30,6 +32,7 @@ class TiCalibPoint
 
 			static double __fastcall getDirectionFromLamp(TiOlios* aOthers, int aMaxCount); // in degrees
 
+			void __fastcall idle();
 			void __fastcall appear();
 			void __fastcall disappear();
 			//void __fastcall moveAway();
@@ -50,7 +53,7 @@ class TiCalibPoint
 	public:
 		__fastcall TiCalibPoint(TiAnimationManager* aManager, int aX, int aY);
 
-		void __fastcall show();
+		void __fastcall show(bool aSetOliosOnIdle = false);
 		void __fastcall hide();
 		void __fastcall lightOn();
 		void __fastcall lightOff();

@@ -14,6 +14,7 @@ object frmMainForm: TfrmMainForm
   KeyPreview = True
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
   OnPaint = FormPaint
   PixelsPerInch = 96

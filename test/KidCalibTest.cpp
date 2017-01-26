@@ -14,6 +14,7 @@ USEUNIT("..\src\CalibPlot.cpp");
 USEUNIT("..\src\CalibPoint.cpp");
 USEUNIT("..\src\CalibPoints.cpp");
 USEUNIT("..\src\Game.cpp");
+USELIB("..\..\XML\XML.lib");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

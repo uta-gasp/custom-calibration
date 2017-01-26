@@ -37,4 +37,6 @@ IDR_GAME_OLIO_16  IMAGE "game_olio_16.png"
 IDR_GAME_OLIO_17  IMAGE "game_olio_17.png"
 IDR_GAME_OLIO_18  IMAGE "game_olio_18.png"
 IDR_GAME_OLIO_19  IMAGE "game_olio_19.png"
+IDR_GAME_BEST     IMAGE "game_best.png"
+IDR_GAME_BACK     IMAGE "game_back.png"
 
