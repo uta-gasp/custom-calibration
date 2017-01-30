@@ -47,6 +47,7 @@ class TfrmCustomCalibration : public TForm
 		TiAnimation* iTarget;
 		TiAnimation* iFireFly;
 		TiTimeout* iTimeout;
+		TiTimeout* iPointAcceptTimeout;
 		bool iIsWaitingToAcceptPoint;
 
 		TiCalibPoints* iCalibPoints;
@@ -70,9 +71,10 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall onGameFisnihed(TObject* aSender);
 
 		void __fastcall StartCalibration();
-		void __fastcall RestartCalibration(int aRecalibrationPointIndex = -1);
-		void __fastcall PointDone();
-		void __fastcall MoveToNextPoint(int aPointNumber = 0);
+		void __fastcall RestartCalibration(int aRecalibrationPointNumber = -1);
+		void __fastcall PointDone(TObject* aSender = NULL);
+		void __fastcall PointAbort(TObject* aSender = NULL);
+		void __fastcall MoveToNextPoint(int aPointNumber = 0, bool aPreviousDone = true);
 		void __fastcall Abort();
 		void __fastcall Finish();
 		void __fastcall Done(TObject* aSender = NULL);
@@ -88,7 +90,7 @@ class TfrmCustomCalibration : public TForm
 
 		void __fastcall clearPoints();
 		void __fastcall addPoint(CalibrationPointStruct& aPoint);
-		void __fastcall nextPoint(int aPointNumber);
+		void __fastcall nextPoint(int aPointNumber, bool aPreviousDone);
 		void __fastcall reportCalibrationResult(int aNumber, CalibrationPointQualityStruct* aLeft,
 				CalibrationPointQualityStruct* aRight);
 		void __fastcall processCalibrationResult();

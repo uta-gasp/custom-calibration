@@ -35,6 +35,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	iAnimationTimeout(NULL)
 {
 	frmMainForm = this;
+	iCalibPointStatus = new int[ARRAYSIZE(KCalibPoints)];
 
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
 	iCustomCalibration = new TfrmCustomCalibration(this);
@@ -44,6 +45,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	iCustomCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
 	iCustomCalibration->OnPointReady = onCalibrationPointReady;
 	iCustomCalibration->OnPointAccepted = onCalibrationPointAccepted;
+	iCustomCalibration->OnPointAborted = onCalibrationPointAborted;
 	iCustomCalibration->OnFinished = onCalibrationFinished;
 	iCustomCalibration->OnAborted = onCalibrationAborted;
 
@@ -158,11 +160,14 @@ Log("START");
 void __fastcall TfrmMainForm::onCalibrationReadyToCalibrate(TObject* aSender) {
 Log("READY_TO_CALIB");
 	iCurrentCalibPointNumber = 1;
-	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
 }
 
-void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
-Log(String("RECALIB_PT_")+aPointIndex);
+void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode) {
+Log(String("RECALIB_PT_#")+aPointNumber);
+
+	iCurrentCalibPointNumber = aPointNumber;
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
 }
 
 void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
@@ -171,14 +176,40 @@ Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 
 void __fastcall TfrmMainForm::onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
 Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
+
+	iCalibPointStatus[aPointIndex] = calibrationPointUnusedBecauseOfBadQuality;
+
+	if (!aIsSinglePointMode)
+	{
+		++iCurrentCalibPointNumber;
+		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
+			iCurrentCalibPointNumber = -1;
+		iCustomCalibration->nextPoint(iCurrentCalibPointNumber, false);
+	}
+	else
+	{
+		iCustomCalibration->nextPoint(-1, false);
+	}
 }
 
 void __fastcall TfrmMainForm::onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
 Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
-	++iCurrentCalibPointNumber;
-	if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
-		iCurrentCalibPointNumber = -1;
-	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
+	if (Mouse->CursorPos.x == 0)
+		return;
+
+	iCalibPointStatus[aPointIndex] = calibrationPointUsed;
+
+	if (!aIsSinglePointMode)
+	{
+		++iCurrentCalibPointNumber;
+		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
+			iCurrentCalibPointNumber = -1;
+		iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
+	}
+	else
+	{
+		iCustomCalibration->nextPoint(-1, true);
+	}
 }
 
 void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
@@ -195,7 +226,7 @@ Log("FINISHED");
 		left->correctedPorY = calibPoint.positionY + randInRange(-20, 20);
 		left->standardDeviationX = randInRange(-40, 40);
 		left->standardDeviationY = randInRange(-40, 40);
-		left->usageStatus = 0;
+		left->usageStatus = iCalibPointStatus[i - 1];
 		left->qualityIndex = double(randInRange(80, 100)) / 100.0;
 		*right = *left;
 

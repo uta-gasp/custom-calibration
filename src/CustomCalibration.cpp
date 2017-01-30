@@ -28,6 +28,7 @@ const int KMaxAllowedCalibQualityOffset = 40;
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
+		iPointAcceptTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
 		iGame(NULL),
 		iStaticBitmap(NULL),
@@ -81,9 +82,9 @@ void __fastcall TfrmCustomCalibration::addPoint(CalibrationPointStruct& aPoint)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber)
+void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber, bool aPreviousDone)
 {
-	MoveToNextPoint(aPointNumber);
+	MoveToNextPoint(aPointNumber, aPreviousDone);
 }
 
 //---------------------------------------------------------------------------
@@ -271,32 +272,45 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointIndex)
+void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointNumber)
 {
 	if (FOnDebug)
 		FOnDebug(this, "restart");
 
 	iCalibPlot->IsVisible = false;
 
-	iCalibPoints->prepare(aRecalibrationPointIndex);
+	iCalibPoints->prepare(aRecalibrationPointNumber);
 
-	bool isSinglePoint = aRecalibrationPointIndex >= 0;
-	if (!isSinglePoint)
-		iEyeBox->IsVisible = true;
+	bool isSinglePoint = aRecalibrationPointNumber > 0;
+	if (isSinglePoint)
+	{
+		iFireFly->fadeIn();
+		//if (!iFireFly->fadeIn())
+		//	MoveToNextPoint();
+		if (FOnRecalibrateSinglePoint)
+			FOnRecalibrateSinglePoint(this, aRecalibrationPointNumber, true);
+	}
 	else
 	{
-		if (!iFireFly->fadeIn())
-			MoveToNextPoint();
+		iEyeBox->IsVisible = true;
 	}
-
-	if (isSinglePoint && FOnRecalibrateSinglePoint)
-		FOnRecalibrateSinglePoint(this, aRecalibrationPointIndex, true);
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::PointDone()
+void __fastcall TfrmCustomCalibration::PointDone(TObject* aSender)
 {
 	iIsWaitingToAcceptPoint = false;
+
+	if (!iPointAcceptTimeout)
+	{
+		TiTimeout::run(1000, PointDone, &iPointAcceptTimeout);
+	}
+	else
+	{
+		if (FOnDebug)
+			FOnDebug(this, "...no acceptance");
+		TiTimeout::run(1000, PointAbort, &iPointAcceptTimeout);
+	}
 
 	if (FOnPointAccepted && iCalibPoints->CurrentPointIndex >= 0)
 		FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
@@ -305,9 +319,22 @@ void __fastcall TfrmCustomCalibration::PointDone()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
+void __fastcall TfrmCustomCalibration::PointAbort(TObject* aSender)
 {
-	iCalibPoints->lightOnCurrent();
+	if (FOnDebug)
+		FOnDebug(this, "...abort point");
+	if (FOnPointAborted)
+		FOnPointAborted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber, bool aPreviousDone)
+{
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
+
+	if (aPreviousDone)
+		iCalibPoints->lightOnCurrent();
 
 	TiCalibPoint* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
@@ -367,6 +394,8 @@ void __fastcall TfrmCustomCalibration::Abort()
 
 	if (iTimeout)
 		iTimeout->kill();
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
 
 	Finish();
 

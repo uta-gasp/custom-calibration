@@ -70,14 +70,14 @@ void __fastcall TiCalibPoints::add(CalibrationPointStruct& aPoint)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoints::prepare(int aCalibPointIndex)
+void __fastcall TiCalibPoints::prepare(int aCalibPointNumber)
 {
 	iCurrentPointIndex = -1;
-	iIsSinglePointMode = aCalibPointIndex >= 0;
+	iIsSinglePointMode = aCalibPointNumber > 0;
 
 	if (iIsSinglePointMode)
 	{
-		TiCalibPoint* point = iPoints[aCalibPointIndex];
+		TiCalibPoint* point = iPoints[aCalibPointNumber - 1];
 		if (point)
 			point->lightOff();
 

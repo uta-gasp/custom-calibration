@@ -47,6 +47,7 @@ __published:	// IDE-managed Components
 private:	// User declarations
 	TfrmCustomCalibration* iCustomCalibration;
 	int iCurrentCalibPointNumber;
+	int* iCalibPointStatus;
 
 	TiAnimation* iFly;
 	TiAnimationManager* iCreatures;
@@ -65,7 +66,7 @@ private:	// User declarations
 	void __fastcall onCalibrationDebug(TObject* aSender, const char* aMsg);
 	void __fastcall onCalibrationStart(TObject* aSender);
 	void __fastcall onCalibrationReadyToCalibrate(TObject* aSender);
-	void __fastcall onRecalibrateSinglePoint(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
+	void __fastcall onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);

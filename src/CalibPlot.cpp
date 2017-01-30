@@ -227,7 +227,7 @@ TiCalibPlot::Point __fastcall TiCalibPlot::GetWorstPoint()
 	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
 		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
-		if (point->usageStatus == 0)
+		if (point->usageStatus == calibrationPointUsed)
 		{
 			double dx = point->positionX - point->correctedPorX;
 			double dy = point->positionY - point->correctedPorY;

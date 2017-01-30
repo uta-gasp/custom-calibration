@@ -39,7 +39,7 @@ class TiCalibPoints
 
 		void __fastcall clear();
 		void __fastcall add(CalibrationPointStruct& aPoint);
-		void __fastcall prepare(int aCalibPointIndex = -1);
+		void __fastcall prepare(int aCalibPointNumber = -1);
 
 		TiCalibPoint* __fastcall next(int aPointNumber = 0);
 
