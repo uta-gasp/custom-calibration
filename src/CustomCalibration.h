@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef CalibrationH
-#define CalibrationH
+#ifndef CustomCalibrationH
+#define CustomCalibrationH
 
 //---------------------------------------------------------------------------
 #include <Classes.hpp>
@@ -18,7 +18,7 @@
 #include "XML.h"
 
 //---------------------------------------------------------------------------
-class TfrmCalibration : public TForm
+class TfrmCustomCalibration : public TForm
 {
 	__published:
 		void __fastcall FormCreate(TObject *Sender);
@@ -30,8 +30,8 @@ class TfrmCalibration : public TForm
 					int Y);
 
 	public:
-		typedef void __fastcall (__closure *FiOnDebug)(System::TObject* Sender, const char* aMsg);
-		typedef void __fastcall (__closure *FiOnCalibrationPoint)(System::TObject* Sender,
+		typedef void __fastcall (__closure *FiOnDebug)(System::TObject* aSender, const char* aMsg);
+		typedef void __fastcall (__closure *FiOnCalibrationPoint)(System::TObject* aSender,
 				int aPointIndex, bool aIsSinglePointMode = false);
 
 	private:
@@ -53,9 +53,11 @@ class TfrmCalibration : public TForm
 
 		FiOnDebug FOnDebug;
 		TNotifyEvent FOnStart;
-		TNotifyEvent FOnRecalibrateSinglePoint;
+		TNotifyEvent FOnReadyToCalibrate;
+		FiOnCalibrationPoint FOnRecalibrateSinglePoint;
 		FiOnCalibrationPoint FOnPointReady;
-		FiOnCalibrationPoint FOnPointAccept;
+		FiOnCalibrationPoint FOnPointAccepted;
+		FiOnCalibrationPoint FOnPointAborted;
 		TNotifyEvent FOnFinished;
 		TNotifyEvent FOnAborted;
 
@@ -70,28 +72,37 @@ class TfrmCalibration : public TForm
 		void __fastcall StartCalibration();
 		void __fastcall RestartCalibration(int aRecalibrationPointIndex = -1);
 		void __fastcall PointDone();
-		void __fastcall MoveToNextPoint();
+		void __fastcall MoveToNextPoint(int aPointNumber = 0);
 		void __fastcall Abort();
 		void __fastcall Finish();
-		void __fastcall Done();
+		void __fastcall Done(TObject* aSender = NULL);
 
 		void __fastcall UpdateCalibPlot();
 
 	public:
-		__fastcall TfrmCalibration(TComponent* aOwner);
-		__fastcall ~TfrmCalibration();
+		__fastcall TfrmCustomCalibration(TComponent* aOwner);
+		__fastcall ~TfrmCustomCalibration();
 
 		void __fastcall setSample(SampleStruct& aSample);
 		void __fastcall setTrackingStability(bool aStable);
+
+		void __fastcall clearPoints();
+		void __fastcall addPoint(CalibrationPointStruct& aPoint);
+		void __fastcall nextPoint(int aPointNumber);
+		void __fastcall reportCalibrationResult(int aNumber, CalibrationPointQualityStruct* aLeft,
+				CalibrationPointQualityStruct* aRight);
+		void __fastcall processCalibrationResult();
 
 		void __fastcall loadSettings(TiXML_INI* aStorage);
 		void __fastcall saveSettings(TiXML_INI* aStorage);
 
 		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
 		__property TNotifyEvent OnStart = {read = FOnStart, write = FOnStart};
-		__property TNotifyEvent OnRecalibrateSinglePoint = {read = FOnRecalibrateSinglePoint, write = FOnRecalibrateSinglePoint};
+		__property TNotifyEvent OnReadyToCalibrate = {read = FOnReadyToCalibrate, write = FOnReadyToCalibrate};
+		__property FiOnCalibrationPoint OnRecalibrateSinglePoint = {read = FOnRecalibrateSinglePoint, write = FOnRecalibrateSinglePoint};
 		__property FiOnCalibrationPoint OnPointReady = {read = FOnPointReady, write = FOnPointReady};
-		__property FiOnCalibrationPoint OnPointAccept = {read = FOnPointAccept, write = FOnPointAccept};
+		__property FiOnCalibrationPoint OnPointAccepted = {read = FOnPointAccepted, write = FOnPointAccepted};
+		__property FiOnCalibrationPoint OnPointAborted = {read = FOnPointAborted, write = FOnPointAborted};
 		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
 };

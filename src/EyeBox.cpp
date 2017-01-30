@@ -9,8 +9,15 @@
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
-const double KMinDistance = 30.0;
+const double KMinDistance = 300.0;
 const double KMinEyeScale2 = 0.2 * 0.2;
+const double KCamWidth = 320;
+const double KCamHeight = 240;
+const double KInvalidValue = 0.0;
+const double KMinStartDistance = 450.0;
+const double KMaxStartDistance = 650.0;
+const double KIdealDistance = 530.0;
+const int KEyeSize = 32;
 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
@@ -27,31 +34,33 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 	iBackground->OnFadingFinished = onBackgroundFadingFinished;
 
 	iLeft = new TiAnimation(false, false);
-	iLeft->addFrames(IDR_EYE, 32);
+	iLeft->addFrames(IDR_EYE, KEyeSize);
 
 	iRight = new TiAnimation(false, false);
-	iRight->addFrames(IDR_EYE, 32);
+	iRight->addFrames(IDR_EYE, KEyeSize);
 
 	iWarning = new TiAnimation(false);
 	iWarning->addFrames(IDR_WARNING, 144, 20);
 	iWarning->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + iWarning->Height);
 	iWarning->FadingDuration = 200;
 
-	iStart = new TiAnimation();
-	iStart->addFrames(IDR_START, 120, 48);
-	iStart->addFrames(IDR_START_HOVER, 120, 48);
+	iStart = new TiAnimation(true, false);
+	iStart->addFrames(IDR_START, 160, 48);
+	iStart->addFrames(IDR_START_HOVER, 160, 48);
+	iStart->FadingDuration = 500;
 	iStart->placeTo(
-			iBackground->X - iStart->Width/2 - 4,
+			//iBackground->X - iStart->Width/2 - 4,
+			iBackground->X,
 			iBackground->Y + iBackground->Height/2 + 4 + iStart->Height/2
 	);
 
-	iClose = new TiAnimation();
-	iClose->addFrames(IDR_CLOSE, 120, 48);
-	iClose->addFrames(IDR_CLOSE_HOVER, 120, 48);
-	iClose->placeTo(
-			iBackground->X + iClose->Width/2 + 4,
-			iBackground->Y + iBackground->Height/2 + 4 + iClose->Height/2
-	);
+	//iClose = new TiAnimation();
+	//iClose->addFrames(IDR_CLOSE, 120, 48);
+	//iClose->addFrames(IDR_CLOSE_HOVER, 120, 48);
+	//iClose->placeTo(
+	//		iBackground->X + iClose->Width/2 + 4,
+	//		iBackground->Y + iBackground->Height/2 + 4 + iClose->Height/2
+	//);
 
 	if (aManager)
 	{
@@ -60,11 +69,11 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 		aManager->add(iRight);
 		aManager->add(iWarning);
 		aManager->add(iStart);
-		aManager->add(iClose);
+		//aManager->add(iClose);
 	}
 
-	SetEyeLocation(iLeft, -1, -1);
-	SetEyeLocation(iRight, -1, -1);
+	SetEyeLocation(iLeft, KInvalidValue, KInvalidValue);
+	SetEyeLocation(iRight, KInvalidValue, KInvalidValue);
 }
 
 //---------------------------------------------------------------------------
@@ -80,6 +89,8 @@ void __fastcall TiEyeBox::left(EyeDataStruct& aEyeData)
 
 	SetEyeLocation(iLeft, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iLeft, aEyeData.eyePositionZ);
+
+	setTrackingStability(aEyeData.eyePositionZ >= KMinStartDistance && aEyeData.eyePositionZ <= KMaxStartDistance);
 }
 
 //---------------------------------------------------------------------------
@@ -97,10 +108,20 @@ void __fastcall TiEyeBox::setTrackingStability(bool aStable)
 {
 	iInstabilityCounter = min(15, max(0, iInstabilityCounter + (aStable ? -1 : 1)));
 
-	if (iInstabilityCounter > 10 && (!iWarning->IsVisible && iWarning->FadingDirection != 1))
-		iWarning->fadeIn();
-	else if (iInstabilityCounter < 5 && iWarning->IsVisible && iWarning->FadingDirection != -1)
-		iWarning->fadeOut();
+	//if (iInstabilityCounter > 10 && (!iWarning->IsVisible && iWarning->FadingDirection != 1))
+	//	iWarning->fadeIn();
+	//else if (iInstabilityCounter < 5 && iWarning->IsVisible && iWarning->FadingDirection != -1)
+	//	iWarning->fadeOut();
+	if (aStable)
+	{
+		if (iStart->Opacity < 1.0)
+			iStart->fadeIn();
+	}
+	else
+	{
+		if (iStart->Opacity > 0.0)
+			iStart->fadeOut();
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -111,15 +132,31 @@ void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUp
 
 	if (aUpdateType & updNonStatic)
 	{
+		iStart->paintTo(aGraphics);
 		iLeft->paintTo(aGraphics);
 		iRight->paintTo(aGraphics);
+
+		double size = GetScale(KIdealDistance) * KEyeSize;
+		double penSize = 3;
+		Gdiplus::Pen idealSizePen(Gdiplus::Color(255 * iLeft->Opacity, 0, 192, 0), penSize);
+
+		if (iLeft->IsVisible)
+		{
+			Gdiplus::Rect idealSizeLeft(iLeft->X - (size - penSize/2)/2, iLeft->Y - (size - penSize/2)/2, size, size);
+			aGraphics->DrawEllipse(&idealSizePen, idealSizeLeft);
+		}
+
+		if (iRight->IsVisible)
+		{
+			Gdiplus::Rect idealSizeRight(iRight->X - (size - penSize/2)/2, iRight->Y - (size - penSize/2)/2, size, size);
+			aGraphics->DrawEllipse(&idealSizePen, idealSizeRight);
+		}
 	}
 
 	if (aUpdateType & updStatic)
 	{
 		iWarning->paintTo(aGraphics);
-		iStart->paintTo(aGraphics);
-		iClose->paintTo(aGraphics);
+		//iClose->paintTo(aGraphics);
 	}
 }
 
@@ -140,12 +177,12 @@ void __fastcall TiEyeBox::SetEyeLocation(TiAnimation* aEye, double aX, double aY
 	int fadingDirection = aEye->FadingDirection;
 	bool visible = false;
 
-	if (aX >= 0 && aY >= 0)
+	if (aX != KInvalidValue && aY != KInvalidValue)
 	{
 		visible = true;
 		aEye->placeTo(
-			iBox.Left + aX * iBox.Width(),
-			iBox.Top + aY * iBox.Height()
+			iBox.Left + (KCamWidth/2 + aX) / KCamWidth * iBox.Width(),
+			iBox.Bottom - (KCamHeight/2 + aY) / KCamHeight * iBox.Height()
 		);
 	}
 
@@ -161,7 +198,13 @@ void __fastcall TiEyeBox::SetEyeScale(TiAnimation* aEye, double aDist)
 	if (aDist <= KMinDistance)
 		return;
 
-	aEye->Scale = sqrt(max(KMinEyeScale2, 1.0 - (aDist - KMinDistance)/50.0));
+	aEye->Scale = GetScale(aDist);
+}
+
+//---------------------------------------------------------------------------
+double __fastcall TiEyeBox::GetScale(double aDist)
+{
+	return sqrt(max(KMinEyeScale2, 1.0 - (aDist - KMinDistance)/350.0));
 }
 
 //---------------------------------------------------------------------------
@@ -174,13 +217,13 @@ void __fastcall TiEyeBox::SetVisible(bool aValue)
 		iRight->fadeOut();
 		iWarning->fadeOut();
 		iStart->fadeOut();
-		iClose->fadeOut();
+		//iClose->fadeOut();
 	}
 	else if (!iVisible && aValue)
 	{
 		iBackground->fadeIn();
 		iStart->fadeIn();
-		iClose->fadeIn();
+		//iClose->fadeIn();
 	}
 
 	iVisible = aValue;

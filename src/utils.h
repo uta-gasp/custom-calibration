@@ -13,6 +13,13 @@
 #pragma option pop
 
 //---------------------------------------------------------------------------
+#define __DEBUG true
+#define debug(x)   { \
+	if(__DEBUG) \
+		::MessageBox(NULL, String((x)).c_str(), "", MB_OK); \
+	}
+
+//---------------------------------------------------------------------------
 bool sameSign(double a, double b);
 inline int sign(double a);
 inline int sign(float a);

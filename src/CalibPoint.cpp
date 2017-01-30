@@ -10,8 +10,8 @@
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
-const int KOlioCountMin = 2;
-const int KOlioCountMax = 4;
+const int KOlioCountMin = 0;
+const int KOlioCountMax = 0;
 const int KOlioDistanceMin = 120;
 const int KOlioDistanceMax = 150;
 const int KOlioIdleSpeedMin = 6;
@@ -190,10 +190,12 @@ __fastcall TiCalibPoint::TiCalibPoint(TiAnimationManager* aManager, int aX, int 
 		//olio->OnFadingFinished = onOlioFadingFinished;
 
 		iOlios.add(olio);
-		aManager->add(olio);
+		if (aManager)
+			aManager->add(olio);
 	}
 
-	aManager->add(iLamp);
+	if (aManager)
+		aManager->add(iLamp);
 }
 
 //---------------------------------------------------------------------------

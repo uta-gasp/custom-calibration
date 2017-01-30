@@ -287,6 +287,9 @@ void __fastcall TiAnimation::setOrientation(double aDX, double aDY)
 //---------------------------------------------------------------------------
 bool __fastcall TiAnimation::hitTest(int aX, int aY)
 {
+	if (!IsVisible)
+		return false;
+		
 	double w = iScale * iWidth;
 	double h = iScale * iHeight;
 	double cx = iScale * iCenter.x;

@@ -1,22 +1,16 @@
 //---------------------------------------------------------------------------
 #include "CalibPoints.h"
+#include "utils.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
 __fastcall TiCalibPoints::TiCalibPoints(TiAnimationManager* aManager, int aWindowWidth, int aWindowHeight) :
-		iCurrentPointIndex(-1)
+		iCurrentPointIndex(-1),
+		iAnimationManager(aManager)
 {
 	iPoints.DeleteContent = true;
-
-	iPoints.add(new TiCalibPoint(aManager, aWindowWidth/2, aWindowHeight/2));
-	iPoints.add(new TiCalibPoint(aManager, aWindowWidth*0.2, aWindowHeight*0.2));
-	iPoints.add(new TiCalibPoint(aManager, aWindowWidth*0.8, aWindowHeight*0.2));
-	iPoints.add(new TiCalibPoint(aManager, aWindowWidth*0.8, aWindowHeight*0.8));
-	iPoints.add(new TiCalibPoint(aManager, aWindowWidth*0.2, aWindowHeight*0.8));
-
-	Rearrange();
 }
 
 //---------------------------------------------------------------------------
@@ -55,6 +49,27 @@ void __fastcall TiCalibPoints::fadeOut()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::clear()
+{
+	iPoints.clear();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::add(CalibrationPointStruct& aPoint)
+{
+	// we are not sure points are added in proper order, i.e. 1,2,3...
+	int index = aPoint.number - 1;
+	while (iPoints.Count < index) {
+		iPoints.add(new TiCalibPoint(NULL, 0, 0));
+	}
+
+	if (index < iPoints.Count)
+		iPoints.set(index, new TiCalibPoint(iAnimationManager, aPoint.positionX, aPoint.positionY));
+	else
+		iPoints.add(new TiCalibPoint(iAnimationManager, aPoint.positionX, aPoint.positionY));
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiCalibPoints::prepare(int aCalibPointIndex)
 {
 	iCurrentPointIndex = -1;
@@ -72,24 +87,30 @@ void __fastcall TiCalibPoints::prepare(int aCalibPointIndex)
 	else
 	{
 		lightOff();
-		Rearrange();
+		//Rearrange();
 		for (int i = 0; i < iPoints.Count; i++)
 			iPoints[i]->Enabled = true;
 	}
 }
 
 //---------------------------------------------------------------------------
-TiCalibPoint* __fastcall TiCalibPoints::next()
+TiCalibPoint* __fastcall TiCalibPoints::next(int aPointNumber)
 {
-	while (true) {
-		iCurrentPointIndex++;
-		if (iCurrentPointIndex == iPoints.Count)
-			break;
-		if (iPoints[iCurrentPointIndex]->Enabled)
-			break;
+	if (!aPointNumber)
+	{
+		while (true) {
+			iCurrentPointIndex++;
+			if (iCurrentPointIndex == iPoints.Count)
+				break;
+			if (iPoints[iCurrentPointIndex]->Enabled)
+				break;
+		}
+	}
+	else {
+		iCurrentPointIndex = aPointNumber - 1;
 	}
 
-	bool canContinue = iCurrentPointIndex < iPoints.Count;
+	bool canContinue = iCurrentPointIndex >= 0 && iCurrentPointIndex < iPoints.Count;
 	if (!canContinue)
 		iCurrentPointIndex = -1;
 

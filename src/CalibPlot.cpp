@@ -14,7 +14,8 @@ const int KPointHitSize = 16;
 const Gdiplus::Color KDeviationColor(208,208,208);
 const Gdiplus::Color KDeviationColorFocused(230,224,224);
 const Gdiplus::Color KTargetColor(0,0,0);
-const Gdiplus::Color KGazeColor(208,64,0);
+const Gdiplus::Color KGazeColorLeft(208,64,0);
+const Gdiplus::Color KGazeColorRight(0,64,208);
 
 //---------------------------------------------------------------------------
 __fastcall TiCalibPlot::TiCalibPlot(TiAnimationManager* aManager, TRect aBox,
@@ -61,7 +62,8 @@ __fastcall TiCalibPlot::TiCalibPlot(TiAnimationManager* aManager, TRect aBox,
 		aManager->add(iClose);
 	}
 
-	iCalibQualityData.DeleteContent = true;
+	iCalibQualityDataLeft.DeleteContent = true;
+	iCalibQualityDataRight.DeleteContent = true;
 }
 
 //---------------------------------------------------------------------------
@@ -72,13 +74,17 @@ __fastcall TiCalibPlot::~TiCalibPlot()
 //---------------------------------------------------------------------------
 void __fastcall TiCalibPlot::reset()
 {
-	iCalibQualityData.clear();
+	iCalibQualityDataLeft.clear();
+	iCalibQualityDataRight.clear();
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPlot::add(CalibrationPointQualityStruct* aCalibPointQuality)
+void __fastcall TiCalibPlot::add(int aNumber,
+		CalibrationPointQualityStruct* aLeft,
+		CalibrationPointQualityStruct* aRight)
 {
-	iCalibQualityData.add(aCalibPointQuality);
+	iCalibQualityDataLeft.add(aLeft);
+	iCalibQualityDataRight.add(aRight);
 	iPlot->invalidate();
 }
 
@@ -87,11 +93,11 @@ CalibrationPointQualityStruct* __fastcall TiCalibPlot::calibPointHitTest(int aX,
 {
 	if (!iVisible)
 		return NULL;
-		
+
 	CalibrationPointQualityStruct* result = NULL;
-	for (int i = 0; i < iCalibQualityData.Count; i++)
+	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
-		CalibrationPointQualityStruct* point = iCalibQualityData[i];
+		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
 		int x = iBox.Left + iScaleX * point->positionX;
 		int y = iBox.Top + iScaleY * point->positionY;
 		if (aX > x - KPointHitSize && aX < x + KPointHitSize &&
@@ -160,46 +166,54 @@ void __fastcall TiCalibPlot::DrawQualityData(Gdiplus::Graphics* aGraphics)
 	Gdiplus::SolidBrush target(Gdiplus::Color(255 * iPlot->Opacity,
 			KTargetColor.GetR(), KTargetColor.GetG(), KTargetColor.GetB())
 	);
-	Gdiplus::SolidBrush gaze(Gdiplus::Color(255 * iPlot->Opacity,
-			KGazeColor.GetR(), KGazeColor.GetG(), KGazeColor.GetB())
+	Gdiplus::SolidBrush gazeLeft(Gdiplus::Color(255 * iPlot->Opacity,
+			KGazeColorLeft.GetR(), KGazeColorLeft.GetG(), KGazeColorLeft.GetB())
+	);
+	Gdiplus::SolidBrush gazeRight(Gdiplus::Color(255 * iPlot->Opacity,
+			KGazeColorRight.GetR(), KGazeColorRight.GetG(), KGazeColorRight.GetB())
 	);
 
-	for (int i = 0; i < iCalibQualityData.Count; i++)
+	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
-		CalibrationPointQualityStruct* point = iCalibQualityData[i];
-		if (point->usageStatus == 0)
-		{
-			Gdiplus::SolidBrush* deviation;
-			if (point == iFocused)
-					deviation = new Gdiplus::SolidBrush(Gdiplus::Color(255 * iPlot->Opacity,
-							KDeviationColorFocused.GetR(),
-							KDeviationColorFocused.GetG(),
-							KDeviationColorFocused.GetB()
-					));
-			else
-					deviation = new Gdiplus::SolidBrush(Gdiplus::Color(255 * iPlot->Opacity,
-							KDeviationColor.GetR(),
-							KDeviationColor.GetG(),
-							KDeviationColor.GetB()
-					));
+		CalibrationPointQualityStruct* pointLeft = iCalibQualityDataLeft[i];
+		CalibrationPointQualityStruct* pointRight = iCalibQualityDataRight[i];
 
-			aGraphics->FillEllipse(deviation,
-					float(iBox.Left + iScaleX * point->positionX - point->standardDeviationX),
-					float(iBox.Top + iScaleY * point->positionY - point->standardDeviationY),
-					2.f * point->standardDeviationX,
-					2.f * point->standardDeviationY
-			);
-			aGraphics->FillEllipse(&gaze,
-					iBox.Left + iScaleX * point->correctedPorX - KTargetSize / 2,
-					iBox.Top + iScaleY * point->correctedPorY - KTargetSize / 2,
-					KTargetSize, KTargetSize
-			);
+		Gdiplus::SolidBrush* deviation;
+		if (pointLeft == iFocused)
+				deviation = new Gdiplus::SolidBrush(Gdiplus::Color(255 * iPlot->Opacity,
+						KDeviationColorFocused.GetR(),
+						KDeviationColorFocused.GetG(),
+						KDeviationColorFocused.GetB()
+				));
+		else
+				deviation = new Gdiplus::SolidBrush(Gdiplus::Color(255 * iPlot->Opacity,
+						KDeviationColor.GetR(),
+						KDeviationColor.GetG(),
+						KDeviationColor.GetB()
+				));
 
-			delete deviation;
-		}
+		aGraphics->FillEllipse(deviation,
+				float(iBox.Left + iScaleX * pointLeft->positionX - pointLeft->standardDeviationX),
+				float(iBox.Top + iScaleY * pointLeft->positionY - pointLeft->standardDeviationY),
+				2.f * pointLeft->standardDeviationX,
+				2.f * pointLeft->standardDeviationY
+		);
+		aGraphics->FillEllipse(&gazeLeft,
+				iBox.Left + iScaleX * pointLeft->correctedPorX - KTargetSize / 2,
+				iBox.Top + iScaleY * pointLeft->correctedPorY - KTargetSize / 2,
+				KTargetSize, KTargetSize
+		);
+		aGraphics->FillEllipse(&gazeRight,
+				iBox.Left + iScaleX * pointRight->correctedPorX - KTargetSize / 2,
+				iBox.Top + iScaleY * pointRight->correctedPorY - KTargetSize / 2,
+				KTargetSize, KTargetSize
+		);
+
+		delete deviation;
+
 		aGraphics->FillEllipse(&target,
-				iBox.Left + iScaleX * point->positionX - KTargetSize / 2,
-				iBox.Top + iScaleY * point->positionY - KTargetSize / 2,
+				iBox.Left + iScaleX * pointLeft->positionX - KTargetSize / 2,
+				iBox.Top + iScaleY * pointLeft->positionY - KTargetSize / 2,
 				KTargetSize, KTargetSize
 		);
 	}
@@ -210,9 +224,9 @@ TiCalibPlot::Point __fastcall TiCalibPlot::GetWorstPoint()
 {
 	TiCalibPlot::Point result;
 
-	for (int i = 0; i < iCalibQualityData.Count; i++)
+	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
-		CalibrationPointQualityStruct* point = iCalibQualityData[i];
+		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
 		if (point->usageStatus == 0)
 		{
 			double dx = point->positionX - point->correctedPorX;

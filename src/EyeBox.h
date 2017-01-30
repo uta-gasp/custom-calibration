@@ -4,7 +4,10 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
-#include "fakeMyGaze.h"
+
+#ifndef RET_SUCCESS
+#include "myGazeAPI.h"
+#endif
 
 //---------------------------------------------------------------------------
 class TiEyeBox : public TObject
@@ -27,6 +30,7 @@ class TiEyeBox : public TObject
 
 		void __fastcall SetEyeLocation(TiAnimation* aEye, double aX, double aY);
 		void __fastcall SetEyeScale(TiAnimation* aEye, double aDist);
+		double __fastcall GetScale(double aDist);
 
 		void __fastcall SetVisible(bool aValue);
 
@@ -46,7 +50,7 @@ class TiEyeBox : public TObject
 		__property TiAnimation* Right = {read = iRight};
 		__property TiAnimation* Warning = {read = iWarning};
 		__property TiAnimation* Start = {read = iStart};
-		__property TiAnimation* Close = {read = iClose};
+		//__property TiAnimation* Close = {read = iClose};
 
 		__property bool IsVisible = {read = iVisible, write = SetVisible};
 

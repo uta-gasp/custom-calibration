@@ -8,14 +8,19 @@
 //---------------------------------------------------------------------------
 #include "CalibPoint.h"
 
+#ifndef RET_SUCCESS
+#include "myGazeAPI.h"
+#endif
+
 //---------------------------------------------------------------------------
 class TiCalibPoints
 {
 	private:
 		typedef TiDynArray<TiCalibPoint> TiPoints;
 
-		TiPoints iPoints;
+		TiAnimationManager* iAnimationManager;
 
+		TiPoints iPoints;
 		int iCurrentPointIndex;
 		bool iIsSinglePointMode;
 
@@ -31,9 +36,12 @@ class TiCalibPoints
 		void __fastcall lightOnCurrent();
 		void __fastcall lightOffCurrent();
 		void __fastcall fadeOut();
+
+		void __fastcall clear();
+		void __fastcall add(CalibrationPointStruct& aPoint);
 		void __fastcall prepare(int aCalibPointIndex = -1);
 
-		TiCalibPoint* __fastcall next();
+		TiCalibPoint* __fastcall next(int aPointNumber = 0);
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 

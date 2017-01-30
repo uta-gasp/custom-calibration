@@ -123,7 +123,6 @@ object frmMainForm: TfrmMainForm
     Width = 193
     Height = 129
     TabOrder = 6
-    OnMouseMove = Panel1MouseMove
     OnMouseUp = Panel1MouseUp
   end
   object Button3: TButton

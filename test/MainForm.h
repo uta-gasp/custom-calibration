@@ -12,7 +12,7 @@
 
 #include "utils.h"
 #include "Animation.h"
-#include "Calibration.h"
+#include "CustomCalibration.h"
 
 //---------------------------------------------------------------------------
 class TfrmMainForm : public TForm
@@ -40,14 +40,13 @@ __published:	// IDE-managed Components
           TShiftState Shift, int X, int Y);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall Button2Click(TObject *Sender);
-	void __fastcall Panel1MouseMove(TObject *Sender, TShiftState Shift, int X,
-          int Y);
 	void __fastcall Button3Click(TObject *Sender);
 	void __fastcall TrackBar3Change(TObject *Sender);
 	void __fastcall FormDestroy(TObject *Sender);
 
 private:	// User declarations
-	TfrmCalibration* iCalibration;
+	TfrmCustomCalibration* iCustomCalibration;
+	int iCurrentCalibPointNumber;
 
 	TiAnimation* iFly;
 	TiAnimationManager* iCreatures;
@@ -65,11 +64,15 @@ private:	// User declarations
 
 	void __fastcall onCalibrationDebug(TObject* aSender, const char* aMsg);
 	void __fastcall onCalibrationStart(TObject* aSender);
-	void __fastcall onRecalibrateSinglePoint(TObject* aSender);
+	void __fastcall onCalibrationReadyToCalibrate(TObject* aSender);
+	void __fastcall onRecalibrateSinglePoint(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
-	void __fastcall onCalibrationPointAccept(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
+	void __fastcall onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
+	void __fastcall onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationFinished(TObject* aSender);
 	void __fastcall onCalibrationAborted(TObject* aSender);
+
+	void __fastcall onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 
 public:		// User declarations
 	__fastcall TfrmMainForm(TComponent* Owner);

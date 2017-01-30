@@ -8,7 +8,7 @@ USERC("..\assets\assets.rc");
 USEUNIT("..\src\Animation.cpp");
 USELIB("GdiPlus.lib");
 USEUNIT("..\src\utils.cpp");
-USEFORM("..\src\Calibration.cpp", frmCalibration);
+USEFORM("..\src\CustomCalibration.cpp", frmCustomCalibration);
 USEUNIT("..\src\EyeBox.cpp");
 USEUNIT("..\src\CalibPlot.cpp");
 USEUNIT("..\src\CalibPoint.cpp");

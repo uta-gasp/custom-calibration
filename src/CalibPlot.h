@@ -7,7 +7,10 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
-#include "fakeMyGaze.h"
+
+#ifndef RET_SUCCESS
+#include "myGazeAPI.h"
+#endif
 
 //---------------------------------------------------------------------------
 class TiCalibPlot : public TObject
@@ -35,7 +38,8 @@ class TiCalibPlot : public TObject
 		float iScaleX;
 		float iScaleY;
 
-		TiCalibQualityData iCalibQualityData;
+		TiCalibQualityData iCalibQualityDataLeft;
+		TiCalibQualityData iCalibQualityDataRight;
 		CalibrationPointQualityStruct* iFocused;
 
 		bool iVisible;
@@ -53,7 +57,8 @@ class TiCalibPlot : public TObject
 		__fastcall ~TiCalibPlot();
 
 		void __fastcall reset();
-		void __fastcall add(CalibrationPointQualityStruct* aCalibPointQuality);
+		void __fastcall add(int aNumber, CalibrationPointQualityStruct* aLeft,
+				CalibrationPointQualityStruct* aRight);
 
 		CalibrationPointQualityStruct* __fastcall calibPointHitTest(int aX, int aY);
 

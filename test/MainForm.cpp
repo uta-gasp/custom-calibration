@@ -16,6 +16,14 @@ TfrmMainForm *frmMainForm;
 
 const String KIniFileName = "settings.ini";
 
+const CalibrationPointStruct KCalibPoints[] = {
+	{1, 700, 380},
+	{2, 1200, 180},
+	{3, 1000, 690},
+	{4, 150, 600},
+	{5, 200, 80},
+};
+
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
 	frmMainForm->log->Lines->Add(aMsg);
@@ -29,24 +37,27 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	frmMainForm = this;
 
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
-	iCalibration = new TfrmCalibration(this);
-	iCalibration->OnDebug = onCalibrationDebug;
-	iCalibration->OnStart = onCalibrationStart;
-	iCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
-	iCalibration->OnPointReady = onCalibrationPointReady;
-	iCalibration->OnPointAccept = onCalibrationPointAccept;
-	iCalibration->OnFinished = onCalibrationFinished;
-	iCalibration->OnAborted = onCalibrationAborted;
+	iCustomCalibration = new TfrmCustomCalibration(this);
+	iCustomCalibration->OnDebug = onCalibrationDebug;
+	iCustomCalibration->OnStart = onCalibrationStart;
+	iCustomCalibration->OnReadyToCalibrate = onCalibrationReadyToCalibrate;
+	iCustomCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
+	iCustomCalibration->OnPointReady = onCalibrationPointReady;
+	iCustomCalibration->OnPointAccepted = onCalibrationPointAccepted;
+	iCustomCalibration->OnFinished = onCalibrationFinished;
+	iCustomCalibration->OnAborted = onCalibrationAborted;
+
+	iCustomCalibration->OnMouseMove = onCalibrationMouseMove;
 
 	if (FileExists(KIniFileName))
 	{
 		String fileName = ExtractFilePath(Application->ExeName);
 		TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", false);
-		iCalibration->loadSettings(ini);
+		iCustomCalibration->loadSettings(ini);
 		delete ini;
 	}
 
-	iCalibration->Show();
+	iCustomCalibration->Show();
 
 	iCreatures = new TiAnimationManager();
 	iCreatures->OnPaint = onCreaturesPaint;
@@ -134,12 +145,95 @@ void __fastcall TfrmMainForm::onCalibrationDebug(TObject* aSender, const char* a
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onCalibrationStart(TObject* aSender) { Log("START"); }
-void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender) { Log("RECALIB_PT"); }
-void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) { Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":"")); }
-void __fastcall TfrmMainForm::onCalibrationPointAccept(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) { Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":"")); }
-void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) { Log("FINISHED"); }
-void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) { Log("ABORTED"); }
+void __fastcall TfrmMainForm::onCalibrationStart(TObject* aSender) {
+Log("START");
+	iCustomCalibration->clearPoints();
+
+	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
+	{
+		iCustomCalibration->addPoint(KCalibPoints[i - 1]);
+	}
+}
+
+void __fastcall TfrmMainForm::onCalibrationReadyToCalibrate(TObject* aSender) {
+Log("READY_TO_CALIB");
+	iCurrentCalibPointNumber = 1;
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
+}
+
+void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
+Log(String("RECALIB_PT_")+aPointIndex);
+}
+
+void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
+Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
+}
+
+void __fastcall TfrmMainForm::onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
+Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
+}
+
+void __fastcall TfrmMainForm::onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
+Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
+	++iCurrentCalibPointNumber;
+	if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
+		iCurrentCalibPointNumber = -1;
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
+}
+
+void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
+Log("FINISHED");
+	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
+	{
+		CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
+		CalibrationPointQualityStruct* left = new CalibrationPointQualityStruct();
+		CalibrationPointQualityStruct* right = new CalibrationPointQualityStruct();
+		left->number = i;
+		left->positionX = calibPoint.positionX;
+		left->positionY = calibPoint.positionY;
+		left->correctedPorX = calibPoint.positionX + randInRange(-20, 20);
+		left->correctedPorY = calibPoint.positionY + randInRange(-20, 20);
+		left->standardDeviationX = randInRange(-40, 40);
+		left->standardDeviationY = randInRange(-40, 40);
+		left->usageStatus = 0;
+		left->qualityIndex = double(randInRange(80, 100)) / 100.0;
+		*right = *left;
+
+		iCustomCalibration->reportCalibrationResult(i, left, right);
+	}
+
+	iCustomCalibration->processCalibrationResult();
+}
+
+void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {
+Log("ABORTED");
+	Close();
+}
+
+void __fastcall TfrmMainForm::onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y) {
+static double sLastEyeX = 0;
+static double sLastEyeY = 0;
+static double sLastDist = 500;
+
+	if (!Shift.Contains(ssShift))
+	{
+		sLastEyeX = (double(X) / iCustomCalibration->Width - 0.5) * 320;
+		sLastEyeY = (0.5 - double(Y) / iCustomCalibration->Height) * 240;
+	}
+	else
+	{
+		double x = (double(X) / iCustomCalibration->Width - 0.5) * 320;
+		sLastDist = 500 + (x - sLastEyeX);
+
+		//iCalibration->setTrackingStability(Y < Panel1->Height / 2);
+	}
+
+	SampleStruct sample = {__int64(0),
+			{0.0, 0.0, 0.0, sLastEyeX-35, sLastEyeY, sLastDist},
+			{0.0, 0.0, 0.0, sLastEyeX+35, sLastEyeY, sLastDist}
+	};
+	iCustomCalibration->setSample(sample);
+}
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
@@ -214,7 +308,7 @@ void __fastcall TfrmMainForm::FormDestroy(TObject *Sender)
 {
 	String fileName = ExtractFilePath(Application->ExeName);
 	TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", true);
-	iCalibration->saveSettings(ini);
+	iCustomCalibration->saveSettings(ini);
 	ini->save(false);
 	delete ini;
 }
@@ -228,11 +322,5 @@ void __fastcall TfrmMainForm::Button2Click(TObject *Sender)
 		iFly->fadeOut();
 }
 
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::Panel1MouseMove(TObject *Sender, TShiftState Shift,
-			int X, int Y)
-{
-	iCalibration->setTrackingStability(Y < Panel1->Height / 2);
-}
 //---------------------------------------------------------------------------
 

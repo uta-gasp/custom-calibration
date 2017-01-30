@@ -1,7 +1,10 @@
 //---------------------------------------------------------------------------
-#include "Calibration.h"
+#include "CustomCalibration.h"
 #include "assets.h"
-#include "fakeMyGaze.h"
+
+#ifndef RET_SUCCESS
+#include "myGazeAPI.h"
+#endif
 
 //---------------------------------------------------------------------------
 #include <math.h>
@@ -14,15 +17,15 @@
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
-TfrmCalibration* frmCalibration;
+//TfrmCalibration* frmCalibration;
 
 const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
-const int KMaxAllowedCalibQualityOffset = 22;
+const int KMaxAllowedCalibQualityOffset = 40;
 
 //---------------------------------------------------------------------------
-__fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
+__fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
@@ -30,9 +33,11 @@ __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 		iStaticBitmap(NULL),
 		FOnDebug(NULL),
 		FOnStart(NULL),
+		FOnReadyToCalibrate(NULL),
 		FOnRecalibrateSinglePoint(NULL),
 		FOnPointReady(NULL),
-		FOnPointAccept(NULL),
+		FOnPointAccepted(NULL),
+		FOnPointAborted(NULL),
 		FOnFinished(NULL),
 		FOnAborted(NULL)
 {
@@ -42,7 +47,7 @@ __fastcall TfrmCalibration::TfrmCalibration(TComponent* aOwner) :
 }
 
 //---------------------------------------------------------------------------
-__fastcall TfrmCalibration::~TfrmCalibration()
+__fastcall TfrmCustomCalibration::~TfrmCustomCalibration()
 {
 	if (iStaticBitmap)
 		delete iStaticBitmap;
@@ -51,33 +56,76 @@ __fastcall TfrmCalibration::~TfrmCalibration()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::setSample(SampleStruct& aSample)
+void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 {
 	iEyeBox->left(aSample.leftEye);
 	iEyeBox->right(aSample.rightEye);
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::setTrackingStability(bool aStable)
+void __fastcall TfrmCustomCalibration::setTrackingStability(bool aStable)
 {
 	iEyeBox->setTrackingStability(aStable);
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::loadSettings(TiXML_INI* aStorage)
+void __fastcall TfrmCustomCalibration::clearPoints()
+{
+	iCalibPoints->clear();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::addPoint(CalibrationPointStruct& aPoint)
+{
+	iCalibPoints->add(aPoint);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber)
+{
+	MoveToNextPoint(aPointNumber);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::reportCalibrationResult(int aNumber,
+		CalibrationPointQualityStruct* aLeft,
+		CalibrationPointQualityStruct* aRight)
+{
+	iCalibPlot->add(aNumber, aLeft, aRight);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::processCalibrationResult()
+{
+	UpdateCalibPlot();
+
+	/*
+	for (int i = 0; i < iCalibPoints->Count; i++)
+	{
+		TiCalibPoint* pt = (*iCalibPoints)[i];
+		iCalibPlot->add(new CalibrationPointQualityStruct(i, pt->X, pt->Y,
+				pt->X + randInRange(-20, 20), pt->Y + randInRange(-20, 20),
+				randInRange(10, 15), randInRange(10, 15),
+				0, 0));
+	} */
+
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::loadSettings(TiXML_INI* aStorage)
 {
 	iGame->BestTime = aStorage->getValue("Game", "BestTime", iGame->BestTime);
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::saveSettings(TiXML_INI* aStorage)
+void __fastcall TfrmCustomCalibration::saveSettings(TiXML_INI* aStorage)
 {
 	aStorage->putValue("Game", "BestTime", iGame->BestTime);
 }
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aUpdateType)
+void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateType aUpdateType)
 {
 	Gdiplus::Rect destRect(0, 0, Width, Height);
 
@@ -128,14 +176,14 @@ void __fastcall TfrmCalibration::onObjectPaint(TObject* aSender, EiUpdateType aU
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onEyeBoxHidden(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onEyeBoxHidden(TObject* aSender)
 {
 	if (FOnDebug)
 		FOnDebug(this, "eyebox hidden");
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onFireFlyFadingFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onFireFlyFadingFisnihed(TObject* aSender)
 {
 	if (iFireFly->IsVisible)
 	{
@@ -143,7 +191,10 @@ void __fastcall TfrmCalibration::onFireFlyFadingFisnihed(TObject* aSender)
 			FOnDebug(this, "firefly on");
 
 		iFireFly->startAnimation();
-		MoveToNextPoint();
+
+		if (FOnReadyToCalibrate)
+			FOnReadyToCalibrate(this);
+		//MoveToNextPoint();
 	}
 	else
 	{
@@ -152,7 +203,7 @@ void __fastcall TfrmCalibration::onFireFlyFadingFisnihed(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onFireFlyMoveFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 {
 	if (iFireFly->IsVisible)
 	{
@@ -167,7 +218,7 @@ void __fastcall TfrmCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onCalibPointTimeout(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 {
 	if (iTarget->IsVisible)
 		iTarget->hide();
@@ -182,7 +233,7 @@ void __fastcall TfrmCalibration::onCalibPointTimeout(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onBackgroundFadingFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSender)
 {
 	if (iBackground->IsVisible)
 	{
@@ -195,7 +246,7 @@ void __fastcall TfrmCalibration::onBackgroundFadingFisnihed(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::onGameFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 {
 	iBackground->FadingDuration = 400;
 	iBackground->fadeOut();
@@ -204,7 +255,7 @@ void __fastcall TfrmCalibration::onGameFisnihed(TObject* aSender)
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::StartCalibration()
+void __fastcall TfrmCustomCalibration::StartCalibration()
 {
 	if (FOnDebug)
 		FOnDebug(this, "start");
@@ -220,7 +271,7 @@ void __fastcall TfrmCalibration::StartCalibration()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::RestartCalibration(int aRecalibrationPointIndex)
+void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointIndex)
 {
 	if (FOnDebug)
 		FOnDebug(this, "restart");
@@ -239,26 +290,26 @@ void __fastcall TfrmCalibration::RestartCalibration(int aRecalibrationPointIndex
 	}
 
 	if (isSinglePoint && FOnRecalibrateSinglePoint)
-		FOnRecalibrateSinglePoint(this);
+		FOnRecalibrateSinglePoint(this, aRecalibrationPointIndex, true);
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::PointDone()
+void __fastcall TfrmCustomCalibration::PointDone()
 {
 	iIsWaitingToAcceptPoint = false;
 
-	if (FOnPointAccept && iCalibPoints->CurrentPointIndex >= 0)
-		FOnPointAccept(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+	if (FOnPointAccepted && iCalibPoints->CurrentPointIndex >= 0)
+		FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
-	MoveToNextPoint();
+	//MoveToNextPoint();
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::MoveToNextPoint()
+void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 {
 	iCalibPoints->lightOnCurrent();
 
-	TiCalibPoint* calibPoint = iCalibPoints->next();
+	TiCalibPoint* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
 	{
 		bool isAtPlaceAlready = !iFireFly->moveTo(calibPoint->X, calibPoint->Y);
@@ -281,18 +332,19 @@ void __fastcall TfrmCalibration::MoveToNextPoint()
 	else
 	{
 		Finish();
+		iCalibPlot->reset();
 
 		if (FOnDebug)
 			FOnDebug(this, "finished");
 		if (FOnFinished)
 			FOnFinished(this);
 
-		UpdateCalibPlot();
+		//UpdateCalibPlot();
 	}
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::Finish()
+void __fastcall TfrmCustomCalibration::Finish()
 {
 	iIsWaitingToAcceptPoint = false;
 
@@ -306,7 +358,7 @@ void __fastcall TfrmCalibration::Finish()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::Abort()
+void __fastcall TfrmCustomCalibration::Abort()
 {
 	if (FOnDebug)
 		FOnDebug(this, "aborted");
@@ -320,32 +372,28 @@ void __fastcall TfrmCalibration::Abort()
 
 	iCalibPoints->lightOff();
 
-	iEyeBox->IsVisible = true;
+	TiTimeout::run(1000, Done);
+
+	//iEyeBox->IsVisible = true;
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::Done()
+void __fastcall TfrmCustomCalibration::Done(TObject* aSender)
 {
 	if (FOnDebug)
 		FOnDebug(this, "close");
-		
-	Close();
+
+	if (FormState.Contains(fsModal))
+		ModalResult = mrOk;
+	else
+		Close();
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::UpdateCalibPlot()
+void __fastcall TfrmCustomCalibration::UpdateCalibPlot()
 {
-	iCalibPlot->reset();
-	for (int i = 0; i < iCalibPoints->Count; i++)
-	{
-		TiCalibPoint* pt = (*iCalibPoints)[i];
-		iCalibPlot->add(new CalibrationPointQualityStruct(i, pt->X, pt->Y,
-				pt->X + randInRange(-20, 20), pt->Y + randInRange(-20, 20),
-				randInRange(10, 15), randInRange(10, 15),
-				0, 0));
-	}
-
 	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
+
 	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset)
 	{
 		RestartCalibration(worstCalibPoint.ID);
@@ -360,7 +408,7 @@ void __fastcall TfrmCalibration::UpdateCalibPlot()
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
+void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 {
 	SetBounds(0, 0, Screen->Width, Screen->Height);
 
@@ -408,7 +456,7 @@ void __fastcall TfrmCalibration::FormCreate(TObject *Sender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::FormDestroy(TObject *Sender)
+void __fastcall TfrmCustomCalibration::FormDestroy(TObject *Sender)
 {
 	delete iCalibPoints;
 	delete iEyeBox;
@@ -423,7 +471,7 @@ void __fastcall TfrmCalibration::FormDestroy(TObject *Sender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
+void __fastcall TfrmCustomCalibration::FormMouseUp(TObject *Sender,
 			TMouseButton Button, TShiftState Shift, int X, int Y)
 {
 	if (Button != mbLeft)
@@ -433,8 +481,8 @@ void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
 	{
 		if (iEyeBox->Start->hitTest(X, Y))
 			StartCalibration();
-		else if (iEyeBox->Close->hitTest(X, Y))
-			Done();
+		//else if (iEyeBox->Close->hitTest(X, Y))
+		//	Done();
 	}
 	else if (iCalibPlot->IsVisible)
 	{
@@ -454,7 +502,7 @@ void __fastcall TfrmCalibration::FormMouseUp(TObject *Sender,
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::FormKeyUp(TObject *Sender, WORD &Key,
+void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 			TShiftState Shift)
 {
 	if (iEyeBox->IsVisible)
@@ -489,9 +537,10 @@ void __fastcall TfrmCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCalibration::FormMouseMove(TObject *Sender,
+void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
 			TShiftState Shift, int X, int Y)
 {
+/*
 	double x = (double(X) / Width - 0.5) / 2 + 0.5;
 	double y = (double(Y) / Height - 0.5) / 2 + 0.5;
 
@@ -511,6 +560,7 @@ void __fastcall TfrmCalibration::FormMouseMove(TObject *Sender,
 		iCalibPlot->Restart->AnimationIndex = iCalibPlot->Restart->hitTest(X, Y) ? 1 : 0;
 		iCalibPlot->Close->AnimationIndex = iCalibPlot->Close->hitTest(X, Y) ? 1 : 0;
 	}
+	*/
 }
 //---------------------------------------------------------------------------
 
