@@ -42,8 +42,26 @@ class TiTimeout : public TTimer
 		DYNAMIC void __fastcall Timer(void);
 
 	public:
-		static void __fastcall run(UINT timeout, TNotifyEvent aCallback, TiTimeout** ref = NULL);
+		static void __fastcall run(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
+		static void __fastcall runSync(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
 		void __fastcall kill();
+};
+
+//---------------------------------------------------------------------------
+class TiSyncThread : public TThread
+{
+	private:
+		UINT iTimeout;
+		TNotifyEvent iCallback;
+		TiTimeout** iRef;
+
+		void __fastcall CreateTimer();
+
+	protected:
+		virtual void __fastcall Execute();
+
+	public:
+		__fastcall TiSyncThread(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
 };
 
 //---------------------------------------------------------------------------

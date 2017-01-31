@@ -91,8 +91,8 @@ void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber)
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::reportCalibrationResult(int aNumber,
-		CalibrationPointQualityStruct* aLeft,
-		CalibrationPointQualityStruct* aRight)
+		CalibrationPointQualityStruct& aLeft,
+		CalibrationPointQualityStruct& aRight)
 {
 	iCalibPlot->add(aNumber, aLeft, aRight);
 }
@@ -201,9 +201,8 @@ void __fastcall TfrmCustomCalibration::onFireFlyFadingFisnihed(TObject* aSender)
 
 		iFireFly->startAnimation();
 
-		if (FOnReadyToCalibrate)
+		if (!iCalibPoints->Current && FOnReadyToCalibrate)
 			FOnReadyToCalibrate(this);
-		//MoveToNextPoint();
 	}
 	else
 	{
@@ -295,8 +294,6 @@ void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPoin
 	if (isSinglePoint)
 	{
 		iFireFly->fadeIn();
-		//if (!iFireFly->fadeIn())
-		//	MoveToNextPoint();
 		if (FOnRecalibrateSinglePoint)
 			FOnRecalibrateSinglePoint(this, aRecalibrationPointNumber, true);
 	}
@@ -324,8 +321,6 @@ void __fastcall TfrmCustomCalibration::PointDone(TObject* aSender)
 
 	if (FOnPointAccepted && iCalibPoints->CurrentPointIndex >= 0)
 		FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
-
-	//MoveToNextPoint();
 }
 
 //---------------------------------------------------------------------------
@@ -360,9 +355,10 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 		}
 		else
 		{
-			iCalibPoints->lightOffCurrent();
 			onFireFlyMoveFisnihed(NULL);
 		}
+
+		iCalibPoints->lightOffCurrent();
 
 		iTarget->placeTo(calibPoint->X, calibPoint->Y);
 		iTarget->show();

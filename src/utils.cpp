@@ -100,15 +100,21 @@ void __fastcall TiTimeout::Timer(void)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiTimeout::run(UINT timeout, TNotifyEvent aCallback, TiTimeout** ref)
+void __fastcall TiTimeout::run(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef)
 {
-	TiTimeout* timer = new TiTimeout(NULL, ref);
-	timer->Interval = timeout;
+	TiTimeout* timer = new TiTimeout(NULL, aRef);
+	timer->Interval = aTimeout;
 	timer->OnTimer = aCallback;
 	timer->Enabled = true;
 
-	if (ref)
-		*ref = timer;
+	if (aRef)
+		*aRef = timer;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiTimeout::runSync(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef)
+{
+	TiSyncThread* thread = new TiSyncThread(aTimeout, aCallback, aRef);
 }
 
 //---------------------------------------------------------------------------
@@ -120,4 +126,27 @@ void __fastcall TiTimeout::kill()
 		*iRef = NULL;
 
 	delete this;
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+__fastcall TiSyncThread::TiSyncThread(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef) :
+	TThread(false)
+{
+	FreeOnTerminate = true;
+	iTimeout = aTimeout;
+	iCallback = aCallback;
+	iRef = aRef;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiSyncThread::Execute()
+{
+	Synchronize((TThreadMethod)&CreateTimer);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiSyncThread::CreateTimer()
+{
+	TiTimeout::run(iTimeout, iCallback, iRef);
 }

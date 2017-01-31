@@ -80,11 +80,17 @@ void __fastcall TiCalibPlot::reset()
 
 //---------------------------------------------------------------------------
 void __fastcall TiCalibPlot::add(int aNumber,
-		CalibrationPointQualityStruct* aLeft,
-		CalibrationPointQualityStruct* aRight)
+		CalibrationPointQualityStruct& aLeft,
+		CalibrationPointQualityStruct& aRight)
 {
-	iCalibQualityDataLeft.add(aLeft);
-	iCalibQualityDataRight.add(aRight);
+	CalibrationPointQualityStruct* left = new CalibrationPointQualityStruct();
+	*left = aLeft;
+	CalibrationPointQualityStruct* right = new CalibrationPointQualityStruct();
+	*right = aRight;
+
+	iCalibQualityDataLeft.add(left);
+	iCalibQualityDataRight.add(right);
+	
 	iPlot->invalidate();
 }
 

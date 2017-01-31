@@ -87,6 +87,31 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::VerifyCalibration(TObject* aSender)
+{
+	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
+	{
+		CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
+		CalibrationPointQualityStruct left, right;
+		left.number = i;
+		left.positionX = calibPoint.positionX;
+		left.positionY = calibPoint.positionY;
+		left.correctedPorX = calibPoint.positionX + randInRange(-20, 20);
+		left.correctedPorY = calibPoint.positionY + randInRange(-20, 20);
+		left.standardDeviationX = randInRange(-40, 40);
+		left.standardDeviationY = randInRange(-40, 40);
+		left.usageStatus = iCalibPointStatus[i - 1];
+		left.qualityIndex = double(randInRange(60, 100)) / 100.0;
+		right = left;
+
+		iCustomCalibration->reportCalibrationResult(i, left, right);
+	}
+
+	if (iCustomCalibration->processCalibrationResult())
+		Log("START GAME");
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCreaturesPaint(TObject* aSender, EiUpdateType aUpdateType)
 {
 	Gdiplus::Rect destRect(0, 0, Panel1->Width, Panel1->Height);
@@ -214,27 +239,7 @@ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 
 void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
 Log("FINISHED");
-	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
-	{
-		CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
-		CalibrationPointQualityStruct* left = new CalibrationPointQualityStruct();
-		CalibrationPointQualityStruct* right = new CalibrationPointQualityStruct();
-		left->number = i;
-		left->positionX = calibPoint.positionX;
-		left->positionY = calibPoint.positionY;
-		left->correctedPorX = calibPoint.positionX + randInRange(-20, 20);
-		left->correctedPorY = calibPoint.positionY + randInRange(-20, 20);
-		left->standardDeviationX = randInRange(-40, 40);
-		left->standardDeviationY = randInRange(-40, 40);
-		left->usageStatus = iCalibPointStatus[i - 1];
-		left->qualityIndex = double(randInRange(80, 100)) / 100.0;
-		*right = *left;
-
-		iCustomCalibration->reportCalibrationResult(i, left, right);
-	}
-
-	if (iCustomCalibration->processCalibrationResult())
-		Log("START GAME");
+TiTimeout::runSync(500, VerifyCalibration);
 }
 
 void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {

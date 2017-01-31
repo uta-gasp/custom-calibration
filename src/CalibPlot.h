@@ -58,8 +58,9 @@ class TiCalibPlot : public TObject
 		__fastcall ~TiCalibPlot();
 
 		void __fastcall reset();
-		void __fastcall add(int aNumber, CalibrationPointQualityStruct* aLeft,
-				CalibrationPointQualityStruct* aRight);
+		void __fastcall add(int aNumber,
+				CalibrationPointQualityStruct& aLeft,
+				CalibrationPointQualityStruct& aRight);
 
 		CalibrationPointQualityStruct* __fastcall calibPointHitTest(int aX, int aY);
 

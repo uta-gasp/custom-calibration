@@ -90,8 +90,9 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall clearPoints();
 		void __fastcall addPoint(CalibrationPointStruct& aPoint);
 		void __fastcall nextPoint(int aPointNumber);
-		void __fastcall reportCalibrationResult(int aNumber, CalibrationPointQualityStruct* aLeft,
-				CalibrationPointQualityStruct* aRight);
+		void __fastcall reportCalibrationResult(int aNumber,
+				CalibrationPointQualityStruct& aLeft,
+				CalibrationPointQualityStruct& aRight);
 		bool __fastcall processCalibrationResult();
 
 		void __fastcall loadSettings(TiXML_INI* aStorage);
