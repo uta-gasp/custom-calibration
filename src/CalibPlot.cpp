@@ -237,6 +237,7 @@ TiCalibPlot::Point __fastcall TiCalibPlot::GetWorstPoint()
 				result.X = point->positionX;
 				result.Y = point->positionY;
 				result.ID = point->number;
+				result.Quality = point->qualityIndex;
 				result.Offset = offset;
 			}
 		}
@@ -245,6 +246,7 @@ TiCalibPlot::Point __fastcall TiCalibPlot::GetWorstPoint()
 			result.X = point->positionX;
 			result.Y = point->positionY;
 			result.ID = point->number;
+			result.Quality = point->qualityIndex;
 			result.Offset = 10000;
 			return result;
 		}

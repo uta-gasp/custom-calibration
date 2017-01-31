@@ -23,6 +23,7 @@ const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
 const int KMaxAllowedCalibQualityOffset = 40;
+const double KMinAllowedCalibQualityValue = 0.9;
 
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
@@ -103,7 +104,8 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 
 	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
 
-	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset)
+	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset ||
+			worstCalibPoint.Quality < KMinAllowedCalibQualityValue)
 	{
 		finished = false;
 		RestartCalibration(worstCalibPoint.ID);

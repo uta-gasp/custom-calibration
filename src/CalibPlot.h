@@ -21,11 +21,12 @@ class TiCalibPlot : public TObject
 		struct Point
 		{
 			double Offset;
+			double Quality;
 			int X;
 			int Y;
 			int ID;
 
-			Point() : Offset(0) { }
+			Point() : Offset(0), Quality(1) { }
 		};
 
 	private:
