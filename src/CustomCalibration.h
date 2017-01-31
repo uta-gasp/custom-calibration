@@ -49,6 +49,7 @@ class TfrmCustomCalibration : public TForm
 		TiTimeout* iTimeout;
 		TiTimeout* iPointAcceptTimeout;
 		bool iIsWaitingToAcceptPoint;
+		bool iLastPointAborted;
 
 		TiCalibPoints* iCalibPoints;
 
@@ -74,7 +75,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall RestartCalibration(int aRecalibrationPointNumber = -1);
 		void __fastcall PointDone(TObject* aSender = NULL);
 		void __fastcall PointAbort(TObject* aSender = NULL);
-		void __fastcall MoveToNextPoint(int aPointNumber = 0, bool aPreviousDone = true);
+		void __fastcall MoveToNextPoint(int aPointNumber);
 		void __fastcall Abort();
 		void __fastcall Finish();
 		void __fastcall Done(TObject* aSender = NULL);
@@ -90,7 +91,7 @@ class TfrmCustomCalibration : public TForm
 
 		void __fastcall clearPoints();
 		void __fastcall addPoint(CalibrationPointStruct& aPoint);
-		void __fastcall nextPoint(int aPointNumber, bool aPreviousDone);
+		void __fastcall nextPoint(int aPointNumber);
 		void __fastcall reportCalibrationResult(int aNumber, CalibrationPointQualityStruct* aLeft,
 				CalibrationPointQualityStruct* aRight);
 		void __fastcall processCalibrationResult();

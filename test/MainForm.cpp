@@ -160,14 +160,14 @@ Log("START");
 void __fastcall TfrmMainForm::onCalibrationReadyToCalibrate(TObject* aSender) {
 Log("READY_TO_CALIB");
 	iCurrentCalibPointNumber = 1;
-	iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 }
 
 void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode) {
 Log(String("RECALIB_PT_#")+aPointNumber);
 
 	iCurrentCalibPointNumber = aPointNumber;
-	iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
+	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 }
 
 void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
@@ -184,11 +184,11 @@ Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 		++iCurrentCalibPointNumber;
 		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
 			iCurrentCalibPointNumber = -1;
-		iCustomCalibration->nextPoint(iCurrentCalibPointNumber, false);
+		iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 	}
 	else
 	{
-		iCustomCalibration->nextPoint(-1, false);
+		iCustomCalibration->nextPoint(-1);
 	}
 }
 
@@ -204,11 +204,11 @@ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 		++iCurrentCalibPointNumber;
 		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
 			iCurrentCalibPointNumber = -1;
-		iCustomCalibration->nextPoint(iCurrentCalibPointNumber, true);
+		iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 	}
 	else
 	{
-		iCustomCalibration->nextPoint(-1, true);
+		iCustomCalibration->nextPoint(-1);
 	}
 }
 

@@ -30,6 +30,7 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iTimeout(NULL),
 		iPointAcceptTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
+		iLastPointAborted(false),
 		iGame(NULL),
 		iStaticBitmap(NULL),
 		FOnDebug(NULL),
@@ -82,9 +83,9 @@ void __fastcall TfrmCustomCalibration::addPoint(CalibrationPointStruct& aPoint)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber, bool aPreviousDone)
+void __fastcall TfrmCustomCalibration::nextPoint(int aPointNumber)
 {
-	MoveToNextPoint(aPointNumber, aPreviousDone);
+	MoveToNextPoint(aPointNumber);
 }
 
 //---------------------------------------------------------------------------
@@ -269,6 +270,7 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 	iFireFly->fadeIn();
 
 	iCalibPoints->prepare();
+	iLastPointAborted = false;
 }
 
 //---------------------------------------------------------------------------
@@ -280,6 +282,7 @@ void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPoin
 	iCalibPlot->IsVisible = false;
 
 	iCalibPoints->prepare(aRecalibrationPointNumber);
+	iLastPointAborted = false;
 
 	bool isSinglePoint = aRecalibrationPointNumber > 0;
 	if (isSinglePoint)
@@ -321,6 +324,7 @@ void __fastcall TfrmCustomCalibration::PointDone(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::PointAbort(TObject* aSender)
 {
+	iLastPointAborted = true;
 	if (FOnDebug)
 		FOnDebug(this, "...abort point");
 	if (FOnPointAborted)
@@ -328,13 +332,15 @@ void __fastcall TfrmCustomCalibration::PointAbort(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber, bool aPreviousDone)
+void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 {
 	if (iPointAcceptTimeout)
 		iPointAcceptTimeout->kill();
 
-	if (aPreviousDone)
+	if (!iLastPointAborted)
 		iCalibPoints->lightOnCurrent();
+
+	iLastPointAborted = false;
 
 	TiCalibPoint* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
