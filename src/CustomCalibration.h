@@ -80,8 +80,6 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall Finish();
 		void __fastcall Done(TObject* aSender = NULL);
 
-		void __fastcall UpdateCalibPlot();
-
 	public:
 		__fastcall TfrmCustomCalibration(TComponent* aOwner);
 		__fastcall ~TfrmCustomCalibration();
@@ -94,7 +92,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall nextPoint(int aPointNumber);
 		void __fastcall reportCalibrationResult(int aNumber, CalibrationPointQualityStruct* aLeft,
 				CalibrationPointQualityStruct* aRight);
-		void __fastcall processCalibrationResult();
+		bool __fastcall processCalibrationResult();
 
 		void __fastcall loadSettings(TiXML_INI* aStorage);
 		void __fastcall saveSettings(TiXML_INI* aStorage);

@@ -97,20 +97,25 @@ void __fastcall TfrmCustomCalibration::reportCalibrationResult(int aNumber,
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::processCalibrationResult()
+bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 {
-	UpdateCalibPlot();
+	bool finished = true;
 
-	/*
-	for (int i = 0; i < iCalibPoints->Count; i++)
+	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
+
+	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset)
 	{
-		TiCalibPoint* pt = (*iCalibPoints)[i];
-		iCalibPlot->add(new CalibrationPointQualityStruct(i, pt->X, pt->Y,
-				pt->X + randInRange(-20, 20), pt->Y + randInRange(-20, 20),
-				randInRange(10, 15), randInRange(10, 15),
-				0, 0));
-	} */
+		finished = false;
+		RestartCalibration(worstCalibPoint.ID);
+	}
+	else
+	{
+		iBackground->fadeIn();
 
+		//iCalibPlot->IsVisible = true;
+	}
+
+	return finished;
 }
 
 //---------------------------------------------------------------------------
@@ -371,8 +376,6 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 			FOnDebug(this, "finished");
 		if (FOnFinished)
 			FOnFinished(this);
-
-		//UpdateCalibPlot();
 	}
 }
 
@@ -422,23 +425,6 @@ void __fastcall TfrmCustomCalibration::Done(TObject* aSender)
 		ModalResult = mrOk;
 	else
 		Close();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::UpdateCalibPlot()
-{
-	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
-
-	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset)
-	{
-		RestartCalibration(worstCalibPoint.ID);
-	}
-	else
-	{
-		iBackground->fadeIn();
-
-		//iCalibPlot->IsVisible = true;
-	}
 }
 
 //---------------------------------------------------------------------------

@@ -233,7 +233,8 @@ Log("FINISHED");
 		iCustomCalibration->reportCalibrationResult(i, left, right);
 	}
 
-	iCustomCalibration->processCalibrationResult();
+	if (iCustomCalibration->processCalibrationResult())
+		Log("START GAME");
 }
 
 void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {
