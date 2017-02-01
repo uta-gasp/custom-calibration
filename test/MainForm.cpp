@@ -87,7 +87,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::VerifyCalibration(TObject* aSender)
+void __fastcall TfrmMainForm::VerifyCalibration()
 {
 	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
 	{
@@ -101,7 +101,7 @@ void __fastcall TfrmMainForm::VerifyCalibration(TObject* aSender)
 		left.standardDeviationX = randInRange(-40, 40);
 		left.standardDeviationY = randInRange(-40, 40);
 		left.usageStatus = iCalibPointStatus[i - 1];
-		left.qualityIndex = double(randInRange(60, 100)) / 100.0;
+		left.qualityIndex = double(randInRange(90, 100)) / 100.0;
 		right = left;
 
 		iCustomCalibration->reportCalibrationResult(i, left, right);
@@ -202,7 +202,7 @@ Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 void __fastcall TfrmMainForm::onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
 Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 
-	iCalibPointStatus[aPointIndex] = calibrationPointUnusedBecauseOfBadQuality;
+	iCalibPointStatus[aPointIndex] = calibrationPointUnusedBecauseOfTimeout;
 
 	if (!aIsSinglePointMode)
 	{
@@ -239,7 +239,7 @@ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 
 void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
 Log("FINISHED");
-TiTimeout::runSync(500, VerifyCalibration);
+VerifyCalibration();
 }
 
 void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {

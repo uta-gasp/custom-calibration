@@ -16,7 +16,7 @@
 #define __DEBUG true
 #define debug(x)   { \
 	if(__DEBUG) \
-		::MessageBox(NULL, String((x)).c_str(), "", MB_OK); \
+		::MessageBox(NULL, String((x)).c_str(), "myGazeDebug", MB_OK); \
 	}
 
 //---------------------------------------------------------------------------
@@ -42,7 +42,7 @@ class TiTimeout : public TTimer
 		DYNAMIC void __fastcall Timer(void);
 
 	public:
-		static void __fastcall run(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
+		static void __fastcall run(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL, Classes::TComponent* aOwner = NULL);
 		static void __fastcall runSync(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
 		void __fastcall kill();
 };

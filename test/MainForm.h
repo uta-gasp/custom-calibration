@@ -55,7 +55,7 @@ private:	// User declarations
 	//Gdiplus::Bitmap* iBackground;
 	TiTimeout* iAnimationTimeout;
 
-	void __fastcall VerifyCalibration(TObject* aSender);
+	void __fastcall VerifyCalibration();
 
 	void __fastcall onCreaturesPaint(TObject* aSender, EiUpdateType aUpdateType);
 	void __fastcall onAnimationFinished(TObject* aSender);

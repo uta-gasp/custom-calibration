@@ -19,4 +19,11 @@ object frmCustomCalibration: TfrmCustomCalibration
   OnMouseUp = FormMouseUp
   PixelsPerInch = 96
   TextHeight = 13
+  object tmrKostyl: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tmrKostylTimer
+    Left = 16
+    Top = 12
+  end
 end

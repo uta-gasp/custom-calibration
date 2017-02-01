@@ -23,7 +23,7 @@ const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
 const int KMaxAllowedCalibQualityOffset = 40;
-const double KMinAllowedCalibQualityValue = 0.9;
+const double KMinAllowedCalibQualityValue = 0.5;
 
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
@@ -47,6 +47,9 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
 	randomize();
+
+	if (!__DEBUG)
+		FormStyle = fsStayOnTop;
 }
 
 //---------------------------------------------------------------------------
@@ -234,7 +237,7 @@ void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 	if (iFireFly->IsVisible)
 	{
 		if (FOnDebug)
-			FOnDebug(this, "point ready - 2");
+			FOnDebug(this, "waiting to accept...");
 
 		iIsWaitingToAcceptPoint = true;
 	}
@@ -372,8 +375,8 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 
 		if (FOnDebug)
 			FOnDebug(this, "finished");
-		if (FOnFinished)
-			FOnFinished(this);
+
+		tmrKostyl->Enabled = true;
 	}
 }
 
@@ -581,5 +584,15 @@ void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
 	}
 	*/
 }
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::tmrKostylTimer(TObject *Sender)
+{
+	tmrKostyl->Enabled = false;
+
+	if (FOnFinished)
+		FOnFinished(this);
+}
+
 //---------------------------------------------------------------------------
 

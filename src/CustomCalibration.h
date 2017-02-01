@@ -16,11 +16,13 @@
 #include "utils.h"
 
 #include "XML.h"
+#include <ExtCtrls.hpp>
 
 //---------------------------------------------------------------------------
 class TfrmCustomCalibration : public TForm
 {
 	__published:
+	TTimer *tmrKostyl;
 		void __fastcall FormCreate(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 		void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
@@ -28,6 +30,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
 					int Y);
+	void __fastcall tmrKostylTimer(TObject *Sender);
 
 	public:
 		typedef void __fastcall (__closure *FiOnDebug)(System::TObject* aSender, const char* aMsg);

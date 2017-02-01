@@ -100,9 +100,9 @@ void __fastcall TiTimeout::Timer(void)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiTimeout::run(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef)
+void __fastcall TiTimeout::run(UINT aTimeout, TNotifyEvent aCallback, TiTimeout** aRef, Classes::TComponent* aOwner)
 {
-	TiTimeout* timer = new TiTimeout(NULL, aRef);
+	TiTimeout* timer = new TiTimeout(aOwner, aRef);
 	timer->Interval = aTimeout;
 	timer->OnTimer = aCallback;
 	timer->Enabled = true;
@@ -148,5 +148,6 @@ void __fastcall TiSyncThread::Execute()
 //---------------------------------------------------------------------------
 void __fastcall TiSyncThread::CreateTimer()
 {
+	MessageBox(NULL, "PRESS ENTER", "", MB_OK);
 	TiTimeout::run(iTimeout, iCallback, iRef);
 }
