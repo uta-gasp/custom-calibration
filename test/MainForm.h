@@ -10,6 +10,8 @@
 #include <ComCtrls.hpp>
 #include <ExtCtrls.hpp>
 
+#define __DEBUG true
+
 #include "utils.h"
 #include "Animation.h"
 #include "CustomCalibration.h"

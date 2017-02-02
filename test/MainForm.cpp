@@ -14,7 +14,7 @@
 //---------------------------------------------------------------------------
 TfrmMainForm *frmMainForm;
 
-const String KIniFileName = "settings.ini";
+const String KIniFileName = "settings.xml";
 
 const CalibrationPointStruct KCalibPoints[] = {
 	{1, 700, 380},

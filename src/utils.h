@@ -13,11 +13,13 @@
 #pragma option pop
 
 //---------------------------------------------------------------------------
-#define __DEBUG true
-#define debug(x)   { \
-	if(__DEBUG) \
-		::MessageBox(NULL, String((x)).c_str(), "myGazeDebug", MB_OK); \
-	}
+#ifdef __DEBUG
+#define debug(x) \
+	if(__DEBUG)    \
+		::MessageBox(NULL, String((x)).c_str(), "myGazeDebug", MB_OK);
+#else
+#define debug(x)
+#endif
 
 //---------------------------------------------------------------------------
 bool sameSign(double a, double b);

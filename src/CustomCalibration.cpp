@@ -23,7 +23,7 @@ const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
 const int KMaxAllowedCalibQualityOffset = 40;
-const double KMinAllowedCalibQualityValue = 0.5;
+const double KMinAllowedCalibQualityValue = 0.8;
 
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
@@ -48,8 +48,11 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 
 	randomize();
 
-	if (!__DEBUG)
-		FormStyle = fsStayOnTop;
+#ifdef __DEBUG
+	FormStyle = __DEBUG ? fsNormal : fsStayOnTop;
+#else
+	FormStyle = fsStayOnTop;
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -127,12 +130,31 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 void __fastcall TfrmCustomCalibration::loadSettings(TiXML_INI* aStorage)
 {
 	iGame->BestTime = aStorage->getValue("Game", "BestTime", iGame->BestTime);
+	iGame->BestTimeDate = aStorage->getValue("Game", "BestTimeDate", iGame->BestTimeDate);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::saveSettings(TiXML_INI* aStorage)
 {
 	aStorage->putValue("Game", "BestTime", iGame->BestTime);
+	aStorage->putValue("Game", "BestTimeDate", iGame->BestTimeDate);
+
+	if (aStorage->openNode("Game", false))
+	{
+		TStringList* results = new TStringList();
+		aStorage->getAllNodes("Results", results);
+		int id = results->Count;
+		delete results;
+
+		if (aStorage->openNode("Results", true))
+		{
+			aStorage->putValue("Result", String("Date"), TDateTime::CurrentDateTime().DateTimeString(), id);
+			aStorage->putValue("Result", String("Time"), iGame->Duration, id);
+			aStorage->closeNode();
+		}
+
+		aStorage->closeNode();
+	}
 }
 
 //---------------------------------------------------------------------------
