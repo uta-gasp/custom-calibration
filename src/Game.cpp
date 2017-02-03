@@ -166,7 +166,7 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
 
 	if (!IsRunning && iDuration > 0.0)
 	{
-		String str = String("Congratulations!\nYour time: ") + String((int)iDuration) + " seconds";
+		String str = String("Valmis!\nTuloksesi on ") + String((int)iDuration) + " sekuntia";
 		WideString bstr(str);
 
 		Gdiplus::Font font(L"Arial", 26);
