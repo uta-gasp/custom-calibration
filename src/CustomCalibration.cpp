@@ -270,6 +270,7 @@ void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSend
 {
 	if (iBackground->IsVisible)
 	{
+		Cursor = crDefault;
 		iGame->start(10);
 	}
 	else
@@ -294,6 +295,8 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 		FOnDebug(this, "start");
 	if (FOnStart)
 		FOnStart(this);
+
+	Cursor = crNone;
 
 	iEyeBox->IsVisible = false;
 

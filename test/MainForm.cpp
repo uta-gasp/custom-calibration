@@ -38,6 +38,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	iCalibPointStatus = new int[ARRAYSIZE(KCalibPoints)];
 
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
+
 	iCustomCalibration = new TfrmCustomCalibration(this);
 	iCustomCalibration->OnDebug = onCalibrationDebug;
 	iCustomCalibration->OnStart = onCalibrationStart;
@@ -58,8 +59,6 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 		iCustomCalibration->loadSettings(ini);
 		delete ini;
 	}
-
-	iCustomCalibration->Show();
 
 	iCreatures = new TiAnimationManager();
 	iCreatures->OnPaint = onCreaturesPaint;
@@ -338,6 +337,8 @@ void __fastcall TfrmMainForm::Panel1MouseUp(TObject *Sender, TMouseButton Button
 void __fastcall TfrmMainForm::FormCreate(TObject *Sender)
 {
 	iGraphics = new Gdiplus::Graphics(Panel1->Handle, false);
+
+	iCustomCalibration->Show();
 }
 
 //---------------------------------------------------------------------------

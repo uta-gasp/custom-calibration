@@ -10,7 +10,7 @@
 #include <ComCtrls.hpp>
 #include <ExtCtrls.hpp>
 
-#define __DEBUG true
+//#define __DEBUG true
 
 #include "utils.h"
 #include "Animation.h"
