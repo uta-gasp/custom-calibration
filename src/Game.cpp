@@ -11,26 +11,26 @@ const int KWidth = 1377;
 const int KResultHeight = 200;
 
 const TiGame::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
-	TiGame::SiHidingOlio(50, 50, 100, 100),
-	TiGame::SiHidingOlio(50, 150, 100, 100),
-	TiGame::SiHidingOlio(50, 250, 100, 100),
-	TiGame::SiHidingOlio(50, 350, 100, 100),
-	TiGame::SiHidingOlio(50, 450, 100, 100),
-	TiGame::SiHidingOlio(50, 550, 100, 100),
-	TiGame::SiHidingOlio(50, 650, 100, 100),
-	TiGame::SiHidingOlio(250, 50, 100, 100),
-	TiGame::SiHidingOlio(250, 150, 100, 100),
-	TiGame::SiHidingOlio(250, 250, 100, 100),
-	TiGame::SiHidingOlio(250, 350, 100, 100),
-	TiGame::SiHidingOlio(250, 450, 100, 100),
-	TiGame::SiHidingOlio(250, 550, 100, 100),
-	TiGame::SiHidingOlio(250, 650, 100, 100),
-	TiGame::SiHidingOlio(450, 50, 100, 100),
-	TiGame::SiHidingOlio(450, 150, 100, 100),
-	TiGame::SiHidingOlio(450, 250, 100, 100),
-	TiGame::SiHidingOlio(450, 350, 100, 100),
-	TiGame::SiHidingOlio(450, 450, 100, 100),
-	TiGame::SiHidingOlio(450, 550, 100, 100),
+	TiGame::SiHidingOlio(1139.5, 71.5, 51, 91),
+	TiGame::SiHidingOlio(1332, 667.5, 54, 113),
+	TiGame::SiHidingOlio(592, 376, 90, 82),
+	TiGame::SiHidingOlio(1060, 549, 56, 148),
+	TiGame::SiHidingOlio(483.5, 366, 55, 123),
+	TiGame::SiHidingOlio(1209, 263, 64, 108),
+	TiGame::SiHidingOlio(796.5, 226.5, 79, 117),
+	TiGame::SiHidingOlio(354.5, 103, 81, 108),
+	TiGame::SiHidingOlio(63.5, 450.5, 79, 133),
+	TiGame::SiHidingOlio(389.5, 718, 105, 90),
+	TiGame::SiHidingOlio(1205, 399, 72, 116),
+	TiGame::SiHidingOlio(574, 549, 38, 84),
+	TiGame::SiHidingOlio(499, 96, 44, 58),
+	TiGame::SiHidingOlio(867, 95.5, 50, 61),
+	TiGame::SiHidingOlio(785, 435, 52, 144),
+	TiGame::SiHidingOlio(815.5, 586, 41, 74),
+	TiGame::SiHidingOlio(164.5, 268, 83, 142),
+	TiGame::SiHidingOlio(303, 450.5, 66, 95),
+	TiGame::SiHidingOlio(916, 635, 58, 142),
+	TiGame::SiHidingOlio(1134.5, 592, 43, 132),
 };
 
 //---------------------------------------------------------------------------
@@ -42,14 +42,14 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 	iShowBestTimeLogo(false)
 {
 	iHidingOlios.DeleteContent = false;
-	
+
 	for (int i = 0; i < ARRAYSIZE(KHidingOlios); i++)
 	{
 		TiGame::SiHidingOlio hidingOlio = KHidingOlios[i];
 
 		TiAnimation* olio = new TiAnimation();
-		olio->Center = TPoint(0, 0);
-		olio->addFrames(IDR_GAME_OLIOS + i, hidingOlio.Width, hidingOlio.Height);
+		//olio->Center = TPoint(0, 0);
+		olio->addFrames(IDR_HIDDEN_OLIOS + 1 + i, hidingOlio.Width, hidingOlio.Height);
 		olio->placeTo(hidingOlio.X, hidingOlio.Y);
 		olio->hide();
 
@@ -104,7 +104,7 @@ void __fastcall TiGame::start(int aOliosToShow)
 
 	while (visibleCount < oliosToShow)
 	{
-		int id = randInRange(0, 19);
+		int id = randInRange(0, ARRAYSIZE(KHidingOlios) - 1);
 		iHidingOlios[id]->show();
 
 		visibleCount = 0;
