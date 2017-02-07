@@ -207,7 +207,7 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
 
 	if (!IsRunning && iScore > 0)
 	{
-		String str = String("Valmis!\nTuloksesi on ") + String(iScore) + " pistetta";
+		String str = String("Valmis!\nSaamasi pisteet: ") + String(iScore);
 		WideString bstr(str);
 
 		Gdiplus::Font font(L"Arial", 26);

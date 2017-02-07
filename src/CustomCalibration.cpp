@@ -128,7 +128,10 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	else
 	{
 		iBackground->fadeIn();
+		iGameInstruction->fadeIn();
 		iCalibPoints->fadeOut();
+
+		TiTimeout::run(7000, HideGameInstruction);
 	}
 
 	return finished;
@@ -198,6 +201,7 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 			iGraphics->DrawImage(iStaticBitmap, destRect);
 
 		iGame->paintTo(graphics);
+		iGameInstruction->paintTo(graphics);
 	}
 
 	if (aUpdateType & updNonStatic)
@@ -278,8 +282,6 @@ void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSend
 {
 	if (iBackground->IsVisible)
 	{
-		Cursor = crDefault;
-		iGame->start(10);
 	}
 	else
 	{
@@ -448,6 +450,14 @@ void __fastcall TfrmCustomCalibration::Abort()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::HideGameInstruction(TObject* aSender)
+{
+	Cursor = crDefault;
+	iGame->start(10);
+	iGameInstruction->fadeOut();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::FadeOut(TObject* aSender)
 {
 	iBackground->FadingDuration = 400;
@@ -514,6 +524,11 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 
 	iGame = new TiGame(iObjects);
 	iGame->OnFinished = onGameFisnihed;
+
+	iGameInstruction = new TiAnimation(false, true);
+	iGameInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 60);
+	iGameInstruction->placeTo(Width / 2, 30);
+	iObjects->add(iGameInstruction);
 }
 
 //---------------------------------------------------------------------------

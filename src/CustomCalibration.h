@@ -45,6 +45,7 @@ class TfrmCustomCalibration : public TForm
 		TiEyeBox* iEyeBox;
 		TiCalibPlot* iCalibPlot;
 		TiGame* iGame;
+		TiAnimation* iGameInstruction;
 		TiAnimationManager* iObjects;
 		TiAnimation* iBackground;
 		TiAnimation* iTarget;
@@ -82,6 +83,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall MoveToNextPoint(int aPointNumber);
 		void __fastcall Abort();
 		void __fastcall Finish();
+		void __fastcall HideGameInstruction(TObject* aSender = NULL);
 		void __fastcall FadeOut(TObject* aSender = NULL);
 		void __fastcall Done(TObject* aSender = NULL);
 
