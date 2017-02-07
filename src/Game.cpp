@@ -33,6 +33,87 @@ const TiGame::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
 };
 
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+__fastcall TiGameTimer::TiGameTimer(int aTimeout) :
+	TiAnimation(false, false),
+	FOnStop(NULL)
+{
+	iMillisecondsLeft = aTimeout * 1000;
+
+	iTimer = new TTimer(NULL);
+	iTimer->Enabled = false;
+	iTimer->Interval = 200;
+	iTimer->OnTimer = Tick;
+
+	addFrames(IDR_GAME_TIMER, 100, 100);
+}
+
+//---------------------------------------------------------------------------
+__fastcall TiGameTimer::~TiGameTimer()
+{
+	delete iTimer;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGameTimer::paintTo(Gdiplus::Graphics* aGraphics)
+{
+	TiAnimation::paintTo(aGraphics);
+
+	if (!IsVisible)
+		return;
+
+	String str = String(int(iMillisecondsLeft / 1000));
+	WideString bstr(str);
+
+	Gdiplus::Font font(L"Arial", 26);
+	Gdiplus::RectF rect(10, 10, 100, 100);
+	Gdiplus::StringFormat format;
+	format.SetAlignment(Gdiplus::StringAlignmentCenter);
+	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+	Gdiplus::SolidBrush brush(Gdiplus::Color(255, 255, 255, 255));
+
+	aGraphics->DrawString(bstr.c_bstr(), -1, &font, rect, &format, &brush);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGameTimer::start()
+{
+	iTimer->Enabled = true;
+	fadeIn();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGameTimer::stop()
+{
+	iTimer->Enabled = false;
+	fadeOut();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGameTimer::Tick(TObject* aSender)
+{
+	int secondsBefore = iMillisecondsLeft / 1000;
+	iMillisecondsLeft -= iTimer->Interval;
+	if (iMillisecondsLeft <= 0.0)
+	{
+		iTimer->Enabled = false;
+		if (FOnStop)
+			FOnStop(this);
+
+		return;
+	}
+
+	int secondsAfter = iMillisecondsLeft / 1000;
+	if (secondsAfter < secondsBefore)
+		invalidate();
+
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 	TObject(),
 	iDuration(0.0),
@@ -103,7 +184,7 @@ void __fastcall TiGame::ComputeAndShowScore()
 {
 	if (iTimeoutRef)
 		iTimeoutRef->kill();
-		
+
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
 
@@ -124,18 +205,6 @@ void __fastcall TiGame::ComputeAndShowScore()
 }
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-void __fastcall TiGame::StopOnTimeout(TObject* aSender)
-{
-	for (int i = 0; i < iHidingOlios.Count; i++)
-		iHidingOlios[i]->hide();
-
-	ComputeAndShowScore();
-
-	if (FOnFinished)
-		FOnFinished(this);
-}
-
 //---------------------------------------------------------------------------
 void __fastcall TiGame::ShowBestScoreLogos(TObject* aSender)
 {
@@ -166,7 +235,19 @@ void __fastcall TiGame::start(int aOliosToShow)
 	iStartTime = li.QuadPart;
 	iMonstersFound = 0;
 
-	TiTimeout::run(1000 * iTimeout, StopOnTimeout, &iTimeoutRef);
+	//TiTimeout::run(1000 * iTimeout, StopOnTimeout, &iTimeoutRef);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGame::stop(TObject* aSender)
+{
+	for (int i = 0; i < iHidingOlios.Count; i++)
+		iHidingOlios[i]->hide();
+
+	ComputeAndShowScore();
+
+	if (FOnFinished)
+		FOnFinished(this);
 }
 
 //---------------------------------------------------------------------------

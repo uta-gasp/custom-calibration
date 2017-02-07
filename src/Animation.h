@@ -122,7 +122,7 @@ class TiAnimation : public TObject
 		bool __fastcall hitTest(int aX, int aY);
 
 		void __fastcall invalidate();
-		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+		virtual void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
 
 		__property TiAnimationManager* Parent = {read = iParent, write = SetParent};
 

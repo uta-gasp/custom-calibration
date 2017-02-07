@@ -216,6 +216,7 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 		iEyeBox->paintTo(graphics, updNonStatic);
 
 		iFireFly->paintTo(graphics);
+		iGameCountdown->paintTo(graphics);
 
 		iGraphics->DrawImage(&buffer, 0, 0);
 	}
@@ -292,6 +293,7 @@ void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSend
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 {
+	iGameCountdown->stop();
 	TiTimeout::run(5000, FadeOut, &iTimeout);
 }
 
@@ -454,6 +456,7 @@ void __fastcall TfrmCustomCalibration::HideGameInstruction(TObject* aSender)
 {
 	Cursor = crDefault;
 	iGame->start(10);
+	iGameCountdown->start();
 	iGameInstruction->fadeOut();
 }
 
@@ -529,6 +532,11 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iGameInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 60);
 	iGameInstruction->placeTo(Width / 2, 30);
 	iObjects->add(iGameInstruction);
+
+	iGameCountdown = new TiGameTimer(iGame->Timeout);
+	iGameCountdown->placeTo(60, 60);
+	iGameCountdown->OnStop = iGame->stop;
+	iObjects->add(iGameCountdown);
 }
 
 //---------------------------------------------------------------------------

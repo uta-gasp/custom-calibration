@@ -46,6 +46,7 @@ class TfrmCustomCalibration : public TForm
 		TiCalibPlot* iCalibPlot;
 		TiGame* iGame;
 		TiAnimation* iGameInstruction;
+		TiGameTimer* iGameCountdown;
 		TiAnimationManager* iObjects;
 		TiAnimation* iBackground;
 		TiAnimation* iTarget;

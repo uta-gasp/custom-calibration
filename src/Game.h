@@ -10,6 +10,29 @@
 #include "utils.h"
 
 //---------------------------------------------------------------------------
+class TiGameTimer : public TiAnimation
+{
+	private:
+		TTimer* iTimer;
+		double iMillisecondsLeft;
+
+		TNotifyEvent FOnStop;
+
+		void __fastcall Tick(TObject* aSender);
+
+	public:
+		__fastcall TiGameTimer(int aTimeout);
+		__fastcall ~TiGameTimer();
+
+		virtual void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+
+		void __fastcall start();
+		void __fastcall stop();
+
+		__property TNotifyEvent OnStop = {read = FOnStop, write = FOnStop};
+};
+
+//---------------------------------------------------------------------------
 class TiGame : public TObject
 {
 	typedef TiDynArray<TiAnimation> TiAnimations;
@@ -58,6 +81,7 @@ class TiGame : public TObject
 
 		void __fastcall start(int aOliosToShow);
 		void __fastcall click(int aX, int aY); // return true if all done
+		void __fastcall stop(TObject* aSender = NULL);
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
 
