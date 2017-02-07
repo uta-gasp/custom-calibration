@@ -53,6 +53,7 @@ class TfrmCustomCalibration : public TForm
 		TiTimeout* iPointAcceptTimeout;
 		bool iIsWaitingToAcceptPoint;
 		bool iLastPointAborted;
+		bool iGameAfterCalibration;
 
 		TiCalibPoints* iCalibPoints;
 
@@ -101,6 +102,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall loadSettings(TiXML_INI* aStorage);
 		void __fastcall saveSettings(TiXML_INI* aStorage);
 
+		__property bool GameAfterCalibration = {read = iGameAfterCalibration, write = iGameAfterCalibration};
 		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
 		__property TNotifyEvent OnStart = {read = FOnStart, write = FOnStart};
 		__property TNotifyEvent OnReadyToCalibrate = {read = FOnReadyToCalibrate, write = FOnReadyToCalibrate};

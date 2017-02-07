@@ -96,7 +96,7 @@ void __fastcall TiTimeout::Timer(void)
 	if (iRef)
 		*iRef = NULL;
 
-	delete this;
+	//delete this;
 }
 
 //---------------------------------------------------------------------------
@@ -125,7 +125,7 @@ void __fastcall TiTimeout::kill()
 	if (iRef)
 		*iRef = NULL;
 
-	delete this;
+	//delete this;
 }
 
 //---------------------------------------------------------------------------

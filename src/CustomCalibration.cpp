@@ -23,7 +23,7 @@ const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
 const int KMaxAllowedCalibQualityOffset = 40;
-const double KMinAllowedCalibQualityValue = 0.8;
+const double KMinAllowedCalibQualityValue = 0.7;
 
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
@@ -34,6 +34,7 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iLastPointAborted(false),
 		iGame(NULL),
 		iStaticBitmap(NULL),
+		iGameAfterCalibration(true),
 		FOnDebug(NULL),
 		FOnStart(NULL),
 		FOnReadyToCalibrate(NULL),
