@@ -1,6 +1,5 @@
 //---------------------------------------------------------------------------
 #include "Game.h"
-#include "utils.h"
 #include "assets.h"
 
 //---------------------------------------------------------------------------
@@ -35,11 +34,16 @@ const TiGame::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
 
 //---------------------------------------------------------------------------
 __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
+	TObject(),
 	iDuration(0.0),
-	iBestTime(10000000),
-	iIsBestTime(false),
+	iMonstersFound(0),
+	iBestScore(0),
+	iIsBestScore(false),
 	iStartTime(0),
-	iShowBestTimeLogo(false)
+	iShowBestScoreLogo(false),
+	iTimeout(30),
+	iTimeoutRef(NULL),
+	FOnFinished(NULL)
 {
 	iHidingOlios.DeleteContent = false;
 
@@ -64,17 +68,17 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 	iResultBackground->hide();
 	aManager->add(iResultBackground);
 
-	iBestTimeLogo1 = new TiAnimation();
-	iBestTimeLogo1->addFrames(IDR_GAME_BEST, 128, 128);
-	iBestTimeLogo1->placeTo(KWidth - 200, KResultHeight / 2);
-	iBestTimeLogo1->hide();
-	aManager->add(iBestTimeLogo1);
+	iBestScoreLogo1 = new TiAnimation();
+	iBestScoreLogo1->addFrames(IDR_GAME_BEST, 128, 128);
+	iBestScoreLogo1->placeTo(KWidth - 200, KResultHeight / 2);
+	iBestScoreLogo1->hide();
+	aManager->add(iBestScoreLogo1);
 
-	iBestTimeLogo2 = new TiAnimation();
-	iBestTimeLogo2->addFrames(IDR_GAME_BEST, 128, 128);
-	iBestTimeLogo2->placeTo(200, KResultHeight / 2);
-	iBestTimeLogo2->hide();
-	aManager->add(iBestTimeLogo2);
+	iBestScoreLogo2 = new TiAnimation();
+	iBestScoreLogo2->addFrames(IDR_GAME_BEST, 128, 128);
+	iBestScoreLogo2->placeTo(200, KResultHeight / 2);
+	iBestScoreLogo2->hide();
+	aManager->add(iBestScoreLogo2);
 
 	LARGE_INTEGER fr;
 	::QueryPerformanceFrequency(&fr);
@@ -89,10 +93,54 @@ bool __fastcall TiGame::GetIsRunning()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiGame::onBestTimeLogoShow(TObject* aSender)
+int __fastcall TiGame::ComputeScore(double aDuration, int aMonstersFound)
 {
-	iBestTimeLogo1->fadeIn();
-	iBestTimeLogo2->fadeIn();
+	return int((iTimeout + 1) - aDuration) * 5 + aMonstersFound * 20;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGame::ComputeAndShowScore()
+{
+	if (iTimeoutRef)
+		iTimeoutRef->kill();
+		
+	LARGE_INTEGER li;
+	::QueryPerformanceCounter(&li);
+
+	iDuration = double(li.QuadPart - iStartTime)/iSysTimerFreq;
+
+	iScore = ComputeScore(iDuration, iMonstersFound);
+
+	if (iScore > iBestScore)
+	{
+		iBestScore = iScore;
+		iBestScoreDate = TDateTime::CurrentDateTime().DateTimeString();
+		iIsBestScore = true;
+		TiTimeout::run(1000, ShowBestScoreLogos);
+	}
+
+	iResultBackground->fadeIn();
+	iStartTime = 0;
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+void __fastcall TiGame::StopOnTimeout(TObject* aSender)
+{
+	for (int i = 0; i < iHidingOlios.Count; i++)
+		iHidingOlios[i]->hide();
+
+	ComputeAndShowScore();
+
+	if (FOnFinished)
+		FOnFinished(this);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGame::ShowBestScoreLogos(TObject* aSender)
+{
+	iBestScoreLogo1->fadeIn();
+	iBestScoreLogo2->fadeIn();
 }
 
 //---------------------------------------------------------------------------
@@ -114,11 +162,15 @@ void __fastcall TiGame::start(int aOliosToShow)
 
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
+
 	iStartTime = li.QuadPart;
+	iMonstersFound = 0;
+
+	TiTimeout::run(1000 * iTimeout, StopOnTimeout, &iTimeoutRef);
 }
 
 //---------------------------------------------------------------------------
-bool __fastcall TiGame::click(int aX, int aY)
+void __fastcall TiGame::click(int aX, int aY)
 {
 	bool finished = false;
 	for (int i = 0; i < iHidingOlios.Count; i++)
@@ -127,35 +179,24 @@ bool __fastcall TiGame::click(int aX, int aY)
 		if (olio->hitTest(aX, aY))
 		{
 			olio->hide();
+			iMonstersFound++;
 
 			int visibleCount = 0;
 			for (int i = 0; i < iHidingOlios.Count; i++)
 				visibleCount += iHidingOlios[i]->IsVisible ? 1 : 0;
 
 			finished = visibleCount == 0;
+			break;
 		}
 	}
 
 	if (finished)
 	{
-		LARGE_INTEGER li;
-		::QueryPerformanceCounter(&li);
+		ComputeAndShowScore();
 
-		iDuration = double(li.QuadPart - iStartTime)/iSysTimerFreq;
-
-		if (iDuration < iBestTime)
-		{
-			iBestTime = iDuration;
-			iBestTimeDate = TDateTime::CurrentDateTime().DateTimeString();
-			iIsBestTime = true;
-			TiTimeout::run(1000, onBestTimeLogoShow);
-		}
-
-		iResultBackground->fadeIn();
-		iStartTime = 0;
+		if (FOnFinished)
+			FOnFinished(this);
 	}
-
-	return finished;
 }
 
 //---------------------------------------------------------------------------
@@ -164,9 +205,9 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
 	for (int i = 0; i < iHidingOlios.Count; i++)
 		iHidingOlios[i]->paintTo(aGraphics);
 
-	if (!IsRunning && iDuration > 0.0)
+	if (!IsRunning && iScore > 0)
 	{
-		String str = String("Valmis!\nTuloksesi on ") + String((int)iDuration) + " sekuntia";
+		String str = String("Valmis!\nTuloksesi on ") + String(iScore) + " pistetta";
 		WideString bstr(str);
 
 		Gdiplus::Font font(L"Arial", 26);
@@ -180,10 +221,10 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
 		iResultBackground->paintTo(aGraphics);
 		aGraphics->DrawString(bstr.c_bstr(), -1, &font, rect, &format, &brush);
 
-		if (iShowBestTimeLogo)
+		if (iShowBestScoreLogo)
 		{
-			iBestTimeLogo1->paintTo(aGraphics);
-			iBestTimeLogo2->paintTo(aGraphics);
+			iBestScoreLogo1->paintTo(aGraphics);
+			iBestScoreLogo2->paintTo(aGraphics);
 		}
 	}
 }

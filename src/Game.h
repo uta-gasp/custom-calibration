@@ -7,9 +7,10 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
+#include "utils.h"
 
 //---------------------------------------------------------------------------
-class TiGame
+class TiGame : public TObject
 {
 	typedef TiDynArray<TiAnimation> TiAnimations;
 
@@ -26,37 +27,51 @@ class TiGame
 	private:
 		TiAnimations iHidingOlios;
 		TiAnimation* iResultBackground;
-		TiAnimation* iBestTimeLogo1;
-		TiAnimation* iBestTimeLogo2;
+		TiAnimation* iBestScoreLogo1;
+		TiAnimation* iBestScoreLogo2;
 
-		double iBestTime;
-		String iBestTimeDate;
-		bool iIsBestTime;
-		bool iShowBestTimeLogo;
+		double iBestScore;
+		String iBestScoreDate;
+		bool iIsBestScore;
+		bool iShowBestScoreLogo;
 
 		__int64 iStartTime;
 		DWORD iSysTimerFreq;
-		double iDuration;
+		double iDuration;     // seconds
+		int iMonstersFound;
+		int iScore;
+
+		int iTimeout;         // seconds
+		TiTimeout* iTimeoutRef;
+
+		TNotifyEvent FOnFinished;
 
 		bool __fastcall GetIsRunning();
+		int __fastcall ComputeScore(double aDuration, int aMonstersFound);
+		void __fastcall ComputeAndShowScore();
 
-		void __fastcall onBestTimeLogoShow(TObject* aSender);
+		void __fastcall StopOnTimeout(TObject* aSender);
+		void __fastcall ShowBestScoreLogos(TObject* aSender);
 
 	public:
 		__fastcall TiGame(TiAnimationManager* aManager);
 
 		void __fastcall start(int aOliosToShow);
-		bool __fastcall click(int aX, int aY); // return true if all done
+		void __fastcall click(int aX, int aY); // return true if all done
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
 
 		__property bool IsRunning = {read = GetIsRunning};
 		__property double Duration = {read = iDuration};
-		__property double BestTime = {read = iBestTime, write = iBestTime};
-		__property String BestTimeDate = {read = iBestTimeDate, write = iBestTimeDate};
-		__property bool ShowBestTimeLogo = {read = iShowBestTimeLogo, write = iShowBestTimeLogo};
+		__property int MonstersFound = {read = iMonstersFound};
+		__property int Score = {read = iScore};
+		__property double BestScore = {read = iBestScore, write = iBestScore};
+		__property String BestScoreDate = {read = iBestScoreDate, write = iBestScoreDate};
+		__property bool ShowBestScoreLogo = {read = iShowBestScoreLogo, write = iShowBestScoreLogo};
+		__property int Timeout = {read = iTimeout, write = iTimeout};
+
+		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 };
 
 //---------------------------------------------------------------------------
 #endif
- 

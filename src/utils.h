@@ -37,6 +37,7 @@ class TiTimeout : public TTimer
 {
 	private:
 		TiTimeout** iRef;
+		bool iKilled;
 
 	protected:
 		__fastcall TiTimeout(Classes::TComponent* aOwner, TiTimeout** aRef = NULL);
@@ -46,7 +47,10 @@ class TiTimeout : public TTimer
 	public:
 		static void __fastcall run(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL, Classes::TComponent* aOwner = NULL);
 		static void __fastcall runSync(UINT timeout, TNotifyEvent aCallback, TiTimeout** aRef = NULL);
+
 		void __fastcall kill();
+
+		__property bool Killed = {read = iKilled};
 };
 
 //---------------------------------------------------------------------------

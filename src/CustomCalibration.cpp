@@ -25,6 +25,14 @@ const int KEyeBoxHeight = 120;
 const int KMaxAllowedCalibQualityOffset = 40;
 const double KMinAllowedCalibQualityValue = 0.7;
 
+const String KIniGame = "Game";
+const String KIniBestScore = "BestScore";
+const String KIniBestScoreDate = "BestScoreDate";
+const String KIniResults = "Results";
+const String KIniResult = "Result";
+const String KIniResultDate = "Date";
+const String KIniResultScore = "Score";
+
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		TForm(aOwner),
@@ -120,8 +128,7 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	else
 	{
 		iBackground->fadeIn();
-
-		//iCalibPlot->IsVisible = true;
+		iCalibPoints->fadeOut();
 	}
 
 	return finished;
@@ -130,27 +137,27 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::loadSettings(TiXML_INI* aStorage)
 {
-	iGame->BestTime = aStorage->getValue("Game", "BestTime", iGame->BestTime);
-	iGame->BestTimeDate = aStorage->getValue("Game", "BestTimeDate", iGame->BestTimeDate);
+	iGame->BestScore = aStorage->getValue(KIniGame, KIniBestScore, iGame->BestScore);
+	iGame->BestScoreDate = aStorage->getValue(KIniGame, KIniBestScoreDate, iGame->BestScoreDate);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::saveSettings(TiXML_INI* aStorage)
 {
-	aStorage->putValue("Game", "BestTime", iGame->BestTime);
-	aStorage->putValue("Game", "BestTimeDate", iGame->BestTimeDate);
+	aStorage->putValue(KIniGame, KIniBestScore, iGame->BestScore);
+	aStorage->putValue(KIniGame, KIniBestScoreDate, iGame->BestScoreDate);
 
-	if (aStorage->openNode("Game", false))
+	if (aStorage->openNode(KIniGame, false))
 	{
 		TStringList* results = new TStringList();
-		aStorage->getAllNodes("Results", results);
+		aStorage->getAllNodes(KIniResults, results);
 		int id = results->Count;
 		delete results;
 
-		if (aStorage->openNode("Results", true))
+		if (aStorage->openNode(KIniResults, true))
 		{
-			aStorage->putValue("Result", String("Date"), TDateTime::CurrentDateTime().DateTimeString(), id);
-			aStorage->putValue("Result", String("Time"), iGame->Duration, id);
+			aStorage->putValue(KIniResult, KIniResultDate, TDateTime::CurrentDateTime().DateTimeString(), id);
+			aStorage->putValue(KIniResult, KIniResultScore, iGame->Duration, id);
 			aStorage->closeNode();
 		}
 
@@ -283,9 +290,7 @@ void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSend
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 {
-	iBackground->FadingDuration = 400;
-	iBackground->fadeOut();
-	iCalibPoints->fadeOut();
+	TiTimeout::run(5000, FadeOut, &iTimeout);
 }
 
 //---------------------------------------------------------------------------
@@ -443,6 +448,13 @@ void __fastcall TfrmCustomCalibration::Abort()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::FadeOut(TObject* aSender)
+{
+	iBackground->FadingDuration = 400;
+	iBackground->fadeOut();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::Done(TObject* aSender)
 {
 	if (FOnDebug)
@@ -501,6 +513,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iObjects->add(iFireFly);
 
 	iGame = new TiGame(iObjects);
+	iGame->OnFinished = onGameFisnihed;
 }
 
 //---------------------------------------------------------------------------
@@ -543,9 +556,11 @@ void __fastcall TfrmCustomCalibration::FormMouseUp(TObject *Sender,
 	}
 	else if (iGame->IsRunning && !iTimeout)
 	{
-		bool isFinished = iGame->click(X, Y);
-		if (isFinished)
-			TiTimeout::run(5000, onGameFisnihed, &iTimeout);
+		iGame->click(X, Y);
+	}
+	else if (iIsWaitingToAcceptPoint)
+	{
+		PointDone();
 	}
 }
 

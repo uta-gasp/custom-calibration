@@ -84,7 +84,8 @@ bool loadBitmapFromPNG(UINT resourceID, Gdiplus::Bitmap** bitmapOut)
 //---------------------------------------------------------------------------
 __fastcall TiTimeout::TiTimeout(Classes::TComponent* aOwner, TiTimeout** aRef) :
 	TTimer(aOwner),
-	iRef(aRef)
+	iRef(aRef),
+	iKilled(false)
 { }
 
 //---------------------------------------------------------------------------
@@ -96,6 +97,7 @@ void __fastcall TiTimeout::Timer(void)
 	if (iRef)
 		*iRef = NULL;
 
+	iKilled = true;
 	//delete this;
 }
 
@@ -125,6 +127,7 @@ void __fastcall TiTimeout::kill()
 	if (iRef)
 		*iRef = NULL;
 
+	iKilled = true;
 	//delete this;
 }
 
