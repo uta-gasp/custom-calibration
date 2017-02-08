@@ -503,7 +503,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iEyeBox = new TiEyeBox(iObjects, TRect(
 		(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
 		(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
-	));
+	), TiEyeBox::TiSize( Width, Height ));
 	iEyeBox->OnHidden = onEyeBoxHidden;
 
 	iCalibPlot = new TiCalibPlot(iObjects, TRect(

@@ -4,6 +4,8 @@
 #define IDR_EYEBOX        		1200
 #define IDR_EYE           		1201
 #define IDR_WARNING       		1202
+#define IDR_CALIB_INSTRUCTION_TOP			1203
+#define IDR_CALIB_INSTRUCTION_BOTTOM	1204
 #define IDR_CALIBPLOT     		1210
 #define IDR_START         		1300
 #define IDR_START_HOVER   		1301

@@ -12,12 +12,23 @@
 //---------------------------------------------------------------------------
 class TiEyeBox : public TObject
 {
+	public:
+		struct TiSize
+		{
+			int Width;
+			int Height;
+			__fastcall TiSize() : Width(0), Height(0) { }
+			__fastcall TiSize(int aWidth, int aHeight) : Width(aWidth), Height(aHeight) { }
+		};
+
 	private:
 		TRect iBox;
 		TiAnimation* iBackground;
 		TiAnimation* iLeft;
 		TiAnimation* iRight;
 		TiAnimation* iWarning;
+		TiAnimation* iInstructionTop;
+		TiAnimation* iInstructionBottom;
 		TiAnimation* iStart;
 		TiAnimation* iClose;
 
@@ -35,7 +46,7 @@ class TiEyeBox : public TObject
 		void __fastcall SetVisible(bool aValue);
 
 	public:
-		__fastcall TiEyeBox(TiAnimationManager* aManager, TRect aBox);
+		__fastcall TiEyeBox(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize);
 		__fastcall ~TiEyeBox();
 
 		void __fastcall left(EyeDataStruct& aEyeData);

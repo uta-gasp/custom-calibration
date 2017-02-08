@@ -18,9 +18,11 @@ const double KMinStartDistance = 450.0;
 const double KMaxStartDistance = 650.0;
 const double KIdealDistance = 530.0;
 const int KEyeSize = 32;
+const int KInstructionWidth = 1200;
+const int KInstructionHeight = 300;
 
 //---------------------------------------------------------------------------
-__fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
+__fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize) :
 		TObject(),
 		iVisible(true),
 		iInstabilityCounter(0),
@@ -43,6 +45,14 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 	iWarning->addFrames(IDR_WARNING, 144, 20);
 	iWarning->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + iWarning->Height);
 	iWarning->FadingDuration = 200;
+
+	iInstructionTop = new TiAnimation();
+	iInstructionTop->addFrames(IDR_CALIB_INSTRUCTION_TOP, KInstructionWidth, KInstructionHeight);
+	iInstructionTop->placeTo(aScreenSize.Width / 2, KInstructionHeight / 2);
+
+	iInstructionBottom = new TiAnimation();
+	iInstructionBottom->addFrames(IDR_CALIB_INSTRUCTION_BOTTOM, KInstructionWidth, KInstructionHeight);
+	iInstructionBottom->placeTo(aScreenSize.Width / 2, aScreenSize.Height - KInstructionHeight / 2);
 
 	iStart = new TiAnimation(true, false);
 	iStart->addFrames(IDR_START, 160, 48);
@@ -68,6 +78,8 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox) :
 		aManager->add(iLeft);
 		aManager->add(iRight);
 		aManager->add(iWarning);
+		aManager->add(iInstructionTop);
+		aManager->add(iInstructionBottom);
 		aManager->add(iStart);
 		//aManager->add(iClose);
 	}
@@ -128,7 +140,11 @@ void __fastcall TiEyeBox::setTrackingStability(bool aStable)
 void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType)
 {
 	if (aUpdateType & updStatic)
+	{
 		iBackground->paintTo(aGraphics);
+		iInstructionTop->paintTo(aGraphics);
+		iInstructionBottom->paintTo(aGraphics);
+	}
 
 	if (aUpdateType & updNonStatic)
 	{
@@ -216,12 +232,16 @@ void __fastcall TiEyeBox::SetVisible(bool aValue)
 		iLeft->fadeOut();
 		iRight->fadeOut();
 		iWarning->fadeOut();
+		iInstructionTop->fadeOut();
+		iInstructionBottom->fadeOut();
 		iStart->fadeOut();
 		//iClose->fadeOut();
 	}
 	else if (!iVisible && aValue)
 	{
 		iBackground->fadeIn();
+		iInstructionTop->fadeIn();
+		iInstructionBottom->fadeIn();
 		iStart->fadeIn();
 		//iClose->fadeIn();
 	}
