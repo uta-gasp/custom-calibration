@@ -23,7 +23,7 @@ const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
 const int KMaxAllowedCalibQualityOffset = 40;
-const double KMinAllowedCalibQualityValue = 0.7;
+const double KMinAllowedCalibQualityValue = 0.5;
 
 const double KMouseGazeCorrectionFactor = 0.05;
 
@@ -574,9 +574,9 @@ void __fastcall TfrmCustomCalibration::FormMouseUp(TObject *Sender,
 	else if (iGame->IsRunning && !iTimeout)
 	{
 		if (iGazeControlInGame)
-			iGame->click(X, Y);
-		else
 			iGame->click();
+		else
+			iGame->click(X, Y);
 	}
 	else if (iIsWaitingToAcceptPoint)
 	{

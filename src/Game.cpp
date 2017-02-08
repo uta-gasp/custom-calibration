@@ -300,8 +300,8 @@ void __fastcall TiGame::stop(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiGame::click(int aX, int aY)
 {
-	int x = aX >= 0 ? aX : iPointer->X;
-	int y = aY >= 0 ? aY : iPointer->Y;
+	int x = aX < 0 ? iPointer->X : aX;
+	int y = aY < 0 ? iPointer->Y : aY;
 
 	bool finished = false;
 	for (int i = 0; i < iHidingOlios.Count; i++)
@@ -339,10 +339,12 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpda
 		for (int i = 0; i < iHidingOlios.Count; i++)
 			iHidingOlios[i]->paintTo(aGraphics);
 
-		if (!IsRunning && iScore > 0)
+		if (!IsRunning && iDuration > 0.0)
 		{
 			String str = (iOliosFound == iOliosToFind) ? "Valmis!" : "Peli loppui.";
-			str = str + "\nSaamasi pisteet: " + String(iScore);
+			if (iScore)
+				str = str + "\nSaamasi pisteet: " + String(iScore);
+
 			WideString bstr(str);
 
 			Gdiplus::Font font(L"Arial", 26);
