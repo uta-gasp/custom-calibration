@@ -25,6 +25,8 @@ const int KEyeBoxHeight = 120;
 const int KMaxAllowedCalibQualityOffset = 40;
 const double KMinAllowedCalibQualityValue = 0.7;
 
+const double KMouseGazeCorrectionFactor = 0.05;
+
 const String KIniGame = "Game";
 const String KIniBestScore = "BestScore";
 const String KIniBestScoreDate = "BestScoreDate";
@@ -44,6 +46,7 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iStaticBitmap(NULL),
 		iGameAfterCalibration(true),
 		iGazeControlInGame(true),
+		iMouseInitialPosition(-1, -1),
 		FOnDebug(NULL),
 		FOnStart(NULL),
 		FOnReadyToCalibrate(NULL),
@@ -81,7 +84,11 @@ void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 	iEyeBox->right(aSample.rightEye);
 
 	if (iGame->IsRunning)
-		iGame->placePointer(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
+	{
+		int dx = KMouseGazeCorrectionFactor * (Mouse->CursorPos.x - iMouseInitialPosition.x);
+		int dy = KMouseGazeCorrectionFactor * (Mouse->CursorPos.y - iMouseInitialPosition.y);
+		iGame->placePointer(aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -621,5 +628,15 @@ void __fastcall TfrmCustomCalibration::tmrKostylTimer(TObject *Sender)
 		FOnFinished(this);
 }
 
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
+      TShiftState Shift, int X, int Y)
+{
+	if (iGame->IsRunning && iMouseInitialPosition.x < 0)
+	{
+		iMouseInitialPosition.x = X;
+		iMouseInitialPosition.y = Y;
+	}
+}
 //---------------------------------------------------------------------------
 

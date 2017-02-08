@@ -29,6 +29,8 @@ class TfrmCustomCalibration : public TForm
 					TShiftState Shift, int X, int Y);
 		void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 	void __fastcall tmrKostylTimer(TObject *Sender);
+	void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
+          int Y);
 
 	public:
 		typedef void __fastcall (__closure *FiOnDebug)(System::TObject* aSender, const char* aMsg);
@@ -53,6 +55,7 @@ class TfrmCustomCalibration : public TForm
 		bool iLastPointAborted;
 		bool iGameAfterCalibration;
 		bool iGazeControlInGame;
+		TPoint iMouseInitialPosition;
 
 		TiCalibPoints* iCalibPoints;
 
