@@ -43,6 +43,7 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iGame(NULL),
 		iStaticBitmap(NULL),
 		iGameAfterCalibration(true),
+		iGazeControlInGame(true),
 		FOnDebug(NULL),
 		FOnStart(NULL),
 		FOnReadyToCalibrate(NULL),
@@ -78,6 +79,9 @@ void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 {
 	iEyeBox->left(aSample.leftEye);
 	iEyeBox->right(aSample.rightEye);
+
+	if (iGame->IsRunning)
+		iGame->placePointer(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
 }
 
 //---------------------------------------------------------------------------
@@ -128,10 +132,10 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	else
 	{
 		iBackground->fadeIn();
-		iGameInstruction->fadeIn();
 		iCalibPoints->fadeOut();
+		iGame->showInstruction();
 
-		TiTimeout::run(7000, HideGameInstruction);
+		TiTimeout::run(6000, StartGame);
 	}
 
 	return finished;
@@ -200,8 +204,7 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 		if (aUpdateType == updStatic)
 			iGraphics->DrawImage(iStaticBitmap, destRect);
 
-		iGame->paintTo(graphics);
-		iGameInstruction->paintTo(graphics);
+		iGame->paintTo(graphics, updStatic);
 	}
 
 	if (aUpdateType & updNonStatic)
@@ -216,7 +219,7 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 		iEyeBox->paintTo(graphics, updNonStatic);
 
 		iFireFly->paintTo(graphics);
-		iGameCountdown->paintTo(graphics);
+		iGame->paintTo(graphics, updNonStatic);
 
 		iGraphics->DrawImage(&buffer, 0, 0);
 	}
@@ -281,19 +284,13 @@ void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSender)
 {
-	if (iBackground->IsVisible)
-	{
-	}
-	else
-	{
+	if (!iBackground->IsVisible)
 		Done();
-	}
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 {
-	iGameCountdown->stop();
 	TiTimeout::run(5000, FadeOut, &iTimeout);
 }
 
@@ -452,12 +449,12 @@ void __fastcall TfrmCustomCalibration::Abort()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::HideGameInstruction(TObject* aSender)
+void __fastcall TfrmCustomCalibration::StartGame(TObject* aSender)
 {
-	Cursor = crDefault;
+	if (!iGazeControlInGame)
+		Cursor = crDefault;
+
 	iGame->start(10);
-	iGameCountdown->start();
-	iGameInstruction->fadeOut();
 }
 
 //---------------------------------------------------------------------------
@@ -503,7 +500,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iEyeBox = new TiEyeBox(iObjects, TRect(
 		(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
 		(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
-	), TiEyeBox::TiSize( Width, Height ));
+	), TiSize( Width, Height ));
 	iEyeBox->OnHidden = onEyeBoxHidden;
 
 	iCalibPlot = new TiCalibPlot(iObjects, TRect(
@@ -525,18 +522,8 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iFireFly->OnMoveFinished = onFireFlyMoveFisnihed;
 	iObjects->add(iFireFly);
 
-	iGame = new TiGame(iObjects);
+	iGame = new TiGame(iObjects, TiSize( Width, Height ));
 	iGame->OnFinished = onGameFisnihed;
-
-	iGameInstruction = new TiAnimation(false, true);
-	iGameInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 60);
-	iGameInstruction->placeTo(Width / 2, 30);
-	iObjects->add(iGameInstruction);
-
-	iGameCountdown = new TiGameTimer(iGame->Timeout);
-	iGameCountdown->placeTo(60, 60);
-	iGameCountdown->OnStop = iGame->stop;
-	iObjects->add(iGameCountdown);
 }
 
 //---------------------------------------------------------------------------
@@ -579,7 +566,10 @@ void __fastcall TfrmCustomCalibration::FormMouseUp(TObject *Sender,
 	}
 	else if (iGame->IsRunning && !iTimeout)
 	{
-		iGame->click(X, Y);
+		if (iGazeControlInGame)
+			iGame->click(X, Y);
+		else
+			iGame->click();
 	}
 	else if (iIsWaitingToAcceptPoint)
 	{
@@ -620,33 +610,6 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 				Done();
 		}
 	}
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
-			TShiftState Shift, int X, int Y)
-{
-/*
-	double x = (double(X) / Width - 0.5) / 2 + 0.5;
-	double y = (double(Y) / Height - 0.5) / 2 + 0.5;
-
-	EyeDataStruct left(0.0,0.0,0.0,X < 5 ? -1.0 : x - 0.1, X < 5 ? -1.0 : y, X);
-	EyeDataStruct right(0.0,0.0,0.0,Y < 5 ? -1.0 : x + 0.1, Y < 5 ? -1.0 : y, Y);
-	setSample(	SampleStruct(__int64(0), left, right) );
-
-	iCalibPlot->calibPointHitTest(X, Y);
-
-	if (iEyeBox->IsVisible)
-	{
-		iEyeBox->Start->AnimationIndex = iEyeBox->Start->hitTest(X, Y) ? 1 : 0;
-		iEyeBox->Close->AnimationIndex = iEyeBox->Close->hitTest(X, Y) ? 1 : 0;
-	}
-	else if (iCalibPlot->IsVisible)
-	{
-		iCalibPlot->Restart->AnimationIndex = iCalibPlot->Restart->hitTest(X, Y) ? 1 : 0;
-		iCalibPlot->Close->AnimationIndex = iCalibPlot->Close->hitTest(X, Y) ? 1 : 0;
-	}
-	*/
 }
 
 //---------------------------------------------------------------------------

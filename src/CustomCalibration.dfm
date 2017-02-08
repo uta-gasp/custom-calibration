@@ -15,7 +15,6 @@ object frmCustomCalibration: TfrmCustomCalibration
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
-  OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
   PixelsPerInch = 96
   TextHeight = 13

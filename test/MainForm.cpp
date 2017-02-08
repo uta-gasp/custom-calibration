@@ -265,8 +265,8 @@ static double sLastDist = 500;
 	}
 
 	SampleStruct sample = {__int64(0),
-			{0.0, 0.0, 0.0, sLastEyeX-35, sLastEyeY, sLastDist},
-			{0.0, 0.0, 0.0, sLastEyeX+35, sLastEyeY, sLastDist}
+			{double(X), double(Y), 70.0, sLastEyeX-35, sLastEyeY, sLastDist},
+			{double(X), double(Y), 70.0, sLastEyeX+35, sLastEyeY, sLastDist}
 	};
 	iCustomCalibration->setSample(sample);
 }

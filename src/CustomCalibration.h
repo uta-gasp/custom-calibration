@@ -28,8 +28,6 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
 					TShiftState Shift, int X, int Y);
 		void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
-	void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
-					int Y);
 	void __fastcall tmrKostylTimer(TObject *Sender);
 
 	public:
@@ -45,8 +43,6 @@ class TfrmCustomCalibration : public TForm
 		TiEyeBox* iEyeBox;
 		TiCalibPlot* iCalibPlot;
 		TiGame* iGame;
-		TiAnimation* iGameInstruction;
-		TiGameTimer* iGameCountdown;
 		TiAnimationManager* iObjects;
 		TiAnimation* iBackground;
 		TiAnimation* iTarget;
@@ -56,6 +52,7 @@ class TfrmCustomCalibration : public TForm
 		bool iIsWaitingToAcceptPoint;
 		bool iLastPointAborted;
 		bool iGameAfterCalibration;
+		bool iGazeControlInGame;
 
 		TiCalibPoints* iCalibPoints;
 
@@ -84,7 +81,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall MoveToNextPoint(int aPointNumber);
 		void __fastcall Abort();
 		void __fastcall Finish();
-		void __fastcall HideGameInstruction(TObject* aSender = NULL);
+		void __fastcall StartGame(TObject* aSender = NULL);
 		void __fastcall FadeOut(TObject* aSender = NULL);
 		void __fastcall Done(TObject* aSender = NULL);
 
@@ -107,6 +104,8 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall saveSettings(TiXML_INI* aStorage);
 
 		__property bool GameAfterCalibration = {read = iGameAfterCalibration, write = iGameAfterCalibration};
+		__property bool GazeControlInGame = {read = iGazeControlInGame, write = iGazeControlInGame};
+
 		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
 		__property TNotifyEvent OnStart = {read = FOnStart, write = FOnStart};
 		__property TNotifyEvent OnReadyToCalibrate = {read = FOnReadyToCalibrate, write = FOnReadyToCalibrate};

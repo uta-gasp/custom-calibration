@@ -71,4 +71,14 @@ class TiSyncThread : public TThread
 };
 
 //---------------------------------------------------------------------------
+struct TiSize
+{
+	int Width;
+	int Height;
+
+	__fastcall TiSize() : Width(0), Height(0) { }
+	__fastcall TiSize(int aWidth, int aHeight) : Width(aWidth), Height(aHeight) { }
+};
+
+//---------------------------------------------------------------------------
 #endif

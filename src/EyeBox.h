@@ -4,6 +4,7 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
+#include "utils.h"
 
 #ifndef RET_SUCCESS
 #include "myGazeAPI.h"
@@ -12,15 +13,6 @@
 //---------------------------------------------------------------------------
 class TiEyeBox : public TObject
 {
-	public:
-		struct TiSize
-		{
-			int Width;
-			int Height;
-			__fastcall TiSize() : Width(0), Height(0) { }
-			__fastcall TiSize(int aWidth, int aHeight) : Width(aWidth), Height(aHeight) { }
-		};
-
 	private:
 		TRect iBox;
 		TiAnimation* iBackground;

@@ -39,7 +39,7 @@ __fastcall TiGameTimer::TiGameTimer(int aTimeout) :
 	TiAnimation(false, false),
 	FOnStop(NULL)
 {
-	iMillisecondsLeft = aTimeout * 1000;
+	Timeout = aTimeout;
 
 	iTimer = new TTimer(NULL);
 	iTimer->Enabled = false;
@@ -92,6 +92,7 @@ void __fastcall TiGameTimer::stop()
 }
 
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 void __fastcall TiGameTimer::Tick(TObject* aSender)
 {
 	int secondsBefore = iMillisecondsLeft / 1000;
@@ -112,12 +113,24 @@ void __fastcall TiGameTimer::Tick(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
+int __fastcall TiGameTimer::GetTimeout()
+{
+	return iMillisecondsLeft / 1000;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiGameTimer::SetTimeout(int aValue)
+{
+	iMillisecondsLeft = aValue * 1000;
+}
+
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-__fastcall TiGame::TiGame(TiAnimationManager* aManager) :
+//---------------------------------------------------------------------------
+__fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 	TObject(),
 	iDuration(0.0),
-	iMonstersFound(0),
+	iOliosFound(0),
 	iBestScore(0),
 	iIsBestScore(false),
 	iStartTime(0),
@@ -161,6 +174,20 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager) :
 	iBestScoreLogo2->hide();
 	aManager->add(iBestScoreLogo2);
 
+	iInstruction = new TiAnimation(false, true);
+	iInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 60);
+	iInstruction->placeTo(aScreenSize.Width / 2, 30);
+	aManager->add(iInstruction);
+
+	iCountdown = new TiGameTimer(iTimeout);
+	iCountdown->placeTo(60, 60);
+	iCountdown->OnStop = stop;
+	aManager->add(iCountdown);
+
+	iPointer = new TiAnimation(false, false);
+	iPointer->addFrames(IDR_GAME_POINTER, 48, 48);
+	aManager->add(iPointer);
+
 	LARGE_INTEGER fr;
 	::QueryPerformanceFrequency(&fr);
 
@@ -174,9 +201,16 @@ bool __fastcall TiGame::GetIsRunning()
 }
 
 //---------------------------------------------------------------------------
-int __fastcall TiGame::ComputeScore(double aDuration, int aMonstersFound)
+void __fastcall TiGame::SetTimeout(int aValue)
 {
-	return int((iTimeout + 1) - aDuration) * 5 + aMonstersFound * 20;
+	iTimeout = aValue;
+	iCountdown->Timeout = iTimeout;
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TiGame::ComputeScore(double aDuration, int aOliosFound)
+{
+	return int((iTimeout + 1) - aDuration) * 5 + aOliosFound * 20;
 }
 
 //---------------------------------------------------------------------------
@@ -185,12 +219,15 @@ void __fastcall TiGame::ComputeAndShowScore()
 	if (iTimeoutRef)
 		iTimeoutRef->kill();
 
+	iCountdown->stop();
+	iPointer->fadeOut();
+
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
 
 	iDuration = double(li.QuadPart - iStartTime)/iSysTimerFreq;
 
-	iScore = ComputeScore(iDuration, iMonstersFound);
+	iScore = ComputeScore(iDuration, iOliosFound);
 
 	if (iScore > iBestScore)
 	{
@@ -202,9 +239,11 @@ void __fastcall TiGame::ComputeAndShowScore()
 
 	iResultBackground->fadeIn();
 	iStartTime = 0;
+
+	if (FOnFinished)
+		FOnFinished(this);
 }
 
-//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TiGame::ShowBestScoreLogos(TObject* aSender)
 {
@@ -214,8 +253,16 @@ void __fastcall TiGame::ShowBestScoreLogos(TObject* aSender)
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
+void __fastcall TiGame::showInstruction()
+{
+	iInstruction->fadeIn();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiGame::start(int aOliosToShow)
 {
+	iInstruction->fadeOut();
+
 	int oliosToShow = min(aOliosToShow, (int)iHidingOlios.Count);
 	int visibleCount = 0;
 
@@ -233,9 +280,12 @@ void __fastcall TiGame::start(int aOliosToShow)
 	::QueryPerformanceCounter(&li);
 
 	iStartTime = li.QuadPart;
-	iMonstersFound = 0;
+	iOliosFound = 0;
 
-	//TiTimeout::run(1000 * iTimeout, StopOnTimeout, &iTimeoutRef);
+	iOliosToFind = oliosToShow;
+
+	iCountdown->start();
+	iPointer->fadeIn();
 }
 
 //---------------------------------------------------------------------------
@@ -245,22 +295,22 @@ void __fastcall TiGame::stop(TObject* aSender)
 		iHidingOlios[i]->hide();
 
 	ComputeAndShowScore();
-
-	if (FOnFinished)
-		FOnFinished(this);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiGame::click(int aX, int aY)
 {
+	int x = aX >= 0 ? aX : iPointer->X;
+	int y = aY >= 0 ? aY : iPointer->Y;
+
 	bool finished = false;
 	for (int i = 0; i < iHidingOlios.Count; i++)
 	{
 		TiAnimation* olio = iHidingOlios[i];
-		if (olio->hitTest(aX, aY))
+		if (olio->hitTest(x, y))
 		{
 			olio->hide();
-			iMonstersFound++;
+			iOliosFound++;
 
 			int visibleCount = 0;
 			for (int i = 0; i < iHidingOlios.Count; i++)
@@ -272,40 +322,52 @@ void __fastcall TiGame::click(int aX, int aY)
 	}
 
 	if (finished)
-	{
 		ComputeAndShowScore();
-
-		if (FOnFinished)
-			FOnFinished(this);
-	}
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics)
+void __fastcall TiGame::placePointer(int aX, int aY)
 {
-	for (int i = 0; i < iHidingOlios.Count; i++)
-		iHidingOlios[i]->paintTo(aGraphics);
+	iPointer->placeTo(aX, aY);
+}
 
-	if (!IsRunning && iScore > 0)
+//---------------------------------------------------------------------------
+void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType)
+{
+	if (aUpdateType & updStatic)
 	{
-		String str = String("Valmis!\nSaamasi pisteet: ") + String(iScore);
-		WideString bstr(str);
+		for (int i = 0; i < iHidingOlios.Count; i++)
+			iHidingOlios[i]->paintTo(aGraphics);
 
-		Gdiplus::Font font(L"Arial", 26);
-		Gdiplus::RectF rect(0, 0, KWidth, KResultHeight);
-		Gdiplus::StringFormat format;
-		format.SetAlignment(Gdiplus::StringAlignmentCenter);
-		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-
-		Gdiplus::SolidBrush brush(Gdiplus::Color(255, 255, 255, 255));
-
-		iResultBackground->paintTo(aGraphics);
-		aGraphics->DrawString(bstr.c_bstr(), -1, &font, rect, &format, &brush);
-
-		if (iShowBestScoreLogo)
+		if (!IsRunning && iScore > 0)
 		{
-			iBestScoreLogo1->paintTo(aGraphics);
-			iBestScoreLogo2->paintTo(aGraphics);
+			String str = (iOliosFound == iOliosToFind) ? "Valmis!" : "Peli loppui.";
+			str = str + "\nSaamasi pisteet: " + String(iScore);
+			WideString bstr(str);
+
+			Gdiplus::Font font(L"Arial", 26);
+			Gdiplus::RectF rect(0, 0, KWidth, KResultHeight);
+			Gdiplus::StringFormat format;
+			format.SetAlignment(Gdiplus::StringAlignmentCenter);
+			format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+			Gdiplus::SolidBrush brush(Gdiplus::Color(255, 255, 255, 255));
+
+			iResultBackground->paintTo(aGraphics);
+			aGraphics->DrawString(bstr.c_bstr(), -1, &font, rect, &format, &brush);
+
+			if (iShowBestScoreLogo)
+			{
+				iBestScoreLogo1->paintTo(aGraphics);
+				iBestScoreLogo2->paintTo(aGraphics);
+			}
 		}
+	}
+
+	if (aUpdateType & updNonStatic)
+	{
+		iInstruction->paintTo(aGraphics);
+		iCountdown->paintTo(aGraphics);
+		iPointer->paintTo(aGraphics);
 	}
 }
