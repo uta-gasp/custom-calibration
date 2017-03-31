@@ -79,6 +79,7 @@ class TiGame : public TObject
 		TNotifyEvent FOnFinished;
 
 		bool __fastcall GetIsRunning();
+		bool __fastcall GetIsInstructionVisible();
 		void __fastcall SetTimeout(int aValue);
 		int __fastcall ComputeScore(double aDuration, int aOliosFound);
 		void __fastcall ComputeAndShowScore();
@@ -98,6 +99,7 @@ class TiGame : public TObject
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
 		__property bool IsRunning = {read = GetIsRunning};
+		__property bool IsInstructionVisible = {read = GetIsInstructionVisible};
 		__property double Duration = {read = iDuration};
 		__property int OliosFound = {read = iOliosFound};
 		__property int Score = {read = iScore};

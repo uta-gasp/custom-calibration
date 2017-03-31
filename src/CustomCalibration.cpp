@@ -142,7 +142,7 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 		iCalibPoints->fadeOut();
 		iGame->showInstruction();
 
-		TiTimeout::run(6000, StartGame);
+		//TiTimeout::run(6000, StartGame);
 	}
 
 	return finished;
@@ -571,6 +571,10 @@ void __fastcall TfrmCustomCalibration::FormMouseUp(TObject *Sender,
 		else if (CalibrationPointQualityStruct* focusedCalibPoint = iCalibPlot->calibPointHitTest(X, Y))
 			RestartCalibration(focusedCalibPoint->number);
 	}
+	else if (iGame->IsInstructionVisible)
+	{
+		StartGame(NULL);
+	}
 	else if (iGame->IsRunning && !iTimeout)
 	{
 		if (iGazeControlInGame)
@@ -599,6 +603,13 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 	{
 		if (Key == VK_SPACE)
 			RestartCalibration();
+		else if (Key == VK_ESCAPE)
+			Done();
+	}
+	else if (iGame->IsInstructionVisible)
+	{
+		if (Key == VK_SPACE)
+			StartGame(NULL);
 		else if (Key == VK_ESCAPE)
 			Done();
 	}
@@ -638,5 +649,6 @@ void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
 		iMouseInitialPosition.y = Y;
 	}
 }
+
 //---------------------------------------------------------------------------
 

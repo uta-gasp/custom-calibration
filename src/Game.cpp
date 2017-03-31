@@ -175,8 +175,8 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 	aManager->add(iBestScoreLogo2);
 
 	iInstruction = new TiAnimation(false, true);
-	iInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 60);
-	iInstruction->placeTo(aScreenSize.Width / 2, 30);
+	iInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 450);
+	iInstruction->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
 	aManager->add(iInstruction);
 
 	iCountdown = new TiGameTimer(iTimeout);
@@ -198,6 +198,12 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 bool __fastcall TiGame::GetIsRunning()
 {
 	return iStartTime != 0;
+}
+
+//---------------------------------------------------------------------------
+bool __fastcall TiGame::GetIsInstructionVisible()
+{
+	return iInstruction->IsVisible;
 }
 
 //---------------------------------------------------------------------------
