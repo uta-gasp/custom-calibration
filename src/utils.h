@@ -100,11 +100,14 @@ class TiTimestamp
 class TiLogger
 {
 	private:
+		String iFileName;
 		int iFileHandle;
 
 	public:
 		__fastcall TiLogger(String aName);
 		__fastcall ~TiLogger();
+
+		static String __fastcall folder(String& aName);
 
 		void __fastcall line(String& aText);
 };

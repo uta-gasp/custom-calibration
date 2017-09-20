@@ -238,9 +238,6 @@ void __fastcall TiGame::ComputeAndShowScore()
 
 	if (iScore > iBestScore)
 	{
-		if (FOnEvent)
-			FOnEvent(this, "best score");
-
 		iBestScore = iScore;
 		iBestScoreDate = TDateTime::CurrentDateTime().DateTimeString();
 		iIsBestScore = true;
@@ -251,7 +248,8 @@ void __fastcall TiGame::ComputeAndShowScore()
 	iStartTime = 0;
 
 	if (FOnEvent)
-		FOnEvent(this, String().sprintf("game stop\t%d\t%d", iOliosFound, iScore));
+		FOnEvent(this, String().sprintf("game stop\t%d\t%d\t%s", iOliosFound, iScore,
+				iIsBestScore ? "best" : "not best"));
 
 	if (FOnFinished)
 		FOnFinished(this);

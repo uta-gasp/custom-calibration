@@ -203,18 +203,12 @@ double __fastcall TiTimestamp::sec()
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-__fastcall TiLogger::TiLogger(String aName)
+__fastcall TiLogger::TiLogger(String aName) :
+		iFileHandle(-1)
 {
-	char userFolder[MAX_PATH];
-	::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, userFolder);
-
-	String debugFilePath = String(userFolder) + "\\University of Tampere\\CustomCalib";
-	if (!DirectoryExists(debugFilePath))
-		ForceDirectories(debugFilePath);
-
+	String filePath = folder("CustomCalib");
 	String date = TDateTime::CurrentDateTime().FormatString("yy-mm-dd_hh-nn-ss");
-	String filename = debugFilePath + "\\" + date + "_" + aName + ".log";
-	iFileHandle = FileCreate(filename);
+	iFileName = filePath + "\\" + date + "_" + aName + ".log";
 }
 
 //---------------------------------------------------------------------------
@@ -227,8 +221,24 @@ __fastcall TiLogger::~TiLogger()
 }
 
 //---------------------------------------------------------------------------
+String __fastcall TiLogger::folder(String& aName)
+{
+	char userFolder[MAX_PATH];
+	::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, userFolder);
+
+	String filePath = String(userFolder) + "\\University of Tampere\\" + aName;
+	if (!DirectoryExists(filePath))
+		ForceDirectories(filePath);
+
+	return filePath;
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiLogger::line(String& aText)
 {
+	if (iFileHandle < 0)
+		iFileHandle = FileCreate(iFileName);
+
 	if (iFileHandle < 0)
 		return;
 
