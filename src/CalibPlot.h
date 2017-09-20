@@ -66,6 +66,8 @@ class TiCalibPlot : public TObject
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
 
+		void __fastcall log(TStrings* aList);
+
 		__property TRect Rect = {read = iBox};
 		__property TiAnimation* Background = {read = iBackground};
 		__property TiAnimation* Plot = {read = iPlot};

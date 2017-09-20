@@ -120,6 +120,7 @@ class TiAnimation : public TObject
 		void __fastcall setOrientation(double aDX, double aDY);
 
 		bool __fastcall hitTest(int aX, int aY);
+		double __fastcall distanceTo(int aX, int aY);
 
 		void __fastcall invalidate();
 		virtual void __fastcall paintTo(Gdiplus::Graphics* aGraphics);

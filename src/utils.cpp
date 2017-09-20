@@ -1,6 +1,9 @@
 //---------------------------------------------------------------------------
 #include "utils.h"
 
+#include <shlobj.h>
+#include <FileCtrl.hpp>
+
 //---------------------------------------------------------------------------
 //#include <SysInit.hpp>
 
@@ -154,3 +157,82 @@ void __fastcall TiSyncThread::CreateTimer()
 	MessageBox(NULL, "PRESS ENTER", "", MB_OK);
 	TiTimeout::run(iTimeout, iCallback, iRef);
 }
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+__fastcall TiTimestamp::TiTimestamp()
+{
+	LARGE_INTEGER fr;
+	::QueryPerformanceFrequency(&fr);
+
+	iFrequency = fr.LowPart;
+
+	reset();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiTimestamp::reset()
+{
+	LARGE_INTEGER li;
+	::QueryPerformanceCounter(&li);
+
+	iStartTime = li.QuadPart;
+}
+
+//---------------------------------------------------------------------------
+long __fastcall TiTimestamp::ms()
+{
+	long result;
+	LARGE_INTEGER li;
+	::QueryPerformanceCounter(&li);
+
+	return double(li.QuadPart - iStartTime) * 1000 / iFrequency;
+}
+
+//---------------------------------------------------------------------------
+double __fastcall TiTimestamp::sec()
+{
+	long result;
+	LARGE_INTEGER li;
+	::QueryPerformanceCounter(&li);
+
+	return double(li.QuadPart - iStartTime) / iFrequency;
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+__fastcall TiLogger::TiLogger(String aName)
+{
+	char userFolder[MAX_PATH];
+	::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, userFolder);
+
+	String debugFilePath = String(userFolder) + "\\University of Tampere\\CustomCalib";
+	if (!DirectoryExists(debugFilePath))
+		ForceDirectories(debugFilePath);
+
+	String date = TDateTime::CurrentDateTime().FormatString("yy-mm-dd_hh-nn-ss");
+	String filename = debugFilePath + "\\" + date + "_" + aName + ".log";
+	iFileHandle = FileCreate(filename);
+}
+
+//---------------------------------------------------------------------------
+__fastcall TiLogger::~TiLogger()
+{
+	if (iFileHandle < 0)
+		return;
+
+	FileClose(iFileHandle);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiLogger::line(String& aText)
+{
+	if (iFileHandle < 0)
+		return;
+
+	FileWrite(iFileHandle, aText.c_str(), (int)aText.Length());
+	FileWrite(iFileHandle, "\r\n", 2);
+}
+

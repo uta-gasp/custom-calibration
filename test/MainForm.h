@@ -67,7 +67,8 @@ private:	// User declarations
 
 	void __fastcall onPostAnimation(TObject* aSender);
 
-	void __fastcall onCalibrationDebug(TObject* aSender, const char* aMsg);
+	void __fastcall onCalibrationEvent(TObject* aSender, const String& aMsg);
+	void __fastcall onCalibrationSample(TObject* aSender, double aX, double aY);
 	void __fastcall onCalibrationStart(TObject* aSender);
 	void __fastcall onCalibrationReadyToCalibrate(TObject* aSender);
 	void __fastcall onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode);

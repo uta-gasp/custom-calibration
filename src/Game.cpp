@@ -128,16 +128,17 @@ void __fastcall TiGameTimer::SetTimeout(int aValue)
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
-	TObject(),
-	iDuration(0.0),
-	iOliosFound(0),
-	iBestScore(0),
-	iIsBestScore(false),
-	iStartTime(0),
-	iShowBestScoreLogo(false),
-	iTimeout(30),
-	iTimeoutRef(NULL),
-	FOnFinished(NULL)
+		TObject(),
+		iDuration(0.0),
+		iOliosFound(0),
+		iBestScore(0),
+		iIsBestScore(false),
+		iStartTime(0),
+		iShowBestScoreLogo(false),
+		iTimeout(30),
+		iTimeoutRef(NULL),
+		FOnEvent(NULL),
+		FOnFinished(NULL)
 {
 	iHidingOlios.DeleteContent = false;
 
@@ -246,6 +247,9 @@ void __fastcall TiGame::ComputeAndShowScore()
 	iResultBackground->fadeIn();
 	iStartTime = 0;
 
+	if (FOnEvent)
+		FOnEvent(this, String().sprintf("game stop\t%d\t%d", iOliosFound, iScore));
+
 	if (FOnFinished)
 		FOnFinished(this);
 }
@@ -262,6 +266,8 @@ void __fastcall TiGame::ShowBestScoreLogos(TObject* aSender)
 void __fastcall TiGame::showInstruction()
 {
 	iInstruction->fadeIn();
+	if (FOnEvent)
+		FOnEvent(this, "show game instructions");
 }
 
 //---------------------------------------------------------------------------
@@ -271,11 +277,14 @@ void __fastcall TiGame::start(int aOliosToShow)
 
 	int oliosToShow = min(aOliosToShow, (int)iHidingOlios.Count);
 	int visibleCount = 0;
+	TStringList* oliosCoords = new TStringList();
 
 	while (visibleCount < oliosToShow)
 	{
 		int id = randInRange(0, ARRAYSIZE(KHidingOlios) - 1);
-		iHidingOlios[id]->show();
+		TiAnimation* olio = iHidingOlios[id];
+		olio->show();
+		oliosCoords->Add(String().sprintf("%d %d", olio->X, olio->Y));
 
 		visibleCount = 0;
 		for (int i = 0; i < iHidingOlios.Count; i++)
@@ -292,6 +301,16 @@ void __fastcall TiGame::start(int aOliosToShow)
 
 	iCountdown->start();
 	iPointer->fadeIn();
+
+	if (FOnEvent)
+	{
+		String olios = "";
+		for (int i = 0; i < oliosCoords->Count; i++)
+		{
+			olios = String().sprintf("%s\t%s", olios.c_str(), oliosCoords->Strings[i].c_str());
+		}
+		FOnEvent(this, String().sprintf("game start\t%s", olios.c_str()));
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -310,11 +329,19 @@ void __fastcall TiGame::click(int aX, int aY)
 	int y = aY < 0 ? iPointer->Y : aY;
 
 	bool finished = false;
+	double minDistance = MaxInt;
+
+	TiAnimation* nearestOlio = NULL;
+
 	for (int i = 0; i < iHidingOlios.Count; i++)
 	{
 		TiAnimation* olio = iHidingOlios[i];
-		if (olio->hitTest(x, y))
+		double distance = olio->distanceTo(x, y);
+		if (distance == 0.0)
 		{
+			minDistance = 0;
+			nearestOlio = olio;
+
 			olio->hide();
 			iOliosFound++;
 
@@ -325,6 +352,20 @@ void __fastcall TiGame::click(int aX, int aY)
 			finished = visibleCount == 0;
 			break;
 		}
+		else if (distance < minDistance)
+		{
+			minDistance = distance;
+			nearestOlio = olio;
+		}
+	}
+
+	if (FOnEvent)
+	{
+		if (minDistance > 0)
+			FOnEvent(this, String().sprintf("creature missed\t%d %d\t%d %d\t%.2f",
+					nearestOlio->X, nearestOlio->Y, x, y, minDistance ));
+		else
+			FOnEvent(this, String().sprintf("creature captured\t%d %d", nearestOlio->X, nearestOlio->Y ));
 	}
 
 	if (finished)

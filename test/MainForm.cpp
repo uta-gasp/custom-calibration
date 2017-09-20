@@ -24,6 +24,10 @@ const CalibrationPointStruct KCalibPoints[] = {
 	{5, 200, 80},
 };
 
+static TiTimestamp sTimestamp;
+static TiLogger iEvents("events");
+static TiLogger iSamples("samples");
+
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
 	frmMainForm->log->Lines->Add(aMsg);
@@ -40,7 +44,8 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
 
 	iCustomCalibration = new TfrmCustomCalibration(this);
-	iCustomCalibration->OnDebug = onCalibrationDebug;
+	iCustomCalibration->OnEvent = onCalibrationEvent;
+	iCustomCalibration->OnSample = onCalibrationSample;
 	iCustomCalibration->OnStart = onCalibrationStart;
 	iCustomCalibration->OnReadyToCalibrate = onCalibrationReadyToCalibrate;
 	iCustomCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
@@ -95,8 +100,8 @@ void __fastcall TfrmMainForm::VerifyCalibration()
 		left.number = i;
 		left.positionX = calibPoint.positionX;
 		left.positionY = calibPoint.positionY;
-		left.correctedPorX = calibPoint.positionX + randInRange(-20, 20);
-		left.correctedPorY = calibPoint.positionY + randInRange(-20, 20);
+		left.correctedPorX = calibPoint.positionX + randInRange(-35, 35);
+		left.correctedPorY = calibPoint.positionY + randInRange(-35, 35);
 		left.standardDeviationX = randInRange(-40, 40);
 		left.standardDeviationY = randInRange(-40, 40);
 		left.usageStatus = iCalibPointStatus[i - 1];
@@ -164,9 +169,16 @@ void __fastcall TfrmMainForm::onPostAnimation(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onCalibrationDebug(TObject* aSender, const char* aMsg)
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationEvent(TObject* aSender, const String& aMsg)
 {
-	Log(aMsg);
+	iEvents.line( String().sprintf("%d\t%s", sTimestamp.ms(), aMsg.c_str()) );
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationSample(TObject* aSender, double aX, double aY)
+{
+	iSamples.line( String().sprintf("%d\t%.2f\t%.2f", sTimestamp.ms(), aX, aY) );
 }
 
 //---------------------------------------------------------------------------

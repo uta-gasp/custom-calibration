@@ -47,7 +47,8 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iGameAfterCalibration(true),
 		iGazeControlInGame(true),
 		iMouseInitialPosition(-1, -1),
-		FOnDebug(NULL),
+		FOnEvent(NULL),
+		FOnSample(NULL),
 		FOnStart(NULL),
 		FOnReadyToCalibrate(NULL),
 		FOnRecalibrateSinglePoint(NULL),
@@ -88,6 +89,9 @@ void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 		int dx = KMouseGazeCorrectionFactor * (Mouse->CursorPos.x - iMouseInitialPosition.x);
 		int dy = KMouseGazeCorrectionFactor * (Mouse->CursorPos.y - iMouseInitialPosition.y);
 		iGame->placePointer(aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
+
+		if (FOnSample)
+			FOnSample(this, aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
 	}
 }
 
@@ -128,7 +132,22 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 {
 	bool finished = true;
 
+	if (FOnEvent)
+	{
+		TStringList* calibQuality = new TStringList();
+		iCalibPlot->log(calibQuality);
+		for (int i = 0; i < calibQuality->Count; i++)
+		{
+			FOnEvent(this, String("quality\t") + calibQuality->Strings[i]);
+		}
+
+		delete calibQuality;
+	}
+
 	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
+	if (FOnEvent)
+		FOnEvent(this, String().sprintf("worst quality\t%d\t%.1f\t%.3f",
+				worstCalibPoint.ID, worstCalibPoint.Offset, worstCalibPoint.Quality));
 
 	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset ||
 			worstCalibPoint.Quality < KMinAllowedCalibQualityValue)
@@ -235,8 +254,8 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onEyeBoxHidden(TObject* aSender)
 {
-	if (FOnDebug)
-		FOnDebug(this, "eyebox hidden");
+	//if (FOnEvent)
+	//	FOnEvent(this, "eyebox hidden");
 }
 
 //---------------------------------------------------------------------------
@@ -244,8 +263,8 @@ void __fastcall TfrmCustomCalibration::onFireFlyFadingFisnihed(TObject* aSender)
 {
 	if (iFireFly->IsVisible)
 	{
-		if (FOnDebug)
-			FOnDebug(this, "firefly on");
+		if (FOnEvent)
+			FOnEvent(this, "firefly appeared");
 
 		iFireFly->startAnimation();
 
@@ -263,8 +282,8 @@ void __fastcall TfrmCustomCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 {
 	if (iFireFly->IsVisible)
 	{
-		if (FOnDebug)
-			FOnDebug(this, "point ready");
+		if (FOnEvent)
+			FOnEvent(this, String().sprintf("arrived to point\t%d", iCalibPoints->CurrentPointIndex));
 		if (FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
 			FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
@@ -281,8 +300,8 @@ void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 
 	if (iFireFly->IsVisible)
 	{
-		if (FOnDebug)
-			FOnDebug(this, "waiting to accept...");
+		if (FOnEvent)
+			FOnEvent(this, String().sprintf("ready to accept\t%d", iCalibPoints->CurrentPointIndex));
 
 		iIsWaitingToAcceptPoint = true;
 	}
@@ -305,8 +324,8 @@ void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::StartCalibration()
 {
-	if (FOnDebug)
-		FOnDebug(this, "start");
+	if (FOnEvent)
+		FOnEvent(this, "calibration start");
 	if (FOnStart)
 		FOnStart(this);
 
@@ -324,8 +343,8 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointNumber)
 {
-	if (FOnDebug)
-		FOnDebug(this, "restart");
+	if (FOnEvent)
+		FOnEvent(this, "restart");
 
 	iCalibPlot->IsVisible = false;
 
@@ -356,21 +375,26 @@ void __fastcall TfrmCustomCalibration::PointDone(TObject* aSender)
 	}
 	else
 	{
-		if (FOnDebug)
-			FOnDebug(this, "...no acceptance");
+		if (FOnEvent)
+			FOnEvent(this, "no acceptance");
 		TiTimeout::run(1000, PointAbort, &iPointAcceptTimeout);
 	}
 
-	if (FOnPointAccepted && iCalibPoints->CurrentPointIndex >= 0)
-		FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+	if (iCalibPoints->CurrentPointIndex >= 0)
+	{
+		if (FOnEvent)
+			FOnEvent(this, String().sprintf("point accepted\t%d", iCalibPoints->CurrentPointIndex));
+		if (FOnPointAccepted)
+			FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+	}
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::PointAbort(TObject* aSender)
 {
 	iLastPointAborted = true;
-	if (FOnDebug)
-		FOnDebug(this, "...abort point");
+	if (FOnEvent)
+		FOnEvent(this, "abort point");
 	if (FOnPointAborted)
 		FOnPointAborted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 }
@@ -389,6 +413,9 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 	TiCalibPoint* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
 	{
+		if (FOnEvent)
+			FOnEvent(this, "move to next point");
+
 		bool isAtPlaceAlready = !iFireFly->moveTo(calibPoint->X, calibPoint->Y);
 		if (!isAtPlaceAlready)
 		{
@@ -412,8 +439,8 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 		Finish();
 		iCalibPlot->reset();
 
-		if (FOnDebug)
-			FOnDebug(this, "finished");
+		if (FOnEvent)
+			FOnEvent(this, "calibration finished");
 
 		tmrKostyl->Enabled = true;
 	}
@@ -436,8 +463,8 @@ void __fastcall TfrmCustomCalibration::Finish()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::Abort()
 {
-	if (FOnDebug)
-		FOnDebug(this, "aborted");
+	if (FOnEvent)
+		FOnEvent(this, "aborted");
 	if (FOnAborted)
 		FOnAborted(this);
 
@@ -474,13 +501,21 @@ void __fastcall TfrmCustomCalibration::FadeOut(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::Done(TObject* aSender)
 {
-	if (FOnDebug)
-		FOnDebug(this, "close");
+	if (FOnEvent)
+		FOnEvent(this, "done");
 
 	if (FormState.Contains(fsModal))
 		ModalResult = mrOk;
 	else
 		Close();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::SetOnEvent(FiOnEvent aFOnEvent)
+{
+	FOnEvent = aFOnEvent;
+	if (iGame)
+		iGame->OnEvent = FOnEvent;
 }
 
 //---------------------------------------------------------------------------
@@ -530,6 +565,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iObjects->add(iFireFly);
 
 	iGame = new TiGame(iObjects, TiSize( Width, Height ));
+	iGame->OnEvent = FOnEvent;
 	iGame->OnFinished = onGameFisnihed;
 }
 
@@ -597,21 +633,29 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 		if (Key == VK_SPACE)
 			StartCalibration();
 		if (Key == VK_ESCAPE)
+		{
+			if (FOnEvent)
+				FOnEvent(this, "calibration skipped");
 			Done();
+		}
 	}
 	else if (iCalibPlot->IsVisible)
 	{
 		if (Key == VK_SPACE)
 			RestartCalibration();
-		else if (Key == VK_ESCAPE)
+		if (Key == VK_ESCAPE)
 			Done();
 	}
 	else if (iGame->IsInstructionVisible)
 	{
 		if (Key == VK_SPACE)
 			StartGame(NULL);
-		else if (Key == VK_ESCAPE)
+		if (Key == VK_ESCAPE)
+		{
+			if (FOnEvent)
+				FOnEvent(this, "game skipped");
 			Done();
+		}
 	}
 	else
 	{
@@ -622,6 +666,10 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 		}
 		else if (Key == VK_ESCAPE)
 		{
+			if (iGame->IsRunning)
+				if (FOnEvent)
+					FOnEvent(this, "game aborted");
+
 			if (iCalibPoints->Current)
 				Abort();
 			else

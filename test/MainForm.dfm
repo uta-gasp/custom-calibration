@@ -64,6 +64,7 @@ object frmMainForm: TfrmMainForm
     Top = 96
     Width = 189
     Height = 45
+    Anchors = [akLeft, akTop, akRight]
     Max = 30
     Min = 10
     Orientation = trHorizontal
@@ -81,6 +82,7 @@ object frmMainForm: TfrmMainForm
     Top = 152
     Width = 189
     Height = 45
+    Anchors = [akLeft, akTop, akRight]
     LineSize = 50
     Max = 2000
     Min = 200
@@ -100,6 +102,7 @@ object frmMainForm: TfrmMainForm
     Top = 264
     Width = 185
     Height = 221
+    Anchors = [akLeft, akTop, akRight]
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
     Font.Height = -16
@@ -140,6 +143,7 @@ object frmMainForm: TfrmMainForm
     Top = 208
     Width = 189
     Height = 45
+    Anchors = [akLeft, akTop, akRight]
     LineSize = 50
     Max = 2000
     Min = 200

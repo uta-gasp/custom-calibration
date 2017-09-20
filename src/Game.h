@@ -52,6 +52,9 @@ class TiGame : public TObject
 			SiHidingOlio(int aX, int aY, int aW, int aH) : X(aX), Y(aY), Width(aW), Height(aH) { }
 		};
 
+	public:
+		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);
+
 	private:
 		TiAnimations iHidingOlios;
 		TiAnimation* iResultBackground;
@@ -76,6 +79,7 @@ class TiGame : public TObject
 		int iTimeout;         // seconds
 		TiTimeout* iTimeoutRef;
 
+		FiOnEvent FOnEvent;
 		TNotifyEvent FOnFinished;
 
 		bool __fastcall GetIsRunning();
@@ -108,6 +112,7 @@ class TiGame : public TObject
 		__property bool ShowBestScoreLogo = {read = iShowBestScoreLogo, write = iShowBestScoreLogo};
 		__property int Timeout = {read = iTimeout, write = SetTimeout};
 
+		__property FiOnEvent OnEvent = {read = FOnEvent, write = FOnEvent};
 		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 };
 

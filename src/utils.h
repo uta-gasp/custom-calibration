@@ -81,4 +81,32 @@ struct TiSize
 };
 
 //---------------------------------------------------------------------------
+class TiTimestamp
+{
+	private:
+		DWORD iFrequency;
+		__int64 iStartTime;
+
+	public:
+		__fastcall TiTimestamp();
+
+		void __fastcall reset();
+		long __fastcall ms();
+		double __fastcall sec();
+};
+
+//---------------------------------------------------------------------------
+class TiLogger
+{
+	private:
+		int iFileHandle;
+
+	public:
+		__fastcall TiLogger(String aName);
+		__fastcall ~TiLogger();
+
+		void __fastcall line(String& aText);
+};
+
+//---------------------------------------------------------------------------
 #endif

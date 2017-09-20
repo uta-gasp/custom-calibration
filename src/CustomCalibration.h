@@ -33,7 +33,8 @@ class TfrmCustomCalibration : public TForm
           int Y);
 
 	public:
-		typedef void __fastcall (__closure *FiOnDebug)(System::TObject* aSender, const char* aMsg);
+		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);
+		typedef void __fastcall (__closure *FiOnSample)(System::TObject* aSender, double aX, double aY);
 		typedef void __fastcall (__closure *FiOnCalibrationPoint)(System::TObject* aSender,
 				int aPointIndex, bool aIsSinglePointMode = false);
 
@@ -59,7 +60,8 @@ class TfrmCustomCalibration : public TForm
 
 		TiCalibPoints* iCalibPoints;
 
-		FiOnDebug FOnDebug;
+		FiOnEvent FOnEvent;
+		FiOnSample FOnSample;
 		TNotifyEvent FOnStart;
 		TNotifyEvent FOnReadyToCalibrate;
 		FiOnCalibrationPoint FOnRecalibrateSinglePoint;
@@ -88,6 +90,8 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall FadeOut(TObject* aSender = NULL);
 		void __fastcall Done(TObject* aSender = NULL);
 
+		void __fastcall SetOnEvent(FiOnEvent aFOnEvent);
+
 	public:
 		__fastcall TfrmCustomCalibration(TComponent* aOwner);
 		__fastcall ~TfrmCustomCalibration();
@@ -109,7 +113,8 @@ class TfrmCustomCalibration : public TForm
 		__property bool GameAfterCalibration = {read = iGameAfterCalibration, write = iGameAfterCalibration};
 		__property bool GazeControlInGame = {read = iGazeControlInGame, write = iGazeControlInGame};
 
-		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
+		__property FiOnEvent OnEvent = {read = FOnEvent, write = SetOnEvent};
+		__property FiOnSample OnSample = {read = FOnSample, write = FOnSample};
 		__property TNotifyEvent OnStart = {read = FOnStart, write = FOnStart};
 		__property TNotifyEvent OnReadyToCalibrate = {read = FOnReadyToCalibrate, write = FOnReadyToCalibrate};
 		__property FiOnCalibrationPoint OnRecalibrateSinglePoint = {read = FOnRecalibrateSinglePoint, write = FOnRecalibrateSinglePoint};

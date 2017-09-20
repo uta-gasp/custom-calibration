@@ -289,13 +289,37 @@ bool __fastcall TiAnimation::hitTest(int aX, int aY)
 {
 	if (!IsVisible)
 		return false;
-		
+
 	double w = iScale * iWidth;
 	double h = iScale * iHeight;
 	double cx = iScale * iCenter.x;
 	double cy = iScale * iCenter.y;
 	return aX > iX - cx && aX < iX + (w - cx) &&
 				 aY > iY - cy && aY < iY + (h - cy);
+}
+
+//---------------------------------------------------------------------------
+double __fastcall TiAnimation::distanceTo(int aX, int aY)
+{
+	if (!IsVisible)
+		return MaxInt;
+
+	double w = iScale * iWidth;
+	double h = iScale * iHeight;
+	double cx = iScale * iCenter.x;
+	double cy = iScale * iCenter.y;
+	bool isInside = aX > iX - cx && aX < iX + (w - cx) &&
+									aY > iY - cy && aY < iY + (h - cy);
+	if (isInside)
+	{
+		return 0;
+	}
+	else
+	{
+		double dx = aX < iX ? (iX - cx) - aX : aX - (iX + (w - cx));
+		double dy = aY < iY ? (iY - cy) - aY : aY - (iY + (h - cy));
+		return sqrt(dx*dx + dy*dy);
+	}
 }
 
 //---------------------------------------------------------------------------
