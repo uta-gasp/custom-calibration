@@ -134,7 +134,7 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 		iBestScore(0),
 		iIsBestScore(false),
 		iStartTime(0),
-		iShowBestScoreLogo(false),
+		iShowBestScoreLogo(true),
 		iTimeout(30),
 		iTimeoutRef(NULL),
 		FOnEvent(NULL),
@@ -238,6 +238,9 @@ void __fastcall TiGame::ComputeAndShowScore()
 
 	if (iScore > iBestScore)
 	{
+		if (FOnEvent)
+			FOnEvent(this, "best score");
+
 		iBestScore = iScore;
 		iBestScoreDate = TDateTime::CurrentDateTime().DateTimeString();
 		iIsBestScore = true;

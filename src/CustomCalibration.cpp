@@ -34,6 +34,7 @@ const String KIniResults = "Results";
 const String KIniResult = "Result";
 const String KIniResultDate = "Date";
 const String KIniResultScore = "Score";
+const String KIniResultIsBest = "IsBest";
 
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
@@ -170,14 +171,17 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::loadSettings(TiXML_INI* aStorage)
 {
-	iGame->BestScore = aStorage->getValue(KIniGame, KIniBestScore, iGame->BestScore);
+	iGame->BestScore = aStorage->getValue(KIniGame, KIniBestScore, (long)iGame->BestScore);
 	iGame->BestScoreDate = aStorage->getValue(KIniGame, KIniBestScoreDate, iGame->BestScoreDate);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::saveSettings(TiXML_INI* aStorage)
 {
-	aStorage->putValue(KIniGame, KIniBestScore, iGame->BestScore);
+	if (!iGame->Duration)
+		return;
+
+	aStorage->putValue(KIniGame, KIniBestScore, (long)iGame->BestScore);
 	aStorage->putValue(KIniGame, KIniBestScoreDate, iGame->BestScoreDate);
 
 	if (aStorage->openNode(KIniGame, false))
@@ -190,7 +194,8 @@ void __fastcall TfrmCustomCalibration::saveSettings(TiXML_INI* aStorage)
 		if (aStorage->openNode(KIniResults, true))
 		{
 			aStorage->putValue(KIniResult, KIniResultDate, TDateTime::CurrentDateTime().DateTimeString(), id);
-			aStorage->putValue(KIniResult, KIniResultScore, iGame->Duration, id);
+			aStorage->putValue(KIniResult, KIniResultScore, (long)iGame->Score, id);
+			aStorage->putValue(KIniResult, KIniResultIsBest, iGame->IsBestScore, id);
 			aStorage->closeNode();
 		}
 

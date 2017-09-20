@@ -64,7 +64,7 @@ class TiGame : public TObject
 		TiGameTimer* iCountdown;
 		TiAnimation* iPointer;
 
-		double iBestScore;
+		int iBestScore;
 		String iBestScoreDate;
 		bool iIsBestScore;
 		bool iShowBestScoreLogo;
@@ -107,7 +107,8 @@ class TiGame : public TObject
 		__property double Duration = {read = iDuration};
 		__property int OliosFound = {read = iOliosFound};
 		__property int Score = {read = iScore};
-		__property double BestScore = {read = iBestScore, write = iBestScore};
+		__property bool IsBestScore = {read = iIsBestScore};
+		__property int BestScore = {read = iBestScore, write = iBestScore};
 		__property String BestScoreDate = {read = iBestScoreDate, write = iBestScoreDate};
 		__property bool ShowBestScoreLogo = {read = iShowBestScoreLogo, write = iShowBestScoreLogo};
 		__property int Timeout = {read = iTimeout, write = SetTimeout};
