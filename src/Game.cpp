@@ -365,7 +365,8 @@ void __fastcall TiGame::click(int aX, int aY)
 			FOnEvent(this, String().sprintf("creature missed\t%d %d\t%d %d\t%.2f",
 					nearestOlio->X, nearestOlio->Y, x, y, minDistance ));
 		else
-			FOnEvent(this, String().sprintf("creature captured\t%d %d", nearestOlio->X, nearestOlio->Y ));
+			FOnEvent(this, String().sprintf("creature captured\t%d %d\t%d %d",
+					nearestOlio->X, nearestOlio->Y, x, y ));
 	}
 
 	if (finished)

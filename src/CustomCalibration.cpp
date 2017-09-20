@@ -325,7 +325,9 @@ void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 void __fastcall TfrmCustomCalibration::StartCalibration()
 {
 	if (FOnEvent)
-		FOnEvent(this, "calibration start");
+		FOnEvent(this, String().sprintf("calibration start\t%s\t%s",
+				iGameAfterCalibration ? "game" : "no game",
+				iGazeControlInGame ? "gaze" : "mouse" ));
 	if (FOnStart)
 		FOnStart(this);
 
@@ -344,7 +346,7 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointNumber)
 {
 	if (FOnEvent)
-		FOnEvent(this, "restart");
+		FOnEvent(this, String().sprintf("restart\t%d", aRecalibrationPointNumber));
 
 	iCalibPlot->IsVisible = false;
 
@@ -394,7 +396,7 @@ void __fastcall TfrmCustomCalibration::PointAbort(TObject* aSender)
 {
 	iLastPointAborted = true;
 	if (FOnEvent)
-		FOnEvent(this, "abort point");
+		FOnEvent(this, String().sprintf("point aborted\t%d", iCalibPoints->CurrentPointIndex));
 	if (FOnPointAborted)
 		FOnPointAborted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 }
@@ -464,7 +466,7 @@ void __fastcall TfrmCustomCalibration::Finish()
 void __fastcall TfrmCustomCalibration::Abort()
 {
 	if (FOnEvent)
-		FOnEvent(this, "aborted");
+		FOnEvent(this, "calibration aborted");
 	if (FOnAborted)
 		FOnAborted(this);
 
