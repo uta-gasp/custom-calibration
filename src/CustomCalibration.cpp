@@ -63,6 +63,9 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 
 	randomize();
 
+	iCalibQualityEstimator = new TiCalibQualityEstimator();
+	iCalibQualityEstimator->OnEvent = FOnEvent;
+
 #ifdef __DEBUG
 	FormStyle = __DEBUG ? fsNormal : fsStayOnTop;
 #else
@@ -73,6 +76,8 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 //---------------------------------------------------------------------------
 __fastcall TfrmCustomCalibration::~TfrmCustomCalibration()
 {
+	delete iCalibQualityEstimator;
+
 	if (iStaticBitmap)
 		delete iStaticBitmap;
 
@@ -89,7 +94,10 @@ void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 	{
 		int dx = KMouseGazeCorrectionFactor * (Mouse->CursorPos.x - iMouseInitialPosition.x);
 		int dy = KMouseGazeCorrectionFactor * (Mouse->CursorPos.y - iMouseInitialPosition.y);
-		iGame->placePointer(aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
+		iGame->placePointer(aSample.leftEye.gazeX, aSample.leftEye.gazeY, dx, dy);
+
+		TiCalibQualityEstimator::TiPointI cqePoint(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
+		iCalibQualityEstimator->addSample(cqePoint);
 
 		if (FOnSample)
 			FOnSample(this, aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
@@ -320,8 +328,32 @@ void __fastcall TfrmCustomCalibration::onBackgroundFadingFisnihed(TObject* aSend
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::onGameSelect(TObject* aSender, int aTargetX, int aTargetY)
+{
+	iCalibQualityEstimator->addSelection(aTargetX, aTargetY);
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 {
+	if (FOnEvent)
+	{
+		SiQuality quality;
+		int points = iCalibQualityEstimator->estimate(quality);
+
+		if (points)
+		{
+			FOnEvent(this, String().sprintf("verification result quality\t%.3f %.3f %.3f\t%.3f %.3f %.3f",
+					quality.Precision.pixels(), quality.Precision.cm(), quality.Precision.deg(60),
+					quality.Accuracy.pixels(), quality.Accuracy.cm(), quality.Accuracy.deg(60)
+			));
+		}
+		else
+		{
+			FOnEvent(this, "verification result\t0");
+		}
+	}
+
 	TiTimeout::run(5000, FadeOut, &iTimeout);
 }
 
@@ -523,6 +555,7 @@ void __fastcall TfrmCustomCalibration::SetOnEvent(FiOnEvent aFOnEvent)
 	FOnEvent = aFOnEvent;
 	if (iGame)
 		iGame->OnEvent = FOnEvent;
+	iCalibQualityEstimator->OnEvent = FOnEvent;
 }
 
 //---------------------------------------------------------------------------
@@ -573,6 +606,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 
 	iGame = new TiGame(iObjects, TiSize( Width, Height ));
 	iGame->OnEvent = FOnEvent;
+	iGame->OnSelect = onGameSelect;
 	iGame->OnFinished = onGameFisnihed;
 }
 

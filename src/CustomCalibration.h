@@ -13,6 +13,7 @@
 #include "CalibPlot.h"
 #include "CalibPoints.h"
 #include "Game.h"
+#include "CalibQualityEstimator.h"
 #include "utils.h"
 
 #include "XML.h"
@@ -60,6 +61,8 @@ class TfrmCustomCalibration : public TForm
 
 		TiCalibPoints* iCalibPoints;
 
+		TiCalibQualityEstimator* iCalibQualityEstimator;
+
 		FiOnEvent FOnEvent;
 		FiOnSample FOnSample;
 		TNotifyEvent FOnStart;
@@ -77,6 +80,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall onFireFlyMoveFisnihed(TObject* aSender);
 		void __fastcall onCalibPointTimeout(TObject* aSender);
 		void __fastcall onBackgroundFadingFisnihed(TObject* aSender);
+		void __fastcall onGameSelect(TObject* aSender, int aTargetX, int aTargetY);
 		void __fastcall onGameFisnihed(TObject* aSender);
 
 		void __fastcall StartCalibration();

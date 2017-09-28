@@ -138,6 +138,7 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 		iTimeout(30),
 		iTimeoutRef(NULL),
 		FOnEvent(NULL),
+		FOnSelect(NULL),
 		FOnFinished(NULL)
 {
 	iHidingOlios.DeleteContent = false;
@@ -370,14 +371,17 @@ void __fastcall TiGame::click(int aX, int aY)
 					nearestOlio->X, nearestOlio->Y, x, y ));
 	}
 
+	if (FOnSelect)
+		FOnSelect(this, nearestOlio->X, nearestOlio->Y);
+
 	if (finished)
 		ComputeAndShowScore();
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiGame::placePointer(int aX, int aY)
+void __fastcall TiGame::placePointer(int aGazeX, int aGazeY, int aCorrectionX, int aCorrectionY)
 {
-	iPointer->placeTo(aX, aY);
+	iPointer->placeTo(aGazeX + aCorrectionX, aGazeY + aCorrectionY);
 }
 
 //---------------------------------------------------------------------------

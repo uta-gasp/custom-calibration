@@ -15,6 +15,7 @@ USEUNIT("..\src\CalibPoint.cpp");
 USEUNIT("..\src\CalibPoints.cpp");
 USEUNIT("..\src\Game.cpp");
 USELIB("..\..\XML\XML.lib");
+USEUNIT("..\src\CalibQualityEstimator.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

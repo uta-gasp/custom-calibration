@@ -54,6 +54,7 @@ class TiGame : public TObject
 
 	public:
 		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);
+		typedef void __fastcall (__closure *FiOnSelect)(System::TObject* aSender, int aTargetX, int aTargetY);
 
 	private:
 		TiAnimations iHidingOlios;
@@ -80,6 +81,7 @@ class TiGame : public TObject
 		TiTimeout* iTimeoutRef;
 
 		FiOnEvent FOnEvent;
+		FiOnSelect FOnSelect;
 		TNotifyEvent FOnFinished;
 
 		bool __fastcall GetIsRunning();
@@ -98,7 +100,7 @@ class TiGame : public TObject
 		void __fastcall stop(TObject* aSender = NULL);
 
 		void __fastcall click(int aX = -1, int aY = -1);
-		void __fastcall placePointer(int aX, int aY);
+		void __fastcall placePointer(int aGazeX, int aGazeY, int aCorrectionX, int aCorrectionY);
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
@@ -114,6 +116,7 @@ class TiGame : public TObject
 		__property int Timeout = {read = iTimeout, write = SetTimeout};
 
 		__property FiOnEvent OnEvent = {read = FOnEvent, write = FOnEvent};
+		__property FiOnSelect OnSelect = {read = FOnSelect, write = FOnSelect};
 		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 };
 
