@@ -25,7 +25,7 @@ const int KEyeBoxHeight = 120;
 const int KMaxAllowedCalibQualityOffset = 40;
 const double KMinAllowedCalibQualityValue = 0.5;
 
-const double KMouseGazeCorrectionFactor = 0.05;
+const double KMouseGazeCorrectionFactor = 0; //0.05;
 
 const String KIniGame = "Game";
 const String KIniBestScore = "BestScore";
@@ -166,11 +166,7 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	}
 	else
 	{
-		iBackground->fadeIn();
-		iCalibPoints->fadeOut();
-		iGame->showInstruction();
-
-		//TiTimeout::run(6000, StartGame);
+		PrepareToPlay();
 	}
 
 	return finished;
@@ -343,7 +339,7 @@ void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 
 		if (points)
 		{
-			FOnEvent(this, String().sprintf("verification result quality\t%.3f %.3f %.3f\t%.3f %.3f %.3f",
+			FOnEvent(this, String().sprintf("verification result\t%.3f %.3f %.3f\t%.3f %.3f %.3f",
 					quality.Precision.pixels(), quality.Precision.cm(), quality.Precision.deg(60),
 					quality.Accuracy.pixels(), quality.Accuracy.cm(), quality.Accuracy.deg(60)
 			));
@@ -522,6 +518,17 @@ void __fastcall TfrmCustomCalibration::Abort()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::PrepareToPlay(TObject* aSender)
+{
+	Cursor = crNone;
+	iBackground->fadeIn();
+	iCalibPoints->fadeOut();
+	iGame->showInstruction();
+
+	//TiTimeout::run(6000, StartGame);
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::StartGame(TObject* aSender)
 {
 	if (!iGazeControlInGame)
@@ -673,11 +680,18 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 	{
 		if (Key == VK_SPACE)
 			StartCalibration();
-		if (Key == VK_ESCAPE)
+		else if (Key == VK_ESCAPE)
+		{
+			if (FOnEvent)
+				FOnEvent(this, "calibration skipped, exiting");
+			Done();
+		}
+		else if (Key == VK_RETURN)
 		{
 			if (FOnEvent)
 				FOnEvent(this, "calibration skipped");
-			Done();
+			iEyeBox->IsVisible = false;
+			PrepareToPlay();
 		}
 	}
 	else if (iCalibPlot->IsVisible)
@@ -734,8 +748,8 @@ void __fastcall TfrmCustomCalibration::FormMouseMove(TObject *Sender,
 {
 	if (iGame->IsRunning && iMouseInitialPosition.x < 0)
 	{
-		iMouseInitialPosition.x = X;
-		iMouseInitialPosition.y = Y;
+		iMouseInitialPosition.x = Mouse->CursorPos.x;
+		iMouseInitialPosition.y = Mouse->CursorPos.y;
 	}
 }
 

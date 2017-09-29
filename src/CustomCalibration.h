@@ -90,6 +90,7 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall MoveToNextPoint(int aPointNumber);
 		void __fastcall Abort();
 		void __fastcall Finish();
+		void __fastcall PrepareToPlay(TObject* aSender = NULL);
 		void __fastcall StartGame(TObject* aSender = NULL);
 		void __fastcall FadeOut(TObject* aSender = NULL);
 		void __fastcall Done(TObject* aSender = NULL);

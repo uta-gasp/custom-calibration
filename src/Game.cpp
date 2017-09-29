@@ -10,26 +10,26 @@ const int KWidth = 1377;
 const int KResultHeight = 200;
 
 const TiGame::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
-	TiGame::SiHidingOlio(1139.5, 71.5, 51, 91),
-	TiGame::SiHidingOlio(1332, 667.5, 54, 113),
-	TiGame::SiHidingOlio(592, 376, 90, 82),
-	TiGame::SiHidingOlio(1060, 549, 56, 148),
-	TiGame::SiHidingOlio(483.5, 366, 55, 123),
-	TiGame::SiHidingOlio(1209, 263, 64, 108),
-	TiGame::SiHidingOlio(796.5, 226.5, 79, 117),
-	TiGame::SiHidingOlio(354.5, 103, 81, 108),
-	TiGame::SiHidingOlio(63.5, 450.5, 79, 133),
-	TiGame::SiHidingOlio(389.5, 718, 105, 90),
-	TiGame::SiHidingOlio(1205, 399, 72, 116),
-	TiGame::SiHidingOlio(574, 549, 38, 84),
-	TiGame::SiHidingOlio(499, 96, 44, 58),
-	TiGame::SiHidingOlio(867, 95.5, 50, 61),
-	TiGame::SiHidingOlio(785, 435, 52, 144),
-	TiGame::SiHidingOlio(815.5, 586, 41, 74),
-	TiGame::SiHidingOlio(164.5, 268, 83, 142),
-	TiGame::SiHidingOlio(303, 450.5, 66, 95),
-	TiGame::SiHidingOlio(916, 635, 58, 142),
-	TiGame::SiHidingOlio(1134.5, 592, 43, 132),
+	TiGame::SiHidingOlio(1139.5, 71.5, 	51, 91, 	27, 27),
+	TiGame::SiHidingOlio(1332, 667.5, 	54, 113, 	33, 30),
+	TiGame::SiHidingOlio(592, 376, 			90, 82, 	45, 38),
+	TiGame::SiHidingOlio(1060, 549, 		56, 148, 	24, 45),
+	TiGame::SiHidingOlio(483.5, 366, 		55, 123, 	21, 42),
+	TiGame::SiHidingOlio(1209, 263, 		64, 108, 	29, 30),
+	TiGame::SiHidingOlio(796.5, 226.5, 	79, 117, 	40, 39),
+	TiGame::SiHidingOlio(354.5, 103, 		81, 108, 	26, 40),
+	TiGame::SiHidingOlio(63.5, 450.5, 	79, 133, 	39, 39),
+	TiGame::SiHidingOlio(389.5, 718, 		105, 90, 	69, 16),
+	TiGame::SiHidingOlio(1205, 399, 		72, 116, 	30, 39),
+	TiGame::SiHidingOlio(574, 549, 			38, 84, 	20, 17),
+	TiGame::SiHidingOlio(499, 96, 			44, 58, 	23, 15),
+	TiGame::SiHidingOlio(867, 95.5, 		50, 61, 	21, 27),
+	TiGame::SiHidingOlio(785, 435, 			52, 144, 	24, 41),
+	TiGame::SiHidingOlio(815.5, 586, 		41, 74, 	20, 20),
+	TiGame::SiHidingOlio(164.5, 268, 		83, 142, 	25, 40),
+	TiGame::SiHidingOlio(303, 450.5, 		66, 95, 	37, 49),
+	TiGame::SiHidingOlio(916, 635, 			58, 142, 	32, 39),
+	TiGame::SiHidingOlio(1134.5, 592, 	43, 132, 	24, 38),
 };
 
 //---------------------------------------------------------------------------
@@ -334,6 +334,7 @@ void __fastcall TiGame::click(int aX, int aY)
 	double minDistance = MaxInt;
 
 	TiAnimation* nearestOlio = NULL;
+	int nearestOlioIndex = -1;
 
 	for (int i = 0; i < iHidingOlios.Count; i++)
 	{
@@ -343,6 +344,7 @@ void __fastcall TiGame::click(int aX, int aY)
 		{
 			minDistance = 0;
 			nearestOlio = olio;
+			nearestOlioIndex = i;
 
 			olio->hide();
 			iOliosFound++;
@@ -358,6 +360,7 @@ void __fastcall TiGame::click(int aX, int aY)
 		{
 			minDistance = distance;
 			nearestOlio = olio;
+			nearestOlioIndex = i;
 		}
 	}
 
@@ -371,8 +374,11 @@ void __fastcall TiGame::click(int aX, int aY)
 					nearestOlio->X, nearestOlio->Y, x, y ));
 	}
 
+	SiHidingOlio olioData = KHidingOlios[nearestOlioIndex];
+	TPoint eyes = nearestOlio->clientToScreen(olioData.GazeSpotX, olioData.GazeSpotY);
 	if (FOnSelect)
-		FOnSelect(this, nearestOlio->X, nearestOlio->Y);
+		FOnSelect(this, eyes.x, eyes.y);
+//		FOnSelect(this, nearestOlio->X, nearestOlio->Y);
 
 	if (finished)
 		ComputeAndShowScore();

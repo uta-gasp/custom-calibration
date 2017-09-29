@@ -323,6 +323,14 @@ double __fastcall TiAnimation::distanceTo(int aX, int aY)
 }
 
 //---------------------------------------------------------------------------
+TPoint __fastcall TiAnimation::clientToScreen(int aX, int aY)
+{
+	double dx = iScale * (aX - iCenter.x);
+	double dy = iScale * (aY - iCenter.y);
+	return TPoint(iX + dx, iY + dy);
+}
+
+//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TiAnimation::invalidate()
 {

@@ -48,8 +48,12 @@ class TiGame : public TObject
 			int Y;
 			int Width;
 			int Height;
+			int GazeSpotX;
+			int GazeSpotY;
+
 			SiHidingOlio() { }
-			SiHidingOlio(int aX, int aY, int aW, int aH) : X(aX), Y(aY), Width(aW), Height(aH) { }
+			SiHidingOlio(int aX, int aY, int aW, int aH, int aGSX, int aGSY) :
+					X(aX), Y(aY), Width(aW), Height(aH), GazeSpotX(aGSX), GazeSpotY(aGSY) { }
 		};
 
 	public:
