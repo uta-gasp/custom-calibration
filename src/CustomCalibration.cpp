@@ -156,7 +156,7 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	TiCalibPlot::Point worstCalibPoint = iCalibPlot->WorstPoint;
 	if (FOnEvent)
 		FOnEvent(this, String().sprintf("worst quality\t%d\t%.1f\t%.3f",
-				worstCalibPoint.ID, worstCalibPoint.Offset, worstCalibPoint.Quality));
+				worstCalibPoint.ID - 1, worstCalibPoint.Offset, worstCalibPoint.Quality));
 
 	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset ||
 			worstCalibPoint.Quality < KMinAllowedCalibQualityValue)
@@ -292,7 +292,8 @@ void __fastcall TfrmCustomCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 	if (iFireFly->IsVisible)
 	{
 		if (FOnEvent)
-			FOnEvent(this, String().sprintf("arrived to point\t%d", iCalibPoints->CurrentPointIndex));
+			FOnEvent(this, String().sprintf("arrived to point\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
+					iCalibPoints->Current->X, iCalibPoints->Current->Y));
 		if (FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
 			FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
@@ -310,7 +311,8 @@ void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 	if (iFireFly->IsVisible)
 	{
 		if (FOnEvent)
-			FOnEvent(this, String().sprintf("ready to accept\t%d", iCalibPoints->CurrentPointIndex));
+			FOnEvent(this, String().sprintf("ready to accept\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
+					iCalibPoints->Current->X, iCalibPoints->Current->Y));
 
 		iIsWaitingToAcceptPoint = true;
 	}
@@ -339,10 +341,7 @@ void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 
 		if (points)
 		{
-			FOnEvent(this, String().sprintf("verification result\t%.3f %.3f %.3f\t%.3f %.3f %.3f",
-					quality.Precision.pixels(), quality.Precision.cm(), quality.Precision.deg(60),
-					quality.Accuracy.pixels(), quality.Accuracy.cm(), quality.Accuracy.deg(60)
-			));
+			FOnEvent(this, quality.toString("verification result"));
 		}
 		else
 		{
@@ -379,7 +378,7 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPointNumber)
 {
 	if (FOnEvent)
-		FOnEvent(this, String().sprintf("restart\t%d", aRecalibrationPointNumber));
+		FOnEvent(this, String().sprintf("restart\t%d", aRecalibrationPointNumber - 1));
 
 	iCalibPlot->IsVisible = false;
 
@@ -418,7 +417,8 @@ void __fastcall TfrmCustomCalibration::PointDone(TObject* aSender)
 	if (iCalibPoints->CurrentPointIndex >= 0)
 	{
 		if (FOnEvent)
-			FOnEvent(this, String().sprintf("point accepted\t%d", iCalibPoints->CurrentPointIndex));
+			FOnEvent(this, String().sprintf("point accepted\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
+					iCalibPoints->Current->X, iCalibPoints->Current->Y));
 		if (FOnPointAccepted)
 			FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 	}

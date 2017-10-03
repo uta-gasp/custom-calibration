@@ -140,11 +140,11 @@ void __fastcall TiCalibPlot::log(TStrings* aList)
 	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
 		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
-		aList->Add(String().sprintf("%d\t%d %d\t%.2f %.2f\t%.2f %.2f\t%d\t%.2f",
+		aList->Add(String().sprintf("%d\t%d %d\t%d %d\t%d %d\t%d\t%.2f",
 			point->number - 1, point->positionX, point->positionY,
-			point->correctedPorX, point->correctedPorY,
-			point->standardDeviationX, point->standardDeviationY,
-			(int)point->usageStatus, point->qualityIndex));
+			int(point->correctedPorX), int(point->correctedPorY),
+			int(point->standardDeviationX), int(point->standardDeviationY),
+			int(point->usageStatus), point->qualityIndex));
 	}
 }
 

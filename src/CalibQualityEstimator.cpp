@@ -13,6 +13,19 @@ int TiQualityMetric::DPI = GetDeviceCaps(sDefaultDC, LOGPIXELSX);
 static _ = ::ReleaseDC(sDefaultWnd, sDefaultDC);
 
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+String SiQuality::toString(const char* aHeader)
+{
+	return String().sprintf("%s\t%d %d\t%.3f %.3f %.3f\t%.3f %.3f %.3f", aHeader, X, Y,
+					Precision.pixels(), Precision.cm(), Precision.deg(60),
+					Accuracy.pixels(), Accuracy.cm(), Accuracy.deg(60)
+	);
+}
+
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 __fastcall TiCalibQualityEstimator::TiCalibQualityEstimator() :
 		iBufferLength(12),
 		FOnEvent(NULL)
@@ -44,7 +57,7 @@ void __fastcall TiCalibQualityEstimator::addSample(const TiPointI& aPoint)
 //---------------------------------------------------------------------------
 bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY)
 {
-	FOnEvent(this, String().sprintf("add selection point\t%d\t%d",
+	FOnEvent(this, String().sprintf("add selection point\t%d %d",
 			aTargetX, aTargetY
 	));
 
@@ -52,13 +65,13 @@ bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY
 	if (!GetAverage(fixation, iGazePoints))
 		return false;
 
-	FOnEvent(this, String().sprintf("   fixation:\t%.2f\t%.2f",
+	FOnEvent(this, String().sprintf("fixation:\t%.2f %.2f",
 			fixation.X, fixation.Y
 	));
 
 	TiPointD offset = TiPointD(aTargetX, aTargetY) - fixation;
 
-	FOnEvent(this, String().sprintf("   offset:\t%.2f\t%.2f",
+	FOnEvent(this, String().sprintf("offset:\t%.2f %.2f",
 			offset.X, offset.Y
 	));
 
@@ -66,16 +79,17 @@ bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY
 	if (!GetStandardDeviation(sd, iGazePoints, &fixation))
 		return false;
 
-	FOnEvent(this, String().sprintf("   sd:\t%.2f\t%.2f",
+	FOnEvent(this, String().sprintf("sd:\t%.2f %.2f",
 			sd.X, sd.Y
 	));
 
 	SiQuality* quality = new SiQuality(
+			aTargetX, aTargetY,
 			TiQualityMetric(sd.length()),
 			TiQualityMetric(offset.length())
 	);
 
-	FOnEvent(this, String().sprintf("   SUMMARY:\t%.2f\t%.2f",
+	FOnEvent(this, String().sprintf("SUMMARY:\t%.2f\t%.2f",
 			offset.length(), sd.length()
 	));
 
@@ -87,16 +101,11 @@ bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY
 //---------------------------------------------------------------------------
 int __fastcall TiCalibQualityEstimator::estimate(SiQuality& aQuality)
 {
-	// debug
 	for (int i = 0; i < iQualities->Count; i++)
 	{
 		SiQuality* q = iQualities->get(i);
-		FOnEvent(this, String().sprintf("verification point quality\t%.3f\t%.3f",
-				q->Precision.pixels(), q->Accuracy.pixels()
-		));
+		FOnEvent(this, q->toString("verification point quality"));
 	}
-	// <---
-
 
 	int count = iQualities->Count;
 	if (!count)

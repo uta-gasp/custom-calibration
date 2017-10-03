@@ -311,7 +311,7 @@ void __fastcall TiGame::start(int aOliosToShow)
 		{
 			olios = String().sprintf("%s\t%s", olios.c_str(), oliosCoords->Strings[i].c_str());
 		}
-		FOnEvent(this, String().sprintf("game start\t%s", olios.c_str()));
+		FOnEvent(this, String().sprintf("game start%s", olios.c_str()));
 	}
 }
 

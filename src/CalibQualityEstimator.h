@@ -56,12 +56,15 @@ class TiQualityMetric
 //---------------------------------------------------------------------------
 struct SiQuality
 {
+	int X, Y;
 	TiQualityMetric Precision;
 	TiQualityMetric Accuracy;
 
 	SiQuality() { }
-	SiQuality(TiQualityMetric aPrecision, TiQualityMetric aAccuracy) :
-			Precision(aPrecision), Accuracy(aAccuracy) { }
+	SiQuality(int aX, int aY, TiQualityMetric aPrecision, TiQualityMetric aAccuracy) :
+			X(aX), Y(aY), Precision(aPrecision), Accuracy(aAccuracy) { }
+
+	String toString(const char* aHeader = "");
 };
 
 //---------------------------------------------------------------------------
