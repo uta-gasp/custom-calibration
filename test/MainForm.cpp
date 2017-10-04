@@ -13,6 +13,8 @@
 
 //---------------------------------------------------------------------------
 TfrmMainForm *frmMainForm;
+static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+static ULONG_PTR m_gdiplusToken = NULL;
 
 const String KIniFileName = "settings.xml";
 
@@ -24,10 +26,6 @@ const CalibrationPointStruct KCalibPoints[] = {
 	{5, 200, 80},
 };
 
-static TiTimestamp sTimestamp;
-static TiLogger iEvents("events");
-static TiLogger iSamples("samples");
-
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
 	frmMainForm->log->Lines->Add(aMsg);
@@ -36,34 +34,18 @@ void Log(String aMsg) {
 //---------------------------------------------------------------------------
 __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	: TForm(Owner),
-	iAnimationTimeout(NULL)
+	iCustomCalibration(NULL),
+	iAnimationTimeout(NULL), 
+	iTimestamp(NULL),
+	iEvents(NULL),
+	iSamples(NULL)
 {
+	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
 	frmMainForm = this;
 	iCalibPointStatus = new int[ARRAYSIZE(KCalibPoints)];
 
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
-
-	iCustomCalibration = new TfrmCustomCalibration(this);
-	iCustomCalibration->OnEvent = onCalibrationEvent;
-	iCustomCalibration->OnSample = onCalibrationSample;
-	iCustomCalibration->OnStart = onCalibrationStart;
-	iCustomCalibration->OnReadyToCalibrate = onCalibrationReadyToCalibrate;
-	iCustomCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
-	iCustomCalibration->OnPointReady = onCalibrationPointReady;
-	iCustomCalibration->OnPointAccepted = onCalibrationPointAccepted;
-	iCustomCalibration->OnPointAborted = onCalibrationPointAborted;
-	iCustomCalibration->OnFinished = onCalibrationFinished;
-	iCustomCalibration->OnAborted = onCalibrationAborted;
-
-	iCustomCalibration->OnMouseMove = onCalibrationMouseMove;
-
-	if (FileExists(KIniFileName))
-	{
-		String fileName = ExtractFilePath(Application->ExeName);
-		TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", false);
-		iCustomCalibration->loadSettings(ini);
-		delete ini;
-	}
 
 	iCreatures = new TiAnimationManager();
 	iCreatures->OnPaint = onCreaturesPaint;
@@ -91,6 +73,70 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 }
 
 //---------------------------------------------------------------------------
+__fastcall TfrmMainForm::~TfrmMainForm() {
+	Gdiplus::GdiplusShutdown(m_gdiplusToken);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::CreateCalibration()
+{
+	DestroyCalibration();
+
+	iTimestamp = new TiTimestamp();
+	iEvents = new TiLogger("events");
+	iSamples = new TiLogger("samples");
+
+	iCustomCalibration = new TfrmCustomCalibration(this);
+	iCustomCalibration->OnEvent = onCalibrationEvent;
+	iCustomCalibration->OnSample = onCalibrationSample;
+	iCustomCalibration->OnStart = onCalibrationStart;
+	iCustomCalibration->OnReadyToCalibrate = onCalibrationReadyToCalibrate;
+	iCustomCalibration->OnRecalibrateSinglePoint = onRecalibrateSinglePoint;
+	iCustomCalibration->OnPointReady = onCalibrationPointReady;
+	iCustomCalibration->OnPointAccepted = onCalibrationPointAccepted;
+	iCustomCalibration->OnPointAborted = onCalibrationPointAborted;
+	iCustomCalibration->OnFinished = onCalibrationFinished;
+	iCustomCalibration->OnAborted = onCalibrationAborted;
+	iCustomCalibration->OnGameStarted = onCalibrationGameStarted;
+	iCustomCalibration->OnGameFinished = onCalibrationGameFinished;
+
+	iCustomCalibration->OnMouseMove = onCalibrationMouseMove;
+
+	if (FileExists(KIniFileName))
+	{
+		String fileName = ExtractFilePath(Application->ExeName);
+		TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", false);
+		iCustomCalibration->loadSettings(ini);
+		delete ini;
+	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::DestroyCalibration()
+{
+	if (iCustomCalibration)
+	{
+		String fileName = ExtractFilePath(Application->ExeName);
+		TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", true);
+		iCustomCalibration->saveSettings(ini);
+		ini->save(false);
+		delete ini;
+
+		delete iCustomCalibration;
+		iCustomCalibration = NULL;
+
+		delete iEvents;
+		iEvents = NULL;
+
+		delete iSamples;
+		iSamples = NULL;
+
+		delete iTimestamp;
+		iTimestamp = NULL;
+	}
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::VerifyCalibration()
 {
 	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
@@ -112,7 +158,13 @@ void __fastcall TfrmMainForm::VerifyCalibration()
 	}
 
 	if (iCustomCalibration->processCalibrationResult())
-		Log("START GAME");
+	{
+		Log("CALIB_FINISHED");
+		if (iCustomCalibration->GameAfterCalibration)
+		{
+			Log("START_GAME");
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -172,13 +224,13 @@ void __fastcall TfrmMainForm::onPostAnimation(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCalibrationEvent(TObject* aSender, const String& aMsg)
 {
-	iEvents.line( String().sprintf("%d\t%s", sTimestamp.ms(), aMsg.c_str()) );
+	iEvents->line( String().sprintf("%d\t%s", iTimestamp->ms(), aMsg.c_str()) );
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCalibrationSample(TObject* aSender, double aX, double aY)
 {
-	iSamples.line( String().sprintf("%d\t%.2f\t%.2f", sTimestamp.ms(), aX, aY) );
+	iSamples->line( String().sprintf("%d\t%.2f\t%.2f", iTimestamp->ms(), aX, aY) );
 }
 
 //---------------------------------------------------------------------------
@@ -200,7 +252,7 @@ Log("READY_TO_CALIB");
 }
 
 void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode) {
-Log(String("RECALIB_PT_#")+aPointNumber);
+Log(String("RECALIB_PT_#")+(aPointNumber-1));
 
 	iCurrentCalibPointNumber = aPointNumber;
 	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
@@ -249,13 +301,20 @@ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 }
 
 void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
-Log("FINISHED");
+Log("VERIFYING");
 VerifyCalibration();
 }
 
 void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {
 Log("ABORTED");
-	Close();
+}
+
+void __fastcall TfrmMainForm::onCalibrationGameStarted(TObject* aSender) {
+Log("GAME_STARTED");
+}
+
+void __fastcall TfrmMainForm::onCalibrationGameFinished(TObject* aSender) {
+Log("GAME_FINISHED");
 }
 
 void __fastcall TfrmMainForm::onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y) {
@@ -349,18 +408,12 @@ void __fastcall TfrmMainForm::Panel1MouseUp(TObject *Sender, TMouseButton Button
 void __fastcall TfrmMainForm::FormCreate(TObject *Sender)
 {
 	iGraphics = new Gdiplus::Graphics(Panel1->Handle, false);
-
-	iCustomCalibration->Show();
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::FormDestroy(TObject *Sender)
 {
-	String fileName = ExtractFilePath(Application->ExeName);
-	TiXML_INI* ini = new TiXML_INI(fileName + "\\" + KIniFileName, "KidCalib", true);
-	iCustomCalibration->saveSettings(ini);
-	ini->save(false);
-	delete ini;
+	DestroyCalibration();
 }
 
 //---------------------------------------------------------------------------
@@ -373,4 +426,22 @@ void __fastcall TfrmMainForm::Button2Click(TObject *Sender)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::btnStartClick(TObject *Sender)
+{
+	CreateCalibration();
+	
+	iCustomCalibration->GameAfterCalibration =
+			Sender == btnStartCalibAndGame ||
+			Sender == btnStartGameOnly;
+
+	iCustomCalibration->Show();
+
+	if (Sender == btnStartCalibAndGame || Sender == btnStartCalibOnly)
+		iCustomCalibration->showEyeBox();
+	else
+		iCustomCalibration->playGame();
+}
+
+//---------------------------------------------------------------------------
+
 

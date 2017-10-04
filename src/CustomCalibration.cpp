@@ -57,7 +57,9 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		FOnPointAccepted(NULL),
 		FOnPointAborted(NULL),
 		FOnFinished(NULL),
-		FOnAborted(NULL)
+		FOnAborted(NULL),
+		FOnGameStarted(NULL),
+		FOnGameFinished(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -108,6 +110,23 @@ void __fastcall TfrmCustomCalibration::setSample(SampleStruct& aSample)
 void __fastcall TfrmCustomCalibration::setTrackingStability(bool aStable)
 {
 	iEyeBox->setTrackingStability(aStable);
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TfrmCustomCalibration::showModal(bool aSkipCalibration)
+{
+	if (aSkipCalibration)
+		playGame();
+	else
+		showEyeBox();
+
+	return ShowModal();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::showEyeBox()
+{
+	iEyeBox->IsVisible = true;
 }
 
 //---------------------------------------------------------------------------
@@ -166,10 +185,23 @@ bool __fastcall TfrmCustomCalibration::processCalibrationResult()
 	}
 	else
 	{
-		PrepareToPlay();
+		iCalibPoints->fadeOut();
+		if (GameAfterCalibration)
+			TiTimeout::run(500, playGame, &iTimeout);
+		else
+			TiTimeout::run(1000, Done, &iTimeout);
 	}
 
 	return finished;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::playGame(TObject* aSender)
+{
+	Cursor = crNone;
+	iBackground->fadeIn();
+
+	TiTimeout::run(700, ShowGameInstructions);
 }
 
 //---------------------------------------------------------------------------
@@ -349,7 +381,10 @@ void __fastcall TfrmCustomCalibration::onGameFisnihed(TObject* aSender)
 		}
 	}
 
-	TiTimeout::run(5000, FadeOut, &iTimeout);
+	if (FOnGameFinished)
+		FOnGameFinished(this);
+
+	TiTimeout::run(4000, FadeOut, &iTimeout);
 }
 
 //---------------------------------------------------------------------------
@@ -518,14 +553,9 @@ void __fastcall TfrmCustomCalibration::Abort()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::PrepareToPlay(TObject* aSender)
+void __fastcall TfrmCustomCalibration::ShowGameInstructions(TObject* aSender)
 {
-	Cursor = crNone;
-	iBackground->fadeIn();
-	iCalibPoints->fadeOut();
 	iGame->showInstruction();
-
-	//TiTimeout::run(6000, StartGame);
 }
 
 //---------------------------------------------------------------------------
@@ -535,6 +565,9 @@ void __fastcall TfrmCustomCalibration::StartGame(TObject* aSender)
 		Cursor = crDefault;
 
 	iGame->start(10);
+
+	if (FOnGameStarted)
+		FOnGameStarted(this);
 }
 
 //---------------------------------------------------------------------------
@@ -691,7 +724,7 @@ void __fastcall TfrmCustomCalibration::FormKeyUp(TObject *Sender, WORD &Key,
 			if (FOnEvent)
 				FOnEvent(this, "calibration skipped");
 			iEyeBox->IsVisible = false;
-			PrepareToPlay();
+			playGame();
 		}
 	}
 	else if (iCalibPlot->IsVisible)

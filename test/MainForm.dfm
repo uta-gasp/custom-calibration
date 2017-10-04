@@ -1,9 +1,9 @@
 object frmMainForm: TfrmMainForm
   Left = 1138
-  Top = 88
+  Top = 5
   AutoScroll = False
   Caption = 'KidCalibt est'
-  ClientHeight = 621
+  ClientHeight = 704
   ClientWidth = 191
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -99,9 +99,9 @@ object frmMainForm: TfrmMainForm
   end
   object log: TMemo
     Left = 0
-    Top = 264
+    Top = 352
     Width = 185
-    Height = 221
+    Height = 217
     Anchors = [akLeft, akTop, akRight]
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
@@ -123,8 +123,8 @@ object frmMainForm: TfrmMainForm
   end
   object Panel1: TPanel
     Left = 0
-    Top = 488
-    Width = 193
+    Top = 572
+    Width = 189
     Height = 129
     TabOrder = 6
     OnMouseUp = Panel1MouseUp
@@ -157,5 +157,35 @@ object frmMainForm: TfrmMainForm
     TickMarks = tmBottomRight
     TickStyle = tsAuto
     OnChange = TrackBar3Change
+  end
+  object btnStartCalibAndGame: TButton
+    Left = 12
+    Top = 260
+    Width = 169
+    Height = 25
+    Anchors = [akLeft, akTop, akRight]
+    Caption = 'Calibration + Game'
+    TabOrder = 9
+    OnClick = btnStartClick
+  end
+  object btnStartCalibOnly: TButton
+    Left = 12
+    Top = 288
+    Width = 169
+    Height = 25
+    Anchors = [akLeft, akTop, akRight]
+    Caption = 'Calibration only'
+    TabOrder = 10
+    OnClick = btnStartClick
+  end
+  object btnStartGameOnly: TButton
+    Left = 12
+    Top = 316
+    Width = 169
+    Height = 25
+    Anchors = [akLeft, akTop, akRight]
+    Caption = 'Game only'
+    TabOrder = 11
+    OnClick = btnStartClick
   end
 end

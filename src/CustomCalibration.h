@@ -23,14 +23,14 @@
 class TfrmCustomCalibration : public TForm
 {
 	__published:
-	TTimer *tmrKostyl;
+		TTimer *tmrKostyl;
 		void __fastcall FormCreate(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 		void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
 					TShiftState Shift, int X, int Y);
 		void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
-	void __fastcall tmrKostylTimer(TObject *Sender);
-	void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
+		void __fastcall tmrKostylTimer(TObject *Sender);
+		void __fastcall FormMouseMove(TObject *Sender, TShiftState Shift, int X,
           int Y);
 
 	public:
@@ -73,6 +73,8 @@ class TfrmCustomCalibration : public TForm
 		FiOnCalibrationPoint FOnPointAborted;
 		TNotifyEvent FOnFinished;
 		TNotifyEvent FOnAborted;
+		TNotifyEvent FOnGameStarted;
+		TNotifyEvent FOnGameFinished;
 
 		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
 		void __fastcall onEyeBoxHidden(TObject* aSender);
@@ -90,7 +92,8 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall MoveToNextPoint(int aPointNumber);
 		void __fastcall Abort();
 		void __fastcall Finish();
-		void __fastcall PrepareToPlay(TObject* aSender = NULL);
+
+		void __fastcall ShowGameInstructions(TObject* aSender = NULL);
 		void __fastcall StartGame(TObject* aSender = NULL);
 		void __fastcall FadeOut(TObject* aSender = NULL);
 		void __fastcall Done(TObject* aSender = NULL);
@@ -104,6 +107,9 @@ class TfrmCustomCalibration : public TForm
 		void __fastcall setSample(SampleStruct& aSample);
 		void __fastcall setTrackingStability(bool aStable);
 
+		int  __fastcall showModal(bool aSkipCalibration = false);
+
+		void __fastcall showEyeBox();
 		void __fastcall clearPoints();
 		void __fastcall addPoint(CalibrationPointStruct& aPoint);
 		void __fastcall nextPoint(int aPointNumber);
@@ -111,6 +117,7 @@ class TfrmCustomCalibration : public TForm
 				CalibrationPointQualityStruct& aLeft,
 				CalibrationPointQualityStruct& aRight);
 		bool __fastcall processCalibrationResult();
+		void __fastcall playGame(TObject* aSender = NULL);
 
 		void __fastcall loadSettings(TiXML_INI* aStorage);
 		void __fastcall saveSettings(TiXML_INI* aStorage);
@@ -128,6 +135,8 @@ class TfrmCustomCalibration : public TForm
 		__property FiOnCalibrationPoint OnPointAborted = {read = FOnPointAborted, write = FOnPointAborted};
 		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
+		__property TNotifyEvent OnGameStarted = {read = FOnGameStarted, write = FOnGameStarted};
+		__property TNotifyEvent OnGameFinished = {read = FOnGameStarted, write = FOnGameFinished};
 };
 
 //---------------------------------------------------------------------------

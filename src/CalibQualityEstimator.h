@@ -60,7 +60,7 @@ struct SiQuality
 	TiQualityMetric Precision;
 	TiQualityMetric Accuracy;
 
-	SiQuality() { }
+	SiQuality() : X(0), Y(0) { }
 	SiQuality(int aX, int aY, TiQualityMetric aPrecision, TiQualityMetric aAccuracy) :
 			X(aX), Y(aY), Precision(aPrecision), Accuracy(aAccuracy) { }
 

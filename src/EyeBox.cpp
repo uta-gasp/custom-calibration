@@ -24,13 +24,13 @@ const int KInstructionHeight = 300;
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize) :
 		TObject(),
-		iVisible(true),
+		iVisible(false),
 		iInstabilityCounter(0),
 		FOnHidden(NULL)
 {
 	iBox = aBox;
 
-	iBackground = new TiAnimation();
+	iBackground = new TiAnimation(iVisible);
 	iBackground->addFrames(IDR_EYEBOX, 160, 120);
 	iBackground->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + aBox.Height()/2);
 	iBackground->OnFadingFinished = onBackgroundFadingFinished;
@@ -46,15 +46,15 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TRect aBox, TiSize a
 	iWarning->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + iWarning->Height);
 	iWarning->FadingDuration = 200;
 
-	iInstructionTop = new TiAnimation();
+	iInstructionTop = new TiAnimation(iVisible);
 	iInstructionTop->addFrames(IDR_CALIB_INSTRUCTION_TOP, KInstructionWidth, KInstructionHeight);
 	iInstructionTop->placeTo(aScreenSize.Width / 2, KInstructionHeight / 2);
 
-	iInstructionBottom = new TiAnimation();
+	iInstructionBottom = new TiAnimation(iVisible);
 	iInstructionBottom->addFrames(IDR_CALIB_INSTRUCTION_BOTTOM, KInstructionWidth, KInstructionHeight);
 	iInstructionBottom->placeTo(aScreenSize.Width / 2, aScreenSize.Height - KInstructionHeight / 2);
 
-	iStart = new TiAnimation(true, false);
+	iStart = new TiAnimation(iVisible, false);
 	iStart->addFrames(IDR_START, 160, 48);
 	iStart->addFrames(IDR_START_HOVER, 160, 48);
 	iStart->FadingDuration = 500;

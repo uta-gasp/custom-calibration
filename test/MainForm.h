@@ -32,6 +32,9 @@ __published:	// IDE-managed Components
 	TButton *Button3;
 	TLabel *Label3;
 	TTrackBar *TrackBar3;
+	TButton *btnStartCalibAndGame;
+	TButton *btnStartCalibOnly;
+	TButton *btnStartGameOnly;
 	void __fastcall Button1Click(TObject *Sender);
 	void __fastcall TrackBar1Change(TObject *Sender);
 	void __fastcall TrackBar2Change(TObject *Sender);
@@ -45,6 +48,7 @@ __published:	// IDE-managed Components
 	void __fastcall Button3Click(TObject *Sender);
 	void __fastcall TrackBar3Change(TObject *Sender);
 	void __fastcall FormDestroy(TObject *Sender);
+	void __fastcall btnStartClick(TObject *Sender);
 
 private:	// User declarations
 	TfrmCustomCalibration* iCustomCalibration;
@@ -57,6 +61,12 @@ private:	// User declarations
 	//Gdiplus::Bitmap* iBackground;
 	TiTimeout* iAnimationTimeout;
 
+	TiTimestamp* iTimestamp;
+	TiLogger* iEvents;
+	TiLogger* iSamples;
+
+	void __fastcall CreateCalibration();
+	void __fastcall DestroyCalibration();
 	void __fastcall VerifyCalibration();
 
 	void __fastcall onCreaturesPaint(TObject* aSender, EiUpdateType aUpdateType);
@@ -77,11 +87,14 @@ private:	// User declarations
 	void __fastcall onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationFinished(TObject* aSender);
 	void __fastcall onCalibrationAborted(TObject* aSender);
+	void __fastcall onCalibrationGameStarted(TObject* aSender);
+	void __fastcall onCalibrationGameFinished(TObject* aSender);
 
 	void __fastcall onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 
 public:		// User declarations
 	__fastcall TfrmMainForm(TComponent* Owner);
+	virtual __fastcall ~TfrmMainForm();
 };
 
 //---------------------------------------------------------------------------
