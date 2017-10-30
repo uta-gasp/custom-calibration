@@ -51,6 +51,9 @@ __published:	// IDE-managed Components
 	void __fastcall btnStartClick(TObject *Sender);
 
 private:	// User declarations
+	double iScaleX;
+	double iScaleY;
+
 	TfrmCustomCalibration* iCustomCalibration;
 	int iCurrentCalibPointNumber;
 	int* iCalibPointStatus;

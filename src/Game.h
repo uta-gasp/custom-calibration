@@ -69,6 +69,7 @@ class TiGame : public TObject
 		TiGameTimer* iCountdown;
 		TiAnimation* iPointer;
 
+		TiSize iScreenSize;
 		int iBestScore;
 		String iBestScoreDate;
 		bool iIsBestScore;

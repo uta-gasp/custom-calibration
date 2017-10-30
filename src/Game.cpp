@@ -7,6 +7,7 @@
 
 //---------------------------------------------------------------------------
 const int KWidth = 1377;
+const int KHeight = 768;
 const int KResultHeight = 200;
 
 const TiGame::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
@@ -67,7 +68,7 @@ void __fastcall TiGameTimer::paintTo(Gdiplus::Graphics* aGraphics)
 	WideString bstr(str);
 
 	Gdiplus::Font font(L"Arial", 26);
-	Gdiplus::RectF rect(10, 10, 100, 100);
+	Gdiplus::RectF rect( X - 50, Y - 50, 100, 100);
 	Gdiplus::StringFormat format;
 	format.SetAlignment(Gdiplus::StringAlignmentCenter);
 	format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
@@ -143,6 +144,10 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 {
 	iHidingOlios.DeleteContent = false;
 
+	iScreenSize = aScreenSize;
+	int offsetX = (aScreenSize.Width - KWidth) / 2;
+	int offsetY = (aScreenSize.Height - KHeight) / 2;
+
 	for (int i = 0; i < ARRAYSIZE(KHidingOlios); i++)
 	{
 		TiGame::SiHidingOlio hidingOlio = KHidingOlios[i];
@@ -150,39 +155,42 @@ __fastcall TiGame::TiGame(TiAnimationManager* aManager, TiSize aScreenSize) :
 		TiAnimation* olio = new TiAnimation();
 		//olio->Center = TPoint(0, 0);
 		olio->addFrames(IDR_HIDDEN_OLIOS + 1 + i, hidingOlio.Width, hidingOlio.Height);
-		olio->placeTo(hidingOlio.X, hidingOlio.Y);
+		olio->placeTo(offsetX + hidingOlio.X, offsetY + hidingOlio.Y);
 		olio->hide();
 
 		iHidingOlios.add(olio);
 		aManager->add(olio);
 	}
 
+	int screenCenterX = aScreenSize.Width / 2;
+	int screenCenterY = aScreenSize.Height / 2;
+
 	iResultBackground = new TiAnimation();
 	iResultBackground->FadingDuration = 400;
 	iResultBackground->addFrames(IDR_GAME_BACK, 700, 200);
-	iResultBackground->placeTo(KWidth / 2, KResultHeight / 2);
+	iResultBackground->placeTo(screenCenterX / 2, offsetY + KResultHeight / 2);
 	iResultBackground->hide();
 	aManager->add(iResultBackground);
 
 	iBestScoreLogo1 = new TiAnimation();
 	iBestScoreLogo1->addFrames(IDR_GAME_BEST, 128, 128);
-	iBestScoreLogo1->placeTo(KWidth - 200, KResultHeight / 2);
+	iBestScoreLogo1->placeTo(screenCenterX + 450, offsetY + KResultHeight / 2);
 	iBestScoreLogo1->hide();
 	aManager->add(iBestScoreLogo1);
 
 	iBestScoreLogo2 = new TiAnimation();
 	iBestScoreLogo2->addFrames(IDR_GAME_BEST, 128, 128);
-	iBestScoreLogo2->placeTo(200, KResultHeight / 2);
+	iBestScoreLogo2->placeTo(screenCenterX - 450, offsetY + KResultHeight / 2);
 	iBestScoreLogo2->hide();
 	aManager->add(iBestScoreLogo2);
 
 	iInstruction = new TiAnimation(false, true);
 	iInstruction->addFrames(IDR_GAME_INSTRUCTION, 1000, 450);
-	iInstruction->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
+	iInstruction->placeTo(screenCenterX, screenCenterY);
 	aManager->add(iInstruction);
 
 	iCountdown = new TiGameTimer(iTimeout);
-	iCountdown->placeTo(60, 60);
+	iCountdown->placeTo(offsetX + 60, offsetY + 60);
 	iCountdown->OnStop = stop;
 	aManager->add(iCountdown);
 
@@ -407,7 +415,11 @@ void __fastcall TiGame::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpda
 			WideString bstr(str);
 
 			Gdiplus::Font font(L"Arial", 26);
-			Gdiplus::RectF rect(0, 0, KWidth, KResultHeight);
+			Gdiplus::RectF rect(
+				(iScreenSize.Width - KWidth) / 2,
+				(iScreenSize.Height - KHeight) / 2,
+				KWidth, KResultHeight
+			);
 			Gdiplus::StringFormat format;
 			format.SetAlignment(Gdiplus::StringAlignmentCenter);
 			format.SetLineAlignment(Gdiplus::StringAlignmentCenter);

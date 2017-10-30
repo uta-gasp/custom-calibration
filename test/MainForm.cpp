@@ -35,7 +35,7 @@ void Log(String aMsg) {
 __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	: TForm(Owner),
 	iCustomCalibration(NULL),
-	iAnimationTimeout(NULL), 
+	iAnimationTimeout(NULL),
 	iTimestamp(NULL),
 	iEvents(NULL),
 	iSamples(NULL)
@@ -44,6 +44,9 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 
 	frmMainForm = this;
 	iCalibPointStatus = new int[ARRAYSIZE(KCalibPoints)];
+
+	iScaleX = double(Screen->Width) / 1377;
+	iScaleY = double(Screen->Height) / 768;
 
 	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
 
@@ -142,12 +145,16 @@ void __fastcall TfrmMainForm::VerifyCalibration()
 	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
 	{
 		CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
+
 		CalibrationPointQualityStruct left, right;
+		int x = calibPoint.positionX * iScaleX;
+		int y = calibPoint.positionY * iScaleY;
+
 		left.number = i;
-		left.positionX = calibPoint.positionX;
-		left.positionY = calibPoint.positionY;
-		left.correctedPorX = calibPoint.positionX + randInRange(-35, 35);
-		left.correctedPorY = calibPoint.positionY + randInRange(-35, 35);
+		left.positionX = x;
+		left.positionY = y;
+		left.correctedPorX = x + randInRange(-35, 35);
+		left.correctedPorY = y + randInRange(-35, 35);
 		left.standardDeviationX = randInRange(-40, 40);
 		left.standardDeviationY = randInRange(-40, 40);
 		left.usageStatus = iCalibPointStatus[i - 1];
@@ -239,9 +246,15 @@ void __fastcall TfrmMainForm::onCalibrationStart(TObject* aSender) {
 Log("START");
 	iCustomCalibration->clearPoints();
 
-	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
+	for (int i = 0; i < ARRAYSIZE(KCalibPoints); i++)
 	{
-		iCustomCalibration->addPoint(KCalibPoints[i - 1]);
+		CalibrationPointStruct& calibPoint = KCalibPoints[i];
+		CalibrationPointStruct cp;
+		cp.number = calibPoint.number;
+		cp.positionX = calibPoint.positionX * iScaleX;
+		cp.positionY = calibPoint.positionY * iScaleY;
+
+		iCustomCalibration->addPoint(cp);
 	}
 }
 
