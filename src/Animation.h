@@ -21,6 +21,9 @@ class TiAnimation : public TObject
 {
 	typedef TiDynArray<Gdiplus::Bitmap> TiAnimations;
 
+	public:
+		typedef void __fastcall (__closure *TiOnFadingTransition)(System::TObject* aSender, double aAlpha);
+
 	private:
 		TiAnimationManager* iParent;
 		TiAnimations iAnimations;
@@ -65,6 +68,7 @@ class TiAnimation : public TObject
 		TNotifyEvent FOnMoveFinished;
 		TNotifyEvent FOnRotationFinished;
 		TNotifyEvent FOnFadingFinished;
+		TiOnFadingTransition FOnFadingTransition;
 
 		void __fastcall AddFrames(Gdiplus::Bitmap* aFrames, int aWidth, int aHeight);
 
@@ -159,6 +163,7 @@ class TiAnimation : public TObject
 		__property TNotifyEvent OnMoveFinished = {read = FOnMoveFinished, write = FOnMoveFinished};
 		__property TNotifyEvent OnRotationFinished = {read = FOnRotationFinished, write = FOnRotationFinished};
 		__property TNotifyEvent OnFadingFinished = {read = FOnFadingFinished, write = FOnFadingFinished};
+		__property TiOnFadingTransition OnFadingTransition = {read = FOnFadingTransition, write = FOnFadingTransition};
 };
 
 //---------------------------------------------------------------------------

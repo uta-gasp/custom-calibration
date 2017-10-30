@@ -1,6 +1,6 @@
 object frmCustomCalibration: TfrmCustomCalibration
-  Left = 300
-  Top = 132
+  Left = 301
+  Top = 134
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 550

@@ -39,6 +39,11 @@ class TfrmCustomCalibration : public TForm
 		typedef void __fastcall (__closure *FiOnCalibrationPoint)(System::TObject* aSender,
 				int aPointIndex, bool aIsSinglePointMode = false);
 
+		enum EiAttractorType {
+			ATTRACTOR_FIREFLY = 0,
+			ATTRACTOR_CIRCLE
+		};
+
 	private:
 		Gdiplus::Graphics* iGraphics;
 		//Gdiplus::Bitmap* iBackground;
@@ -50,7 +55,15 @@ class TfrmCustomCalibration : public TForm
 		TiAnimationManager* iObjects;
 		TiAnimation* iBackground;
 		TiAnimation* iTarget;
+
 		TiAnimation* iFireFly;
+		TiAnimation* iCircle;
+		TiAnimation* iAttractor;
+
+		Gdiplus::Color iBackgroundColor;
+		Gdiplus::Color iSetupBackgroundColor;
+		Gdiplus::Color iCalibrationBackgroundColor;
+
 		TiTimeout* iTimeout;
 		TiTimeout* iPointAcceptTimeout;
 		bool iIsWaitingToAcceptPoint;
@@ -62,6 +75,8 @@ class TfrmCustomCalibration : public TForm
 		TiCalibPoints* iCalibPoints;
 
 		TiCalibQualityEstimator* iCalibQualityEstimator;
+
+		EiAttractorType iAttractorType;
 
 		FiOnEvent FOnEvent;
 		FiOnSample FOnSample;
@@ -77,9 +92,10 @@ class TfrmCustomCalibration : public TForm
 		TNotifyEvent FOnGameFinished;
 
 		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
+		void __fastcall onEyeBoxFadingTransition(TObject* aSender, double iAlpha);
 		void __fastcall onEyeBoxHidden(TObject* aSender);
-		void __fastcall onFireFlyFadingFisnihed(TObject* aSender);
-		void __fastcall onFireFlyMoveFisnihed(TObject* aSender);
+		void __fastcall onAttractorFadingFisnihed(TObject* aSender);
+		void __fastcall onAttractorMoveFisnihed(TObject* aSender);
 		void __fastcall onCalibPointTimeout(TObject* aSender);
 		void __fastcall onBackgroundFadingFisnihed(TObject* aSender);
 		void __fastcall onGameSelect(TObject* aSender, int aTargetX, int aTargetY);
@@ -124,6 +140,7 @@ class TfrmCustomCalibration : public TForm
 
 		__property bool GameAfterCalibration = {read = iGameAfterCalibration, write = iGameAfterCalibration};
 		__property bool GazeControlInGame = {read = iGazeControlInGame, write = iGazeControlInGame};
+		__property EiAttractorType AttractorType = {read = iAttractorType, write = iAttractorType};
 
 		__property FiOnEvent OnEvent = {read = FOnEvent, write = SetOnEvent};
 		__property FiOnSample OnSample = {read = FOnSample, write = FOnSample};

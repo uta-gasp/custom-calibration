@@ -2,6 +2,7 @@
 
 IDR_BACKGROUND     		IMAGE "background.png"
 IDR_FIREFLY        		IMAGE "firefly.png"
+IDR_CIRCLE        		IMAGE "circle.png"
 IDR_TARGET         		IMAGE "target.png"
 IDR_EYEBOX         		IMAGE "eyebox.png"
 IDR_EYE            		IMAGE "eye.png"

@@ -48,6 +48,8 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		iGameAfterCalibration(true),
 		iGazeControlInGame(true),
 		iMouseInitialPosition(-1, -1),
+		iAttractor(NULL),
+		iAttractorType(ATTRACTOR_CIRCLE),
 		FOnEvent(NULL),
 		FOnSample(NULL),
 		FOnStart(NULL),
@@ -62,6 +64,10 @@ __fastcall TfrmCustomCalibration::TfrmCustomCalibration(TComponent* aOwner) :
 		FOnGameFinished(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
+	iSetupBackgroundColor = Gdiplus::Color(255, 0, 0, 0);
+	iCalibrationBackgroundColor = Gdiplus::Color(255, 0, 0, 0);
+	iBackgroundColor = iSetupBackgroundColor;
 
 	randomize();
 
@@ -257,9 +263,9 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 		Gdiplus::Graphics* graphics = &g;
 
 		//graphics->DrawImage(iBackground, 0, 0);
-		Gdiplus::SolidBrush blackBrush(Gdiplus::Color(255, 0, 0, 0));
+		Gdiplus::SolidBrush backgroundBrush(iBackgroundColor);
 		Gdiplus::Rect fillRect(0, 0, Width, Height);
-		graphics->FillRectangle(&blackBrush, fillRect);
+		graphics->FillRectangle(&backgroundBrush, fillRect);
 
 		iBackground->paintTo(graphics);
 		iCalibPoints->paintTo(graphics, updStatic);
@@ -286,11 +292,23 @@ void __fastcall TfrmCustomCalibration::onObjectPaint(TObject* aSender, EiUpdateT
 		iEyeBox->paintTo(graphics, updNonStatic);
 
 		iFireFly->paintTo(graphics);
+		iCircle->paintTo(graphics);
 		iGame->paintTo(graphics, updNonStatic);
 
 		iGraphics->DrawImage(&buffer, 0, 0);
 	}
 }
+
+//---------------------------------------------------------------------------
+void __fastcall TfrmCustomCalibration::onEyeBoxFadingTransition(TObject* aSender, double iAlpha)
+{
+	iBackgroundColor = Gdiplus::Color(
+		iSetupBackgroundColor.GetR() * iAlpha + iCalibrationBackgroundColor.GetR() * (1 - iAlpha),
+		iSetupBackgroundColor.GetG() * iAlpha + iCalibrationBackgroundColor.GetG() * (1 - iAlpha),
+		iSetupBackgroundColor.GetB() * iAlpha + iCalibrationBackgroundColor.GetB() * (1 - iAlpha)
+	);
+}
+
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmCustomCalibration::onEyeBoxHidden(TObject* aSender)
@@ -300,28 +318,29 @@ void __fastcall TfrmCustomCalibration::onEyeBoxHidden(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::onFireFlyFadingFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onAttractorFadingFisnihed(TObject* aSender)
 {
-	if (iFireFly->IsVisible)
+	if (iAttractor->IsVisible)
 	{
 		if (FOnEvent)
-			FOnEvent(this, "firefly appeared");
+			FOnEvent(this, "attractor appeared");
 
-		iFireFly->startAnimation();
+		if (iAttractor == iFireFly)
+			iFireFly->startAnimation();
 
 		if (!iCalibPoints->Current && FOnReadyToCalibrate)
 			FOnReadyToCalibrate(this);
 	}
 	else
 	{
-		iFireFly->stopAnimation();
+		iAttractor->stopAnimation();
 	}
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmCustomCalibration::onFireFlyMoveFisnihed(TObject* aSender)
+void __fastcall TfrmCustomCalibration::onAttractorMoveFisnihed(TObject* aSender)
 {
-	if (iFireFly->IsVisible)
+	if (iAttractor->IsVisible)
 	{
 		if (FOnEvent)
 			FOnEvent(this, String().sprintf("arrived to point\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
@@ -329,7 +348,11 @@ void __fastcall TfrmCustomCalibration::onFireFlyMoveFisnihed(TObject* aSender)
 		if (FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
 			FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
-		iFireFly->stopAnimation();
+		if (iAttractor == iFireFly)
+			iFireFly->stopAnimation();
+		else if (iAttractor == iCircle)
+			iCircle->startAnimation();
+
 		TiTimeout::run(500, onCalibPointTimeout, &iTimeout);
 	}
 }
@@ -340,7 +363,7 @@ void __fastcall TfrmCustomCalibration::onCalibPointTimeout(TObject* aSender)
 	if (iTarget->IsVisible)
 		iTarget->hide();
 
-	if (iFireFly->IsVisible)
+	if (iAttractor->IsVisible)
 	{
 		if (FOnEvent)
 			FOnEvent(this, String().sprintf("ready to accept\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
@@ -402,8 +425,20 @@ void __fastcall TfrmCustomCalibration::StartCalibration()
 
 	iEyeBox->IsVisible = false;
 
-	iFireFly->placeTo(Width / 2, 32);
-	iFireFly->fadeIn();
+	switch (iAttractorType)
+	{
+		case ATTRACTOR_FIREFLY:
+			iAttractor = iFireFly;
+			iCalibrationBackgroundColor = Gdiplus::Color(255, 0, 0, 0);
+			break;
+		case ATTRACTOR_CIRCLE:
+			iAttractor = iCircle;
+			iCalibrationBackgroundColor = Gdiplus::Color(255, 0xDD, 0xDD, 0xDD);
+			break;
+	}
+
+	iAttractor->placeTo(Width / 2, 32);
+	iAttractor->fadeIn();
 
 	iCalibPoints->prepare();
 	iLastPointAborted = false;
@@ -423,7 +458,7 @@ void __fastcall TfrmCustomCalibration::RestartCalibration(int aRecalibrationPoin
 	bool isSinglePoint = aRecalibrationPointNumber > 0;
 	if (isSinglePoint)
 	{
-		iFireFly->fadeIn();
+		iAttractor->fadeIn();
 		if (FOnRecalibrateSinglePoint)
 			FOnRecalibrateSinglePoint(this, aRecalibrationPointNumber, true);
 	}
@@ -486,23 +521,33 @@ void __fastcall TfrmCustomCalibration::MoveToNextPoint(int aPointNumber)
 		if (FOnEvent)
 			FOnEvent(this, "move to next point");
 
-		bool isAtPlaceAlready = !iFireFly->moveTo(calibPoint->X, calibPoint->Y);
+		bool isAtPlaceAlready = !iAttractor->moveTo(calibPoint->X, calibPoint->Y);
 		if (!isAtPlaceAlready)
 		{
-			iFireFly->setOrientation(calibPoint->X - iFireFly->X, calibPoint->Y - iFireFly->Y);
-			iFireFly->startAnimation();
+			if (iAttractor == iFireFly)
+			{
+				iFireFly->setOrientation(calibPoint->X - iFireFly->X, calibPoint->Y - iFireFly->Y);
+				iFireFly->startAnimation();
+			}
+			else if (iAttractor == iCircle)
+			{
+				iCircle->stopAnimation();
+			}
 		}
 		else
 		{
-			onFireFlyMoveFisnihed(NULL);
+			onAttractorMoveFisnihed(NULL);
 		}
 
 		iCalibPoints->lightOffCurrent();
 
 		iTarget->placeTo(calibPoint->X, calibPoint->Y);
-		iTarget->show();
 
-		calibPoint->show(isAtPlaceAlready);
+		if (iAttractor == iFireFly)
+		{
+			iTarget->show();
+			calibPoint->show(isAtPlaceAlready);
+		}
 	}
 	else
 	{
@@ -521,10 +566,18 @@ void __fastcall TfrmCustomCalibration::Finish()
 {
 	iIsWaitingToAcceptPoint = false;
 
-	iFireFly->setOrientation(Width / 2 - iFireFly->X, 32 - iFireFly->Y);
-	iFireFly->moveTo(Width / 2, 32);
-	iFireFly->fadeOut();
-	iFireFly->startAnimation();
+	if (iAttractor == iFireFly)
+	{
+		iFireFly->setOrientation(Width / 2 - iFireFly->X, 32 - iFireFly->Y);
+		iFireFly->startAnimation();
+	}
+	else if (iAttractor == iCircle)
+	{
+		iCircle->stopAnimation();
+	}
+
+	iAttractor->moveTo(Width / 2, 32);
+	iAttractor->fadeOut();
 
 	if (iTarget->IsVisible)
 		iTarget->hide();
@@ -624,6 +677,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 		(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
 	), TiSize( Width, Height ));
 	iEyeBox->OnHidden = onEyeBoxHidden;
+	iEyeBox->Background->OnFadingTransition = onEyeBoxFadingTransition;
 
 	iCalibPlot = new TiCalibPlot(iObjects, TRect(
 		(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
@@ -640,9 +694,20 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iFireFly->RewindAnimationAfterStop = false;
 	iFireFly->MoveSpeed = 650;
 	iFireFly->placeTo(Width / 2, 32);
-	iFireFly->OnFadingFinished = onFireFlyFadingFisnihed;
-	iFireFly->OnMoveFinished = onFireFlyMoveFisnihed;
+	iFireFly->OnFadingFinished = onAttractorFadingFisnihed;
+	iFireFly->OnMoveFinished = onAttractorMoveFisnihed;
 	iObjects->add(iFireFly);
+
+	iCircle = new TiAnimation(false, false);
+	iCircle->addFrames(IDR_CIRCLE, 45);
+	iCircle->LoopAnimation = true;
+	iCircle->RewindAnimationAfterStop = true;
+	iCircle->AllowAnimationReversion = true;
+	iCircle->MoveSpeed = 650;
+	iCircle->placeTo(Width / 2, 32);
+	iCircle->OnFadingFinished = onAttractorFadingFisnihed;
+	iCircle->OnMoveFinished = onAttractorMoveFisnihed;
+	iObjects->add(iCircle);
 
 	iGame = new TiGame(iObjects, TiSize( Width, Height ));
 	iGame->OnEvent = FOnEvent;

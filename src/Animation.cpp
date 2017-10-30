@@ -40,7 +40,8 @@ __fastcall TiAnimation::TiAnimation(bool aVisible, bool aIsStatic) :
 	FOnAnimationFinished(NULL),
 	FOnMoveFinished(NULL),
 	FOnRotationFinished(NULL),
-	FOnFadingFinished(NULL)
+	FOnFadingFinished(NULL),
+	FOnFadingTransition(NULL)
 {
 	iAnimations.DeleteContent = true;
 
@@ -634,6 +635,9 @@ void __fastcall TiAnimation::onFadingTimer(TObject* aSender)
 
 	iAlpha = alpha;
 	iIsPaintRequested = true;
+
+	if (FOnFadingTransition)
+		FOnFadingTransition(this, iAlpha);
 
 	if (!iFadingTimer->Enabled)
 	{
