@@ -692,7 +692,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iFireFly->addFrames(IDR_FIREFLY, 45);
 	iFireFly->LoopAnimation = true;
 	iFireFly->RewindAnimationAfterStop = false;
-	iFireFly->MoveSpeed = 650;
+	iFireFly->MoveSpeed = 1000;
 	iFireFly->placeTo(Width / 2, 32);
 	iFireFly->OnFadingFinished = onAttractorFadingFisnihed;
 	iFireFly->OnMoveFinished = onAttractorMoveFisnihed;
@@ -703,7 +703,7 @@ void __fastcall TfrmCustomCalibration::FormCreate(TObject *Sender)
 	iCircle->LoopAnimation = true;
 	iCircle->RewindAnimationAfterStop = true;
 	iCircle->AllowAnimationReversion = true;
-	iCircle->MoveSpeed = 650;
+	iCircle->MoveSpeed = 1000;
 	iCircle->placeTo(Width / 2, 32);
 	iCircle->OnFadingFinished = onAttractorFadingFisnihed;
 	iCircle->OnMoveFinished = onAttractorMoveFisnihed;
