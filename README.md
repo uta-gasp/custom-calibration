@@ -1,5 +1,5 @@
-# Custom calibration for kids
+# Standard and two custom calibrations for kids
 
-Custom calibration UI for myGaze eye tracker.
-Still has dependency on myGazeAPI.h
+A moving point, a firefly, and a profiled game used for calibration of myGaze eye tracker.
+Has dependency on myGazeAPI.h
 For Borland C++ Builder (BCB with VCL)

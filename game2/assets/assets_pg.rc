@@ -1,0 +1,61 @@
+#include "assets_pg.h"
+
+IDR_DOORS_OPEN		 	 									IMAGE "doors/opening.png"
+IDR_DOORS_CLOSE		 	 									IMAGE "doors/closing.png"
+IDR_DOORS_UP			 	 									IMAGE "doors/up.png"
+IDR_DOORS_DOWN	 	 										IMAGE "doors/down.png"
+
+IDR_CALIB_LEVEL1_ITEMS								IMAGE "level1/buttons.png"
+IDR_CALIB_LEVEL1_ITEM_OFF							IMAGE "level1/button-off.png"
+IDR_CALIB_LEVEL1_ITEM_RESULT					IMAGE "level1/result.png"
+
+IDR_CALIB_LEVEL2_ITEMS								IMAGE "level2/buttons.png"
+IDR_CALIB_LEVEL2_ITEM_OFF							IMAGE "level2/button-off.png"
+IDR_CALIB_LEVEL2_ITEM_RESULT					IMAGE "level2/result.png"
+
+IDR_AVATAR_BODY												IMAGE "avatar/body.png"
+IDR_AVATAR_EYES												IMAGE "avatar/eyes.png"
+IDR_AVATAR_HAIR												IMAGE "avatar/hair.png"
+IDR_AVATAR_SHIRT											IMAGE "avatar/shirt.png"
+
+IDR_PROFILER_BACKGROUND								IMAGE "profiler/background.png"
+IDR_PROFILER_BUTTONS									IMAGE "profiler/buttons.png"
+IDR_PROFILER_SELECTION								IMAGE "profiler/selection.png"
+IDR_PROFILER_TITLE										IMAGE "profiler/title.png"
+
+IDR_INSTRUCTIONS_SITTING							IMAGE "instructions/sitting.png"
+IDR_INSTRUCTIONS_START								IMAGE "instructions/start.png"
+IDR_INSTRUCTIONS_CALIBRATE						IMAGE "instructions/calibrate.png"
+IDR_INSTRUCTIONS_LOGIN								IMAGE "instructions/login.png"
+IDR_INSTRUCTIONS_REWARDS							IMAGE "instructions/rewards.png"
+IDR_INSTRUCTIONS_REWARDS_BONUS				IMAGE "instructions/rewards-bonus.png"
+
+IDR_INSTRUCTIONS_LEVEL1_ITEM_RED			IMAGE "level1/instructions/red.png"
+IDR_INSTRUCTIONS_LEVEL1_ITEM_GREEN 		IMAGE "level1/instructions/green.png"
+IDR_INSTRUCTIONS_LEVEL1_ITEM_BLUE			IMAGE "level1/instructions/blue.png"
+IDR_INSTRUCTIONS_LEVEL1_ITEM_YELLOW		IMAGE "level1/instructions/yellow.png"
+IDR_INSTRUCTIONS_LEVEL1_RESULT				IMAGE "level1/instruction-result.png"
+
+IDR_INSTRUCTIONS_LEVEL2_ITEM_CIRCLE		IMAGE "level2/instructions/circle.png"
+IDR_INSTRUCTIONS_LEVEL2_ITEM_SQUARE  	IMAGE "level2/instructions/square.png"
+IDR_INSTRUCTIONS_LEVEL2_ITEM_STAR			IMAGE "level2/instructions/star.png"
+IDR_INSTRUCTIONS_LEVEL2_ITEM_TRIANGLE	IMAGE "level2/instructions/triangle.png"
+IDR_INSTRUCTIONS_LEVEL2_RESULT				IMAGE "level2/instruction-result.png"
+
+//IDR_BONUS													IMAGE "bonus/hat.png"
+
+IDR_STORY_LEVEL1_BACKGROUND						IMAGE "level1/background.png"
+IDR_STORY_LEVEL1_ALERT								IMAGE "level1/alert.png"
+
+IDR_STORY_LEVEL2_BOX_CLOSED						IMAGE "level2/box-closed.png"
+IDR_STORY_LEVEL2_BOX_OPENED						IMAGE "level2/box-opened.png"
+IDR_STORY_LEVEL2_BUTTON_GREEN					IMAGE "level2/button-green.png"
+IDR_STORY_LEVEL2_BUTTON_RED						IMAGE "level2/button-red.png"
+IDR_STORY_LEVEL2_GHOSTS_ESCAPE				IMAGE "level2/ghosts-escape.png"
+IDR_STORY_LEVEL2_GHOSTS_TRAPPED				IMAGE "level2/ghosts-trapped.png"
+
+IDR_STATUS_BACKGROUND									IMAGE "status/background.png"
+IDR_STATUS_PANEL											IMAGE "status/panel.png"
+IDR_STATUS_BUTTON_CONTINUE        		IMAGE "status/button continue.png"
+
+
