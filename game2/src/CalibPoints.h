@@ -8,7 +8,6 @@
 //---------------------------------------------------------------------------
 #include "Scene.h"
 #include "CalibPoint.h"
-#include "LevelLegend.h"
 
 #ifndef RET_SUCCESS
 #include "myGazeAPI.h"
@@ -69,7 +68,7 @@ class TiCalibPoints : public TiScene
 		__fastcall TiCalibPoints(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
 		__fastcall ~TiCalibPoints();
 
-		virtual void __fastcall show(TiLevelLegend* aLevelLegend);
+		virtual void __fastcall show(TiAnimation* aBackground = NULL);
 		virtual void __fastcall hide();
 
 		void __fastcall reset();

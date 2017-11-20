@@ -1,5 +1,6 @@
 #include "assets_pg.h"
 
+IDR_DOORS		 	 												IMAGE "doors/doors.png"
 IDR_DOORS_OPEN		 	 									IMAGE "doors/opening.png"
 IDR_DOORS_CLOSE		 	 									IMAGE "doors/closing.png"
 IDR_DOORS_UP			 	 									IMAGE "doors/up.png"

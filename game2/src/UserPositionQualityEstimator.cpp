@@ -78,6 +78,8 @@ TiUserPositionQualityEstimator::PositionQuality _fastcall TiUserPositionQualityE
 
 		if (result == pqUndefined)
 			result = pqOK;
+		else
+			iProximities->clear();
 	}
 
 	return result;

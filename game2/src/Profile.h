@@ -42,13 +42,13 @@ class TiProfile
 			psLogged
 		};
 
-		struct SiGameScore
+		struct SiGameResults
 		{
 			int Success;
 			int Failure;
 			int Duration;
 
-			SiGameScore() : Success(0), Failure(0), Duration(0) { }
+			SiGameResults() : Success(0), Failure(0), Duration(0) { }
 		};
 
 		struct SiTargetPoint
@@ -81,7 +81,7 @@ class TiProfile
 
 		TiAvatar* iAvatar;
 
-		SiGameScore iGameScore;
+		SiGameResults iGameResults;
 
 		TiTargetPoints* iTargetPoints;
 
@@ -90,6 +90,8 @@ class TiProfile
 		int iSaldo;
 		int iBonus;
 
+		bool iIsGainedNewLevel;
+		int iGameScore;
 		int iGameCoins;
 		int iGameBonus;
 
@@ -99,7 +101,6 @@ class TiProfile
 		void __fastcall SetEyesColorID(int aValue);
 		void __fastcall SetShirtColorID(int aValue);
 
-		void __fastcall SetGameScore(SiGameScore& aValue);
 		int __fastcall GetLevelScore();
 		int __fastcall GetLevelScoreMax();
 		bool __fastcall GetIsSucceeded();
@@ -131,12 +132,15 @@ class TiProfile
 
 		__property TiAvatar* Avatar = { read = iAvatar };
 
-		__property SiGameScore GameScore = { read = iGameScore, write = SetGameScore };
+		__property SiGameResults GameResults = { read = iGameResults };
 
 		__property int Level = { read = iLevel };
 		__property int LevelScore = { read = GetLevelScore };
 		__property int LevelScoreMax = { read = GetLevelScoreMax };
 		__property int Saldo = { read = iSaldo };
+		
+		__property bool IsGainedNewLevel = { read = iIsGainedNewLevel };
+		__property int GameScore = { read = iGameScore };
 		__property int GameCoins = { read = iGameCoins };
 		__property int GameBonus = { read = iGameBonus };
 

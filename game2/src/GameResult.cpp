@@ -29,7 +29,7 @@ void __fastcall TiGameResult::show(TiProfile* aProfile, int aLevel)
 	iManager->add(iBackground);
 	iDynamicAssets->add(iBackground);
 
-	iGameScore = aProfile->GameScore;
+	iGameResults = aProfile->GameResults;
 
 	iBackground->setFrame(aProfile->IsSucceeded ? 1 : 0);
 
@@ -53,8 +53,8 @@ void __fastcall TiGameResult::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType
 	
 	if (iIsVisible && aUpdateType & updNonStatic)
 	{
-		DrawNumber(aGraphics, iGameScore.Success, 598);
-		DrawNumber(aGraphics, iGameScore.Failure, 750);
+		DrawNumber(aGraphics, iGameResults.Success, 598);
+		DrawNumber(aGraphics, iGameResults.Failure, 750);
 	}
 }
 

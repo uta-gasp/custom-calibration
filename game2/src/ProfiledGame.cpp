@@ -256,13 +256,13 @@ void __fastcall TiProfiledGame::onObjectPaint(TObject* aSender, EiUpdateType aUp
 
 		graphics->DrawImage(iStaticBitmap, destRect);
 
-		iCalibPoints->paintTo(graphics, updNonStatic);
 		if (iProfileEditor)
 			iProfileEditor->paintTo(graphics, updNonStatic);
 		iEyeBox->paintTo(graphics, updNonStatic);
 		if (iLevelLegend)
 			iLevelLegend->paintTo(graphics, updNonStatic);
 		iDoor->paintTo(graphics, updNonStatic);
+		iCalibPoints->paintTo(graphics, updNonStatic);
 		if (iLevelInstruction)
 			iLevelInstruction->paintTo(graphics, updNonStatic);
 		iInstructionCalibrate->paintTo(graphics, updNonStatic);
@@ -559,7 +559,7 @@ void __fastcall TiProfiledGame::StartCalibration(TObject* aSender)
 	if (FOnStart)
 		FOnStart(this);
 
-	iCalibPoints->show(iLevelLegend);
+	iCalibPoints->show();
 	iPositionTracker->Enabled = true;
 
 	iCalibPoints->prepare();

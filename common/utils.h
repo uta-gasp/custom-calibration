@@ -16,8 +16,7 @@
 //---------------------------------------------------------------------------
 #ifdef _DEBUG
 #define debug(x) \
-	if(_DEBUG)    \
-		::MessageBox(NULL, String((x)).c_str(), "KidCalib Debug", MB_OK);
+	::MessageBox(NULL, String((x)).c_str(), "KidCalib Debug", MB_OK);
 #else
 #define debug(x)
 #endif

@@ -23,9 +23,13 @@ class TiRewards : public TiScene
 		int iLevel;
 		int iScore;
 		int iLevelScoreMax;
-		int iCoins;
-		int iPrizeIndex;
 
+		bool iIsNewLevel;
+		int iGainedScore;
+		int iGainedCoins;
+		int iGainedPrizeIndex;
+
+		void __fastcall DrawScoreBackground(Gdiplus::Graphics* aGraphics, double aValue, Gdiplus::Color& aColor);
 		void __fastcall DrawNumber(Gdiplus::Graphics* aGraphics, int aNumber, int aX, int aY,
 			const Gdiplus::Color& aColor, Gdiplus::StringAlignment aAlignment = Gdiplus::StringAlignmentNear);
 		void __fastcall DrawString(Gdiplus::Graphics* aGraphics, String& aText, int aX, int aY,

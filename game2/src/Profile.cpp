@@ -22,6 +22,10 @@ const int KLevelScoreMax	= 500;
 const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
 const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
 
+// Getting a bonus: thresholds
+const double KBonusScoreThreshold = 0.90;	// % of max possible
+const double KBonusFailedThreshold = 2;		// max number of failed targets
+
 //---------------------------------------------------------------------------
 TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
 		iManager(aManager),
@@ -36,6 +40,8 @@ TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aV
 		iScore(0),
 		iSaldo(0),
 		iBonus(0),
+		iIsGainedNewLevel(false),
+		iGameScore(0),
 		iGameCoins(0),
 		iGameBonus(0)
 {
@@ -138,9 +144,9 @@ void __fastcall TiProfile::save(TiXML_INI* aStorage)
 		aStorage->putValue(iName, L"Score", (long)iScore);
 		aStorage->putValue(iName, L"Saldo", (long)iSaldo);
 		aStorage->putValue(iName, L"Bonus", (long)iBonus);
-		aStorage->putValue(iName, L"Succeeded", long(data->Succeeded + iGameScore.Success));
-		aStorage->putValue(iName, L"Failured", long(data->Failured + iGameScore.Failure));
-		aStorage->putValue(iName, L"Duration", long(data->Duration + iGameScore.Duration));
+		aStorage->putValue(iName, L"Succeeded", long(data->Succeeded + iGameResults.Success));
+		aStorage->putValue(iName, L"Failured", long(data->Failured + iGameResults.Failure));
+		aStorage->putValue(iName, L"Duration", long(data->Duration + iGameResults.Duration));
 
 		aStorage->closeNode();
 	}
@@ -151,11 +157,11 @@ void __fastcall TiProfile::addPoint(SiTargetPoint* aPoint)
 {
 	iTargetPoints->add(aPoint);
 
-	iGameScore.Duration += aPoint->Duration;
+	iGameResults.Duration += aPoint->Duration;
 	if (aPoint->Success)
-		iGameScore.Success++;
+		iGameResults.Success++;
 	else
-		iGameScore.Failure++;
+		iGameResults.Failure++;
 };
 
 //---------------------------------------------------------------------------
@@ -198,7 +204,8 @@ void __fastcall TiProfile::updateScore()
 	{
 		int maxPossibleScore = (KScores[0] + 2) * iTargetPoints->Count;
 
-		if (score >= (maxPossibleScore / 2))
+		if (score >= (KBonusScoreThreshold * maxPossibleScore) &&
+				iGameResults.Failure <= KBonusFailedThreshold)
 		{
 			iGameBonus = GetRandomBonus();
 			if (iGameBonus)
@@ -206,14 +213,18 @@ void __fastcall TiProfile::updateScore()
 		}
 	}
 
-	iScore += score;
-	iSaldo = min(9999, iSaldo + coins);
-
+	iGameScore = score;
 	iGameCoins = coins;
+
+	iScore = min(9999, iScore + score);
+	iSaldo = min(9999, iSaldo + coins);
 
 	int nextLevelThreshold = (iLevel + 1) * KLevelScoreMax;
 	if (iScore > nextLevelThreshold)
+	{
+		iIsGainedNewLevel = true;
 		iLevel++;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -282,12 +293,6 @@ void __fastcall TiProfile::SetShirtColorID(int aValue)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiProfile::SetGameScore(SiGameScore& aValue)
-{
-	iGameScore = aValue;
-}
-
-//---------------------------------------------------------------------------
 int __fastcall TiProfile::GetLevelScore()
 {
 	return (iScore - iLevel * KLevelScoreMax);
@@ -302,7 +307,7 @@ int __fastcall TiProfile::GetLevelScoreMax()
 //---------------------------------------------------------------------------
 bool __fastcall TiProfile::GetIsSucceeded()
 {
-	return (iGameScore.Success + iGameScore.Failure) ? (double(iGameScore.Success) / (iGameScore.Success + iGameScore.Failure)) > KSuccessThreshold : false;
+	return (iGameResults.Success + iGameResults.Failure) ? (double(iGameResults.Success) / (iGameResults.Success + iGameResults.Failure)) > KSuccessThreshold : false;
 }
 
 //---------------------------------------------------------------------------

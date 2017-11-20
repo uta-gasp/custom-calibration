@@ -1,8 +1,8 @@
 #define IDR_DOORS					 	 					0x1000
-#define IDR_DOORS_OPEN					 	 			0x00 + IDR_DOORS
-#define IDR_DOORS_CLOSE					 	 			0x10 + IDR_DOORS
-#define IDR_DOORS_UP					 	 				0x20 + IDR_DOORS
-#define IDR_DOORS_DOWN					 	 			0x30 + IDR_DOORS
+#define IDR_DOORS_OPEN					 	 			0x10 + IDR_DOORS
+#define IDR_DOORS_CLOSE					 	 			0x20 + IDR_DOORS
+#define IDR_DOORS_UP					 	 				0x30 + IDR_DOORS
+#define IDR_DOORS_DOWN					 	 			0x40 + IDR_DOORS
 
 #define IDR_CALIB								 	 		0x2000
 

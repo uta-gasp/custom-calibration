@@ -24,6 +24,12 @@ __fastcall TiCalibPoints::TiCalibPoints(TiAnimationManager* aManager,
 {
 	iPoints.DeleteContent = true;
 
+	TiAnimation* background = new TiAnimation(false);
+	background->addFrames(IDR_DOORS, aViewport.Width, aViewport.Height);
+	background->placeTo(iScreenSize.Width / 2, iScreenSize.Height / 2);
+	iManager->add(background);
+	iStaticAssets->add(background);   
+
 	iTimestamp = new TiTimestamp();
 }
 
@@ -34,11 +40,13 @@ __fastcall TiCalibPoints::~TiCalibPoints()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoints::show(TiLevelLegend* aLevelLegend)
+void __fastcall TiCalibPoints::show(TiAnimation* aBackground)
 {
-	iStaticAssets->add(aLevelLegend->Background);
+	if (aBackground)
+		iStaticAssets->add(aBackground);
 
 	TiScene::show();
+	iItemResult->hide();
 }
 
 //---------------------------------------------------------------------------
@@ -208,7 +216,7 @@ TiCalibPoints::EiItemResultType __fastcall TiCalibPoints::showItemResult(int aTa
 {
 	bool success = Current->CalibTarget->FrameIndex == aTargetID;
 	iItemResult->setFrame(success ? 1 : 0);
-	iItemResult->placeTo(Current->CalibTarget->X, Current->CalibTarget->Y + 70);
+	iItemResult->placeTo(Current->CalibTarget->X, Current->CalibTarget->Y);
 	iItemResult->show();
 
 	return success ? irtSuccess : irtFailure;

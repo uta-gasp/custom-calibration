@@ -14,18 +14,20 @@ const int KFontSize = 36;
 const Gdiplus::FontStyle KFontStyle = Gdiplus::FontStyleBold;
 const Gdiplus::Unit KFontUnits = Gdiplus::UnitPixel;
 
-const Gdiplus::Color KColorScore(255, 0, 128, 192);
+const Gdiplus::Color KColorScore(255, 64, 32, 128);
 const Gdiplus::Color KColorCoins(255, 255, 255, 255);
 const int KPositionScoreY = 248;
 
-const Gdiplus::Color KScoreBackgroundColor(255, 127, 208, 255);
+const Gdiplus::Color KColorBackgroundScoreAll(255, 255, 255, 255);
+const Gdiplus::Color KColorBackgroundScoreNew(255, 127, 208, 255);
+const Gdiplus::Color KColorBackgroundScoreOld(255, 32, 128, 224);
 const TiRect KScoreBackgroundRect(527, 245, 310, 47);
 
 //---------------------------------------------------------------------------
 __fastcall TiRewards::TiRewards(TiAnimationManager* aManager,
 		TiSize aScreenSize, TiSize aViewport) :
 		TiScene(aManager, aScreenSize, aViewport),
-		iPrizeIndex(-1)
+		iGainedPrizeIndex(-1)
 {
 	iPrizes = new TiAnimations(false);
 
@@ -66,8 +68,11 @@ void __fastcall TiRewards::show(TiProfile* aProfile)
 	iLevel = aProfile->Level;
 	iScore = aProfile->LevelScore;
 	iLevelScoreMax = aProfile->LevelScoreMax;
-	iCoins = aProfile->GameCoins;
-	iPrizeIndex = aProfile->GameBonus - 1;
+
+	iIsNewLevel = aProfile->IsGainedNewLevel;
+	iGainedScore = aProfile->GameScore;
+	iGainedCoins = aProfile->GameCoins;
+	iGainedPrizeIndex = aProfile->GameBonus - 1;
 
 	iBackground->setFrame(aProfile->IsSucceeded ? 1 : 0);
 
@@ -84,8 +89,8 @@ void __fastcall TiRewards::showBonus()
 
 	iBonus->show();
 
-	if (iPrizeIndex >= 0 && iPrizeIndex < iPrizes->Count)
-		iPrizes->get(iPrizeIndex)->show();
+	if (iGainedPrizeIndex >= 0 && iGainedPrizeIndex < iPrizes->Count)
+		iPrizes->get(iGainedPrizeIndex)->show();
 }
 
 //---------------------------------------------------------------------------
@@ -103,40 +108,56 @@ void __fastcall TiRewards::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aU
 {
 	if (iIsVisible && aUpdateType & updStatic)
 	{
-		double rate = double(iScore) / iLevelScoreMax;
-		int width = rate * KScoreBackgroundRect.Width;
-
-		Gdiplus::Rect fullRect(
-			Offset.x + KScoreBackgroundRect.X, Offset.y + KScoreBackgroundRect.Y,
-			KScoreBackgroundRect.Width, KScoreBackgroundRect.Height);
-
-		Gdiplus::SolidBrush whiteBrush(Gdiplus::Color(255, 255, 255, 255));
-		aGraphics->FillRectangle(&whiteBrush, fullRect);
-
-		Gdiplus::Rect scoreBackgroundRect(
-			Offset.x + KScoreBackgroundRect.X, Offset.y + KScoreBackgroundRect.Y,
-			width, KScoreBackgroundRect.Height);
-
-		Gdiplus::SolidBrush scoreBackgroundBrush(KScoreBackgroundColor);
-		aGraphics->FillRectangle(&scoreBackgroundBrush, scoreBackgroundRect);
+		DrawScoreBackground(aGraphics, iLevelScoreMax, KColorBackgroundScoreAll);
+		if (iIsNewLevel)
+		{
+			DrawString(aGraphics, String().sprintf("Taso %d!", iLevel + 1),
+					KScoreBackgroundRect.X + KScoreBackgroundRect.Width / 2,
+					KPositionScoreY,
+					KColorScore, Gdiplus::StringAlignmentCenter);
+		}
+		else
+		{
+			DrawScoreBackground(aGraphics, iScore, KColorBackgroundScoreNew);
+			DrawScoreBackground(aGraphics, max(0, iScore - iGainedScore), KColorBackgroundScoreOld);
+		}
 	}
 
 	TiScene::paintTo(aGraphics, aUpdateType);
 
-	if (iPrizeIndex >= 0 && iPrizeIndex < iPrizes->Count)
-		iPrizes->get(iPrizeIndex)->paintTo(aGraphics);
+	if (iGainedPrizeIndex >= 0 && iGainedPrizeIndex < iPrizes->Count)
+		iPrizes->get(iGainedPrizeIndex)->paintTo(aGraphics);
 
 	if (iIsVisible && aUpdateType & updNonStatic)
 	{
-		DrawNumber(aGraphics, iScore, 688, KPositionScoreY, KColorScore, Gdiplus::StringAlignmentFar);
-		DrawString(aGraphics, String("/"), 680, KPositionScoreY, KColorScore);
-		DrawNumber(aGraphics, iLevelScoreMax, 690, KPositionScoreY, KColorScore);
-		DrawString(aGraphics, String().sprintf("Taso %d", iLevel + 1),
-				KScoreBackgroundRect.X + KScoreBackgroundRect.Width / 2,
-				KScoreBackgroundRect.Y + KScoreBackgroundRect.Height + 10,
-				KColorCoins, Gdiplus::StringAlignmentCenter);
-		DrawString(aGraphics, String().sprintf("+%d", iCoins), 685, 370, KColorCoins);
+		if (!iIsNewLevel)
+		{
+			DrawNumber(aGraphics, iScore, 688, KPositionScoreY, KColorScore, Gdiplus::StringAlignmentFar);
+			DrawString(aGraphics, String("/"), 680, KPositionScoreY, KColorScore);
+			DrawNumber(aGraphics, iLevelScoreMax, 690, KPositionScoreY, KColorScore);
+
+			DrawString(aGraphics, String().sprintf("Taso %d", iLevel + 1),
+					KScoreBackgroundRect.X + KScoreBackgroundRect.Width / 2,
+					KScoreBackgroundRect.Y + KScoreBackgroundRect.Height + 10,
+					KColorCoins, Gdiplus::StringAlignmentCenter);
+		}
+
+		DrawString(aGraphics, String().sprintf("+%d", iGainedCoins), 685, 370, KColorCoins);
 	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiRewards::DrawScoreBackground(Gdiplus::Graphics* aGraphics, double aValue, Gdiplus::Color& aColor)
+{
+	double rate = aValue / iLevelScoreMax;
+	int width = rate * KScoreBackgroundRect.Width;
+
+	Gdiplus::Rect scoreBackgroundRect(
+			Offset.x + KScoreBackgroundRect.X, Offset.y + KScoreBackgroundRect.Y,
+			width, KScoreBackgroundRect.Height);
+
+	Gdiplus::SolidBrush scoreBackgroundBrush(aColor);
+	aGraphics->FillRectangle(&scoreBackgroundBrush, scoreBackgroundRect);
 }
 
 //---------------------------------------------------------------------------

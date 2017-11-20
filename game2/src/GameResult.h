@@ -16,7 +16,7 @@ class TiGameResult : public TiScene
 		TiAnimation* iBackground;
 
 		TiRect iButtonContinue;
-		TiProfile::SiGameScore iGameScore;
+		TiProfile::SiGameResults iGameResults;
 
 		void __fastcall DrawNumber(Gdiplus::Graphics* aGraphics, int aNumber, int aX);
 
