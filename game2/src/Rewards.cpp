@@ -24,8 +24,11 @@ const TiRect KScoreBackgroundRect(527, 245, 310, 47);
 //---------------------------------------------------------------------------
 __fastcall TiRewards::TiRewards(TiAnimationManager* aManager,
 		TiSize aScreenSize, TiSize aViewport) :
-		TiScene(aManager, aScreenSize, aViewport)
+		TiScene(aManager, aScreenSize, aViewport),
+		iPrizeIndex(-1)
 {
+	iPrizes = new TiAnimations(false);
+
 	iBackground = new TiAnimation(false);
 	iBackground->addFrames(IDR_INSTRUCTIONS_REWARDS, aViewport.Width, aViewport.Height);
 	iBackground->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
@@ -38,7 +41,23 @@ __fastcall TiRewards::TiRewards(TiAnimationManager* aManager,
 	aManager->add(iBonus);
 	iStaticAssets->add(iBonus);
 
+	for (int i = 0; i < TiProfile::getBonusCountMax(); i++)
+	{
+		TiAnimation* prize = new TiAnimation(false);
+		prize->addFrames(IDR_PRIZE_ICON + i, aViewport.Width, aViewport.Height);
+		prize->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
+
+		aManager->add(prize);
+		iPrizes->add(prize);
+	}
+
 	iButtonContinue = TiRect(Offset.x + 583, Offset.y + 482, 200, 60);
+}
+
+//---------------------------------------------------------------------------
+__fastcall TiRewards::~TiRewards()
+{
+	delete iPrizes;
 }
 
 //---------------------------------------------------------------------------
@@ -48,6 +67,7 @@ void __fastcall TiRewards::show(TiProfile* aProfile)
 	iScore = aProfile->LevelScore;
 	iLevelScoreMax = aProfile->LevelScoreMax;
 	iCoins = aProfile->GameCoins;
+	iPrizeIndex = aProfile->GameBonus - 1;
 
 	iBackground->setFrame(aProfile->IsSucceeded ? 1 : 0);
 
@@ -59,8 +79,13 @@ void __fastcall TiRewards::show(TiProfile* aProfile)
 //---------------------------------------------------------------------------
 void __fastcall TiRewards::showBonus()
 {
-	if (iIsVisible)
-		iBonus->show();
+	if (!iIsVisible)
+		return;
+
+	iBonus->show();
+
+	if (iPrizeIndex >= 0 && iPrizeIndex < iPrizes->Count)
+		iPrizes->get(iPrizeIndex)->show();
 }
 
 //---------------------------------------------------------------------------
@@ -97,6 +122,9 @@ void __fastcall TiRewards::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aU
 	}
 
 	TiScene::paintTo(aGraphics, aUpdateType);
+
+	if (iPrizeIndex >= 0 && iPrizeIndex < iPrizes->Count)
+		iPrizes->get(iPrizeIndex)->paintTo(aGraphics);
 
 	if (iIsVisible && aUpdateType & updNonStatic)
 	{

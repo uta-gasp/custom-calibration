@@ -31,6 +31,9 @@ class TiGhostBox : public TiLevelLegend
 		void __fastcall AnimateGhostsTrapping(TObject* aSender = NULL);
 		void __fastcall AfterTrapped(TObject* aSender = NULL);
 
+	protected:
+		virtual TiAnimation* __fastcall GetBackground();
+
 	public:
 		__fastcall TiGhostBox(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
 

@@ -67,6 +67,8 @@ class TiProfile
 		typedef TiDynArray<SiTargetPoint> TiTargetPoints;
 
 		TiAnimationManager* iManager;
+		TiSize iScreenSize;
+		TiSize iViewport;
 
 		TiXMLDataList* iSavedData;
 
@@ -107,8 +109,8 @@ class TiProfile
 		void __fastcall CreateAvatar();
 
 	public:
-		TiProfile(TiAnimationManager* aManager);
-		TiProfile(TiAnimationManager* aManager, WideString aName);
+		TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
+		//TiProfile(TiAnimationManager* aManager, WideString aName);
 
 		~TiProfile();
 
@@ -117,6 +119,8 @@ class TiProfile
 
 		void __fastcall addPoint(SiTargetPoint* aPoint);
 		void __fastcall updateScore();
+
+		static int __fastcall getBonusCountMax();
 
 		__property EiStatus Status = { read = iStatus };
 		__property WideString Name = { read = iName, write = SetName };

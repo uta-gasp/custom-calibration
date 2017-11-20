@@ -170,6 +170,8 @@ class TiAnimation : public TObject
 		__property TiOnFadingTransition OnFadingTransition = {read = FOnFadingTransition, write = FOnFadingTransition};
 };
 
+typedef TiDynArray<TiAnimation> TiAnimations;
+
 //---------------------------------------------------------------------------
 enum EiUpdateType
 {
@@ -182,8 +184,6 @@ enum EiUpdateType
 //---------------------------------------------------------------------------
 class TiAnimationManager : public TObject
 {
-	typedef TiDynArray<TiAnimation> TiAnimations;
-
 	public:
 		typedef void __fastcall (__closure *FiOnPaint)(System::TObject* Sender, EiUpdateType aUpdateType);
 

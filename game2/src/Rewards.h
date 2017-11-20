@@ -18,10 +18,13 @@ class TiRewards : public TiScene
 
 		TiRect iButtonContinue;
 
+		TiAnimations* iPrizes;
+
 		int iLevel;
 		int iScore;
 		int iLevelScoreMax;
 		int iCoins;
+		int iPrizeIndex;
 
 		void __fastcall DrawNumber(Gdiplus::Graphics* aGraphics, int aNumber, int aX, int aY,
 			const Gdiplus::Color& aColor, Gdiplus::StringAlignment aAlignment = Gdiplus::StringAlignmentNear);
@@ -30,6 +33,7 @@ class TiRewards : public TiScene
 
 	public:
 		__fastcall TiRewards(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
+		__fastcall ~TiRewards();
 
 		virtual void __fastcall show(TiProfile* aProfile);
 		virtual void __fastcall showBonus();

@@ -197,3 +197,9 @@ void __fastcall TiGhostBox::AfterTrapped(TObject* aSender)
 		FOnDone(this);
 }
 
+//---------------------------------------------------------------------------
+TiAnimation* __fastcall TiGhostBox::GetBackground()
+{
+	return iBoxOpened;
+}
+

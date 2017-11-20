@@ -8,6 +8,7 @@
 //---------------------------------------------------------------------------
 #include "Scene.h"
 #include "CalibPoint.h"
+#include "LevelLegend.h"
 
 #ifndef RET_SUCCESS
 #include "myGazeAPI.h"
@@ -36,6 +37,15 @@ class TiCalibPoints : public TiScene
 	private:
 		typedef TiDynArray<TiCalibPoint> TiPoints;
 
+		struct SiPauseState
+		{
+			bool Enabled;
+			int PointIndex;
+			int Frame;
+
+			SiPauseState() : Enabled(false) { }
+		};
+
 		TiAnimation* iItemResult;
 		TiTimestamp* iTimestamp;
 
@@ -47,6 +57,8 @@ class TiCalibPoints : public TiScene
 		EiAnimationDuration iAnimationDuration;
 		int iPointsCompleted;
 
+		SiPauseState iPauseState;
+
 		int __fastcall GetCount();
 		TiCalibPoint* __fastcall GetCurrent();
 
@@ -57,6 +69,9 @@ class TiCalibPoints : public TiScene
 		__fastcall TiCalibPoints(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
 		__fastcall ~TiCalibPoints();
 
+		virtual void __fastcall show(TiLevelLegend* aLevelLegend);
+		virtual void __fastcall hide();
+
 		void __fastcall reset();
 
 		void __fastcall clear(int aLevel = -1);
@@ -66,6 +81,9 @@ class TiCalibPoints : public TiScene
 		TiCalibPoint* __fastcall next(int aPointNumber = 0);
 		void __fastcall waitAcceptance();
 		int __fastcall accept();
+
+		void __fastcall pause();
+		void __fastcall resume();
 
 		EiItemResultType __fastcall showItemResult(int aTargetID);
 

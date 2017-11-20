@@ -20,6 +20,7 @@ using namespace ProfiledGame;
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
+//---------------------------------------------------------------------------
 const int KViewportWidth = 1366;
 const int KViewportHeight = 768;
 
@@ -28,8 +29,8 @@ const Gdiplus::Color KBackgroundColor(255, 0, 0, 0);
 const int KMaxAllowedCalibQualityOffset = 40;
 const double KMinAllowedCalibQualityValue = 0.5;
 
-const int VERIFICATION_POINT_COUNT_X = 3;
-const int VERIFICATION_POINT_COUNT_Y = 2;
+const int KVerificationPointCountX = 3;
+const int KVerificationPointCountY = 2;
 
 const int KVerificationCellMargin = 80;
 
@@ -43,6 +44,7 @@ __fastcall TiProfiledGame::TiProfiledGame(TComponent* aOwner) :
 		iIsRecalibrating(false),
 		iLevelInstruction(NULL),
 		iLevelLegend(NULL),
+		iPositionTracker(NULL),
 		FOnEvent(NULL),
 		FOnSample(NULL),
 		FOnStart(NULL),
@@ -91,6 +93,10 @@ void __fastcall TiProfiledGame::setSample(SampleStruct& aSample)
 
 	TiCalibQualityEstimator::TiPointI cqePoint(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
 	iCalibQualityEstimator->addSample(cqePoint);
+
+	if (iPositionTracker)
+		if (iPositionTracker->isPositionWrong(aSample) && iCalibPoints->IsVisible)
+			iCalibPoints->pause();
 
 	if (FOnSample)
 		FOnSample(this, aSample.leftEye.gazeX, aSample.leftEye.gazeY);
@@ -263,6 +269,7 @@ void __fastcall TiProfiledGame::onObjectPaint(TObject* aSender, EiUpdateType aUp
 		iGameResult->paintTo(graphics, updNonStatic);
 		iRewards->paintTo(graphics, updNonStatic);
 		iStatus->paintTo(graphics, updNonStatic);
+		iPositionTracker->paintTo(graphics, updNonStatic);
 
 		iGraphics->DrawImage(&buffer, 0, 0);
 	}
@@ -371,7 +378,7 @@ void __fastcall TiProfiledGame::onLevelLegendDone(TObject* aSender)
 {
 	if (!iLevelLegend)
 		return;
-		
+
 	if (iLevelLegend->IsDirty)
 	{
 		iDoor->show(TiDoor::dmDown);
@@ -395,10 +402,8 @@ void __fastcall TiProfiledGame::onDoorDone(TObject* aSender)
 	if (iDoor->IsClosed)
 	{
 		if (iLevelLegend)
-		{
 			iLevelLegend->hide();
-			iLevelLegend = NULL;
-		}
+
 		TiTimeout::run(500, AfterDoor, &iTimeout);
 	}
 }
@@ -427,7 +432,7 @@ void __fastcall TiProfiledGame::onLevelInstructionDone(TObject* aSender)
 {
 	iLevelInstruction->hide();
 	iLevelInstruction = NULL;
-	
+
 	iInstructionCalibrate->show();
 }
 
@@ -440,6 +445,7 @@ void __fastcall TiProfiledGame::onInstructionCalibrateDone(TObject* aSender)
 	iCalibrationLevel = iProfile->Level;
 
 	StartCalibration();
+	iLevelLegend = NULL;
 
 	if (FOnEvent)
 		FOnEvent(this, "scene appeared");
@@ -453,6 +459,9 @@ void __fastcall TiProfiledGame::onInstructionCalibrateDone(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::onCalibPointsDone(TObject* aSender)
 {
+	iPositionTracker->Enabled = false;
+
+	iCalibPoints->hide();
 	iDoor->show(TiDoor::dmUp);
 
 	TiTimeout::run(1000, AfterCalibPoints, &iTimeout);
@@ -497,6 +506,7 @@ void __fastcall TiProfiledGame::onGameResultDone(TObject* aSender)
 		iLevelLegend->hide();
 		iLevelLegend = NULL;
 	}
+	
 	iDoor->hide();
 	iGameResult->hide();
 
@@ -530,6 +540,13 @@ void __fastcall TiProfiledGame::onStatusDone(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::onPositionTrackerDone(TObject* aSender)
+{
+	iPositionTracker->hide();
+	iCalibPoints->resume();
+}
+
+//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::StartCalibration(TObject* aSender)
 {
@@ -541,6 +558,9 @@ void __fastcall TiProfiledGame::StartCalibration(TObject* aSender)
 		FOnEvent(this, "calibration start");
 	if (FOnStart)
 		FOnStart(this);
+
+	iCalibPoints->show(iLevelLegend);
+	iPositionTracker->Enabled = true;
 
 	iCalibPoints->prepare();
 }
@@ -715,14 +735,14 @@ void __fastcall TiProfiledGame::AddVerificationPoints()
 {
 	clearPoints();
 
-	int cellWidth = Width / VERIFICATION_POINT_COUNT_X;
-	int cellHeight = Height / VERIFICATION_POINT_COUNT_Y;
+	int cellWidth = Width / KVerificationPointCountX;
+	int cellHeight = Height / KVerificationPointCountY;
 
-	for (int i = 0; i < VERIFICATION_POINT_COUNT_X; i++)
-		for (int j = 0; j < VERIFICATION_POINT_COUNT_Y; j++)
+	for (int i = 0; i < KVerificationPointCountX; i++)
+		for (int j = 0; j < KVerificationPointCountY; j++)
 		{
 			CalibrationPointStruct cp;
-			cp.number = i * VERIFICATION_POINT_COUNT_Y + j + 1;
+			cp.number = i * KVerificationPointCountY + j + 1;
 			cp.positionX = i * cellWidth + KVerificationCellMargin + random(cellWidth - 2 * KVerificationCellMargin);
 			cp.positionY = j * cellHeight + KVerificationCellMargin + random(cellHeight - 2 * KVerificationCellMargin);
 
@@ -769,7 +789,7 @@ void __fastcall TiProfiledGame::FormCreate(TObject *Sender)
 	iObjects = new TiAnimationManager();
 	iObjects->OnPaint = onObjectPaint;
 
-	iProfile = new TiProfile(iObjects);
+	iProfile = new TiProfile(iObjects, screenSize, viewport);
 
 	iBackground = new TiAnimation(false);
 	//iBackground->addFrames(IDR_BACKGROUND, KViewportWidth, KViewportHeight);
@@ -817,6 +837,9 @@ void __fastcall TiProfiledGame::FormCreate(TObject *Sender)
 
 	iStatus = new TiStatus(iObjects, screenSize, viewport);
 	iStatus->OnDone = onStatusDone;
+
+	iPositionTracker = new TiPositionTracker(iObjects, screenSize, viewport);
+	iPositionTracker->OnDone = onPositionTrackerDone;
 }
 
 //---------------------------------------------------------------------------
@@ -842,6 +865,7 @@ void __fastcall TiProfiledGame::FormDestroy(TObject *Sender)
 	delete iGameResult;
 	delete iRewards;
 	delete iStatus;
+	delete iPositionTracker;
 
 	delete iProfile;
 
@@ -857,41 +881,25 @@ void __fastcall TiProfiledGame::FormMouseUp(TObject *Sender,
 			TMouseButton Button, TShiftState Shift, int X, int Y)
 {
 	if (iLogin->IsVisible)
-	{
 		iLogin->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iProfileEditor && iProfileEditor->IsVisible)
-	{
 		iProfileEditor->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iInstructionSitting->IsVisible)
-	{
 		iInstructionSitting->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iInstructionStart->IsVisible)
-	{
 		iInstructionStart->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iLevelInstruction && iLevelInstruction->IsVisible)
-	{
 		iLevelInstruction->mouseClick(Button, Shift, X, Y);
-	}
-	else if (iCalibPoints->IsWaitingToAcceptPoint)
-	{
+	else if (iCalibPoints->IsWaitingToAcceptPoint && !iPositionTracker->IsVisible)
 		PointDone();
-	}
 	else if (iGameResult->IsVisible)
-	{
 		iGameResult->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iRewards->IsVisible)
-	{
 		iRewards->mouseClick(Button, Shift, X, Y);
-	}
 	else if (iStatus->IsVisible)
-	{
 		iStatus->mouseClick(Button, Shift, X, Y);
-	}
+	else if (iPositionTracker->IsVisible)
+		iPositionTracker->mouseClick(Button, Shift, X, Y);
 }
 
 //---------------------------------------------------------------------------
@@ -976,6 +984,13 @@ void __fastcall TiProfiledGame::FormKeyUp(TObject *Sender, WORD &Key,
 		else if (Key == VK_SPACE)
 			onStatusDone();
 	}
+	else if (iPositionTracker->IsVisible)
+	{
+		if (Key == VK_ESCAPE)
+			Abort("display status");
+		else if (Key == VK_SPACE)
+			onPositionTrackerDone();
+	}
 	else
 	{
 		if (Key == VK_ESCAPE)
@@ -989,7 +1004,7 @@ void __fastcall TiProfiledGame::FormKeyDown(TObject *Sender,
 {
 	if (Key == VK_SPACE)
 	{
-		if (iCalibPoints->IsWaitingToAcceptPoint)
+		if (iCalibPoints->IsWaitingToAcceptPoint && !iPositionTracker->IsVisible)
 			PointDone();
 	}
 }

@@ -129,14 +129,14 @@ void __fastcall TiController::run(EiCalibType aCalibType)
 		if (iFireflyAndPoints)
 			iFireflyAndPoints->showEyeBox();
 		else if (iProfiledGame)
-			iProfiledGame->showLogin();
+			iProfiledGame->showLogin(iCurrentUser->Name);
 	}
 	else
 	{
 		if (iFireflyAndPoints)
 			iFireflyAndPoints->showModal();
 		else if (iProfiledGame)
-			iProfiledGame->showModal();
+			iProfiledGame->showModal(iCurrentUser->Name);
 	}
 }
 

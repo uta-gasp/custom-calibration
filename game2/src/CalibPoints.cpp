@@ -34,6 +34,22 @@ __fastcall TiCalibPoints::~TiCalibPoints()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::show(TiLevelLegend* aLevelLegend)
+{
+	iStaticAssets->add(aLevelLegend->Background);
+
+	TiScene::show();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::hide()
+{
+	TiScene::hide();
+
+	iStaticAssets->clear();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiCalibPoints::reset()
 {
 	iIsWaitingToAcceptPoint = false;
@@ -143,7 +159,9 @@ void __fastcall TiCalibPoints::waitAcceptance()
 {
 	iTimestamp->reset();
 	iIsWaitingToAcceptPoint = true;
-	Current->start();
+
+	if (!iPauseState.Enabled)
+		Current->start();
 }
 
 //---------------------------------------------------------------------------
@@ -156,6 +174,33 @@ int __fastcall TiCalibPoints::accept()
 	Current->stop();
 
 	return duration;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::pause()
+{
+	if (Current)
+		Current->stop();
+
+	iPauseState.Enabled = true;
+	iPauseState.PointIndex = iCurrentPointIndex;
+	iPauseState.Frame = Current ? Current->CalibTarget->FrameIndex : -1;
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiCalibPoints::resume()
+{
+	iTimestamp->reset();
+
+	iPauseState.Enabled = false;
+
+	if (Current && IsVisible)
+	{
+		if (iCurrentPointIndex == iPauseState.PointIndex)
+			Current->CalibTarget->setFrame(iPauseState.Frame);
+
+		Current->start();
+	}
 }
 
 //---------------------------------------------------------------------------

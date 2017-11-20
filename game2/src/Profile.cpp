@@ -19,12 +19,14 @@ const int KSpeedOK 				= 8000;
 
 const int KLevelScoreMax	= 500;
 
-const int KBonusMaxBit	 = 8 * sizeof(int) - 1;
-const int KBonusCountMax = 20;	// <= KBonusMaxBit
+const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
+const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
 
 //---------------------------------------------------------------------------
-TiProfile::TiProfile(TiAnimationManager* aManager) :
+TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
 		iManager(aManager),
+		iScreenSize(aScreenSize),
+		iViewport(aViewport),
 		iStatus(psNoName),
 		iSkinColorID(0),
 		iHairColorID(0),
@@ -41,14 +43,27 @@ TiProfile::TiProfile(TiAnimationManager* aManager) :
 	iTargetPoints = new TiTargetPoints(true);
 }
 
-//---------------------------------------------------------------------------
+/*/---------------------------------------------------------------------------
 TiProfile::TiProfile(TiAnimationManager* aManager, WideString aName) :
 		iManager(aManager)
+		iStatus(psNoName),
+		iSkinColorID(0),
+		iHairColorID(0),
+		iEyesColorID(0),
+		iShirtColorID(0),
+		iLevel(0),
+		iScore(0),
+		iSaldo(0),
+		iBonus(0),
+		iGameCoins(0),
+		iGameBonus(0)
 {
 	iSavedData = new TiXMLDataList(true);
 	iTargetPoints = new TiTargetPoints(true);
+	iPrizes = new TiAnimations(false);
+
 	SetName(aName);
-}
+}*/
 
 //---------------------------------------------------------------------------
 TiProfile::~TiProfile()
@@ -110,39 +125,6 @@ void __fastcall TiProfile::save(TiXML_INI* aStorage)
 		data = new SiXMLData();
 		iSavedData->add(data);
 	}
-
-	/*
-	data->Name = iName;
-	data->Avatar = iSkinColorID +
-			(iHairColorID << 4) +
-			(iEyesColorID << 8) +
-			(iShirtColorID << 12);
-	data->Level = iLevel;
-	data->Score = iScore;
-	data->Saldo = iSaldo;
-	data->Succeeded += iGameScore.Success;
-	data->Failured += iGameScore.Failure;
-	data->Duration += iGameScore.Duration;
-
-	// update data
-	TiXML_Strings* profileNames = new TiXML_Strings(true);
-	aStorage->getAllNodes(L"Profiles", profileNames);
-
-	if (aStorage->openNode(WideString("Profiles"), true))
-	{
-		aStorage->putValue(iName, L"Avatar", (long)data->Avatar);
-		aStorage->putValue(iName, L"Level", (long)data->Level);
-		aStorage->putValue(iName, L"Score", (long)data->Score);
-		aStorage->putValue(iName, L"Saldo", (long)data->Saldo);
-		aStorage->putValue(iName, L"Succeeded", (long)data->Succeeded);
-		aStorage->putValue(iName, L"Failured", (long)data->Failured);
-		aStorage->putValue(iName, L"Duration", (long)data->Duration);
-
-		aStorage->closeNode();
-	}
-
-	delete profileNames;
-	*/
 
 	long avatar = iSkinColorID +
 			(iHairColorID << 4) +
@@ -219,7 +201,8 @@ void __fastcall TiProfile::updateScore()
 		if (score >= (maxPossibleScore / 2))
 		{
 			iGameBonus = GetRandomBonus();
-			iBonus = iBonus | (1 << iGameBonus);
+			if (iGameBonus)
+				iBonus = iBonus | (1 << (iGameBonus - 1));
 		}
 	}
 
@@ -231,6 +214,12 @@ void __fastcall TiProfile::updateScore()
 	int nextLevelThreshold = (iLevel + 1) * KLevelScoreMax;
 	if (iScore > nextLevelThreshold)
 		iLevel++;
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TiProfile::getBonusCountMax()
+{
+	return KBonusCountMax;
 }
 
 //---------------------------------------------------------------------------
@@ -256,6 +245,9 @@ void __fastcall TiProfile::SetName(WideString aValue)
 			iScore = saved->Score;
 			iSaldo = saved->Saldo;
 			iBonus = saved->Bonus;
+	
+			iAvatar->setPrizes(iBonus);
+
 			break;
 		}
 	}
@@ -341,17 +333,17 @@ int __fastcall TiProfile::GetRandomBonus()
 		}
 	}
 
-	return result;
+	return result + 1;
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfile::CreateAvatar()
 {
-	iAvatar = new TiAvatar();
+	iAvatar = new TiAvatar(iManager, iScreenSize, iViewport);
 
-	iAvatar->add(iManager, TiAvatar::apBody);
-	iAvatar->add(iManager, TiAvatar::apEyes);
-	iAvatar->add(iManager, TiAvatar::apHair);
-	iAvatar->add(iManager, TiAvatar::apShirt);
+	iAvatar->add(TiAvatar::apBody);
+	iAvatar->add(TiAvatar::apEyes);
+	iAvatar->add(TiAvatar::apHair);
+	iAvatar->add(TiAvatar::apShirt);
 }
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef GAME1_FireflyAndPointsH
-#define GAME1_FireflyAndPointsH
+#ifndef FireflyAndPointsH
+#define FireflyAndPointsH
 
 //---------------------------------------------------------------------------
 #include <Classes.hpp>

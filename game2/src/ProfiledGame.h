@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
-#ifndef GAME2_ProfilesGameH
-#define GAME2_ProfilesGameH
+#ifndef ProfilesGameH
+#define ProfilesGameH
 
 //---------------------------------------------------------------------------
 #include <Classes.hpp>
@@ -27,6 +27,7 @@
 #include "GameResult.h"
 #include "Rewards.h"
 #include "Status.h"
+#include "PositionTracker.h"
 
 #include "CalibQuality.h"
 #include "CalibQualityEstimator.h"
@@ -80,6 +81,7 @@ class TiProfiledGame : public TForm
 		ProfiledGame::TiGameResult* iGameResult;
 		ProfiledGame::TiRewards* iRewards;
 		ProfiledGame::TiStatus* iStatus;
+		ProfiledGame::TiPositionTracker* iPositionTracker;
 
 		ProfiledGame::TiLevelInstruction* iLevelInstruction;
 		ProfiledGame::TiLevelLegend* iLevelLegend;
@@ -132,6 +134,7 @@ class TiProfiledGame : public TForm
 		void __fastcall DelayedRewards(TObject *Sender);
 		void __fastcall onRewardsDone(TObject* aSender = NULL);
 		void __fastcall onStatusDone(TObject* aSender = NULL);
+		void __fastcall onPositionTrackerDone(TObject* aSender = NULL);
 
 		void __fastcall StartCalibration(TObject* aSender = NULL);
 		void __fastcall StartVerification(TObject* aSender = NULL);

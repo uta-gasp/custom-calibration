@@ -41,6 +41,7 @@ USEUNIT("..\game2\src\LevelInstruction.cpp");
 USEUNIT("..\game2\src\LevelLegend.cpp");
 USEUNIT("..\game2\src\GhostBox.cpp");
 USEUNIT("Controller.cpp");
+USEUNIT("..\game2\src\PositionTracker.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

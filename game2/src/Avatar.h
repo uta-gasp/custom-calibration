@@ -28,17 +28,27 @@ class TiAvatar {
 		TiAnimation* iShirt;
 
 		TiAnimation* iParts[apCount];
+		TiAnimations* iPrizes;
+		int iBonus;
 
-		int GetPartIndex(EiPart aPart);
+		TiAnimationManager* iManager;
+		TiSize iScreenSize;
+		TiSize iViewport;
+
+		int __fastcall GetPartIndex(EiPart aPart);
 
 	public:
-		void add(TiAnimationManager* aManager, EiPart aPart);
-		void placeTo(int aX, int aY);
-		void setPartType(EiPart aPart, int aType);
-		void paintTo(Gdiplus::Graphics* aGraphics);
+		__fastcall TiAvatar(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
+		__fastcall TiAvatar::~TiAvatar();
 
-		void show();
-		void hide();
+		void __fastcall add(EiPart aPart);
+		void __fastcall setPrizes(int aBonus);
+		void __fastcall placeTo(int aX, int aY);
+		void __fastcall setPartType(EiPart aPart, int aType);
+		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);
+
+		void __fastcall show();
+		void __fastcall hide();
 };
 
 //---------------------------------------------------------------------------

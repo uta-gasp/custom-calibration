@@ -13,7 +13,7 @@
       build\Rewards.obj build\Status.obj build\InstructionShape.obj 
       build\LevelInstruction.obj build\LevelLegend.obj build\GhostBox.obj 
       build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
-      build\utils.obj"/>
+      build\utils.obj build\PositionTracker.obj"/>
     <RESFILES value="ProfiledGameTest.res build\assets_pg.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\src\ProfiledGame.dfm"/>
@@ -34,8 +34,8 @@
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="ProfiledGameTest.cpp"/>
-    <INCLUDEPATH value="..\src;..\assets;..\..\common;..\..\..\GDI+\Include;..\..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\src;..\assets;..\..\common;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;..\..\common;..\..\..\GDI+\Include;..\..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\src;..\assets;..\..\common;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-pch -w-par -w-hid"/>
   </MACROS>
   <OPTIONS>

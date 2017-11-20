@@ -19,11 +19,11 @@ __fastcall TiFactory::TiFactory(TiAnimationManager* aManager,
 		TiLevelLegend(aManager, aScreenSize, aViewport),
 		iTimeout(NULL)
 {
-	TiAnimation* background = new TiAnimation(false);
-	background->addFrames(IDR_STORY_LEVEL1_BACKGROUND, aViewport.Width, aViewport.Height);
-	background->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
-	aManager->add(background);
-	iStaticAssets->add(background);
+	iBackground = new TiAnimation(false);
+	iBackground->addFrames(IDR_STORY_LEVEL1_BACKGROUND, aViewport.Width, aViewport.Height);
+	iBackground->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
+	aManager->add(iBackground);
+	iStaticAssets->add(iBackground);
 
 	iAlert = new TiAnimation(false);
 	iAlert->addFrames(IDR_STORY_LEVEL1_ALERT, aViewport.Width, aViewport.Height);
@@ -84,5 +84,11 @@ void __fastcall TiFactory::Cleared(TObject* aSender)
 {
 	if (FOnDone)
 		FOnDone(this);
+}
+
+//---------------------------------------------------------------------------
+TiAnimation* __fastcall TiFactory::GetBackground()
+{
+	return iBackground;
 }
 

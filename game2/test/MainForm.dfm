@@ -1,6 +1,6 @@
 object frmMainForm: TfrmMainForm
-  Left = 333
-  Top = 308
+  Left = 440
+  Top = 365
   AutoScroll = False
   Caption = 'KidCalibt est'
   ClientHeight = 317
