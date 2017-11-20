@@ -197,9 +197,13 @@ __fastcall TiOlioHunting::TiOlioHunting(TiAnimationManager* aManager, TiSize aSc
 	iCountdown->OnStop = stop;
 	aManager->add(iCountdown);
 
-	iPointer = new TiAnimation(false, false);
-	iPointer->addFrames(IDR_GAME_POINTER, 48, 48);
-	aManager->add(iPointer);
+	iPointerGaze = new TiAnimation(false, false);
+	//iPointerGaze->addFrames(IDR_GAME_POINTER, 48, 48);
+	//aManager->add(iPointerGaze);
+
+	iPointerMouse = new TiAnimation(false, false);
+	iPointerMouse->addFrames(IDR_GAME_POINTER, 48, 48);
+	aManager->add(iPointerMouse);
 
 	LARGE_INTEGER fr;
 	::QueryPerformanceFrequency(&fr);
@@ -239,7 +243,7 @@ void __fastcall TiOlioHunting::ComputeAndShowScore()
 		iTimeoutRef->kill();
 
 	iCountdown->stop();
-	iPointer->fadeOut();
+	iPointerMouse->fadeOut();
 
 	LARGE_INTEGER li;
 	::QueryPerformanceCounter(&li);
@@ -313,7 +317,7 @@ void __fastcall TiOlioHunting::start(int aOliosToShow)
 	iOliosToFind = oliosToShow;
 
 	iCountdown->start();
-	iPointer->fadeIn();
+	iPointerMouse->fadeIn();
 
 	if (FOnEvent)
 	{
@@ -336,10 +340,11 @@ void __fastcall TiOlioHunting::stop(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiOlioHunting::click(int aX, int aY)
+void __fastcall TiOlioHunting::click()
 {
-	int x = aX < 0 ? iPointer->X : aX;
-	int y = aY < 0 ? iPointer->Y : aY;
+	/*
+	int x = aX < 0 ? iPointerGaze->X : aX;
+	int y = aY < 0 ? iPointerGaze->Y : aY;
 
 	bool finished = false;
 	double minDistance = MaxInt;
@@ -386,15 +391,58 @@ void __fastcall TiOlioHunting::click(int aX, int aY)
 	if (FOnSelect)
 		FOnSelect(this, eyes.x, eyes.y);
 //		FOnSelect(this, nearestOlio->X, nearestOlio->Y);
+	*/
+
+
+	int mouseX = iPointerMouse->X;
+	int mouseY = iPointerMouse->Y;
+
+	TiAnimation* hitOlio = NULL;
+
+	for (int i = 0; i < iHidingOlios.Count; i++)
+	{
+		TiAnimation* olio = iHidingOlios[i];
+		double distance = olio->distanceTo(mouseX, mouseY);
+		if (distance == 0.0)
+		{
+			hitOlio = olio;
+			break;
+		}
+	}
+
+	bool finished = false;
+	if (hitOlio)
+	{
+		if (FOnEvent)
+			FOnEvent(this, String().sprintf("verification point\t%d %d\t%d %d",
+					mouseX, mouseY, iPointerGaze->X, iPointerGaze->Y));
+		if (FOnSelect)
+			FOnSelect(this, mouseX, mouseY);
+
+		hitOlio->hide();
+		iOliosFound++;
+
+		int visibleCount = 0;
+		for (int i = 0; i < iHidingOlios.Count; i++)
+			visibleCount += iHidingOlios[i]->IsVisible ? 1 : 0;
+
+		finished = visibleCount == 0;
+	}
 
 	if (finished)
 		ComputeAndShowScore();
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiOlioHunting::placePointer(int aGazeX, int aGazeY, int aCorrectionX, int aCorrectionY)
+void __fastcall TiOlioHunting::placeGazePointer(int aX, int aY, int aCorrectionX, int aCorrectionY)
 {
-	iPointer->placeTo(aGazeX + aCorrectionX, aGazeY + aCorrectionY);
+	iPointerGaze->placeTo(aX + aCorrectionX, aY + aCorrectionY);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiOlioHunting::placeMousePointer(int aX, int aY)
+{
+	iPointerMouse->placeTo(aX, aY);
 }
 
 //---------------------------------------------------------------------------
@@ -440,6 +488,6 @@ void __fastcall TiOlioHunting::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateTyp
 	{
 		iInstruction->paintTo(aGraphics);
 		iCountdown->paintTo(aGraphics);
-		iPointer->paintTo(aGraphics);
+		iPointerMouse->paintTo(aGraphics);
 	}
 }

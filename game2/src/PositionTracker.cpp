@@ -9,6 +9,10 @@
 using namespace ProfiledGame;
 
 //---------------------------------------------------------------------------
+const int KThresholdZ = 80;
+const int KThresholdXY = 60;
+
+//---------------------------------------------------------------------------
 __fastcall TiPositionTracker::TiPositionTracker(TiAnimationManager* aManager,
 		TiSize aScreenSize, TiSize aViewport) :
 		TiScene(aManager, aScreenSize, aViewport),
@@ -21,6 +25,14 @@ __fastcall TiPositionTracker::TiPositionTracker(TiAnimationManager* aManager,
 	iDynamicAssets->add(background);
 
 	iButtonContinue = TiRect(Offset.x + 583, Offset.y + 475, 200, 60);
+
+	iUserPositionQualityEstimator = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
+}
+
+//---------------------------------------------------------------------------
+__fastcall TiPositionTracker::~TiPositionTracker()
+{
+	delete iUserPositionQualityEstimator;
 }
 
 //---------------------------------------------------------------------------
@@ -39,7 +51,11 @@ bool __fastcall TiPositionTracker::isPositionWrong(SampleStruct& aSample)
 	if (!iEnabled || IsVisible)
 		return false;
 
-	bool isWrong = aSample.leftEye.eyePositionX > 120;
+	//bool isWrong = aSample.leftEye.eyePositionX > 120;
+
+	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimator->feed(aSample.leftEye);
+	bool isWrong = quality > TiUserPositionQualityEstimator::pqOK;
+
 	if (isWrong && !IsVisible)
 		show();
 

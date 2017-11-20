@@ -121,6 +121,10 @@ void __fastcall TiController::run(EiCalibType aCalibType)
 
 	CreateCalibration(aCalibType);
 
+	String userName = "";
+	if (iCurrentUser)
+		userName = iCurrentUser->Name;
+
 	if (iDebug)
 	{
 		iCalibrationForm->Show();
@@ -129,14 +133,14 @@ void __fastcall TiController::run(EiCalibType aCalibType)
 		if (iFireflyAndPoints)
 			iFireflyAndPoints->showEyeBox();
 		else if (iProfiledGame)
-			iProfiledGame->showLogin(iCurrentUser->Name);
+			iProfiledGame->showLogin(userName);
 	}
 	else
 	{
 		if (iFireflyAndPoints)
 			iFireflyAndPoints->showModal();
 		else if (iProfiledGame)
-			iProfiledGame->showModal(iCurrentUser->Name);
+			iProfiledGame->showModal(userName);
 	}
 }
 
@@ -212,7 +216,11 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 	if (aType == ctStandard || aType == ctFirefly)
 	{
-		iFireflyAndPoints = new TiFireflyAndPoints(NULL);
+		TiFireflyAndPoints::EiAttractorType attractorType = aType == ctStandard ?
+				TiFireflyAndPoints::atCircle :
+				TiFireflyAndPoints::atFirefly;
+
+		iFireflyAndPoints = new TiFireflyAndPoints(NULL, attractorType);
 		iFireflyAndPoints->OnEvent = onCalib_Event;
 		iFireflyAndPoints->OnSample = onCalib_Sample;
 		iFireflyAndPoints->OnStart = onCalib_Start;
@@ -227,9 +235,6 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iFireflyAndPoints->OnGameFinished = onCalib_VerifFinished;
 
 		iFireflyAndPoints->GameAfterCalibration = true;
-		iFireflyAndPoints->AttractorType = aType == ctStandard ?
-				TiFireflyAndPoints::atCircle :
-				TiFireflyAndPoints::atFirefly;
 
 		if (iDebug)
 			iFireflyAndPoints->OnMouseMove = onCalib_MouseMove;

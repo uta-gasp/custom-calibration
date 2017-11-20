@@ -4,6 +4,7 @@
 
 //---------------------------------------------------------------------------
 #include "Scene.h"
+#include "UserPositionQualityEstimator.h"
 
 #ifndef RET_SUCCESS
 #include "myGazeAPI.h"
@@ -19,8 +20,11 @@ class TiPositionTracker : public TiScene
 		TiRect iButtonContinue;
 		bool iEnabled;
 
+		TiUserPositionQualityEstimator* iUserPositionQualityEstimator;
+
 	public:
 		__fastcall TiPositionTracker(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
+		__fastcall ~TiPositionTracker();
 
 		virtual void __fastcall mouseClick(TMouseButton aButton, TShiftState aShift, int aX, int aY);
 

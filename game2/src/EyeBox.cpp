@@ -21,24 +21,20 @@ const double KInvalidValue = 0.0;
 const double KMinStartDistance = 450.0; // mm
 const double KMaxStartDistance = 650.0; // mm
 
-const double KIdealDistance = 530.0;    // mm
-const double KIdealEyeX 		= -36.0;    // px, left eye
-const double KIdealEyeY 		=   2.0;    // px, left eye
-
 const int KEyeSize = 36;								// px
 const int KEyeCircleWidth = 8;
 
 const int KEyeBoxWidth = 640;
 const int KEyeBoxHeight = 480;
 
-const int KProximityBufferSize = 20;
 const int KThresholdZ = 80;
 const int KThresholdXY = 7;
 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
 		TiScene(aManager, aScreenSize, aViewport),
-		iProfile(NULL)
+		iProfile(NULL),
+		iEstimateUserPositionQuality(false)
 {
 	iEyeArea = TiRect(
 		(aScreenSize.Width - KEyeBoxWidth) / 2, (aScreenSize.Height - KEyeBoxHeight) / 2,
@@ -58,7 +54,7 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, 
 	//iRight->addFrames(IDR_EYEBOX_EYE, KEyeSize);
 	aManager->add(iRight);
 
-	iProximities = new TiProximities(true);
+	iUserPositionQualityEstimator = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
 
 	SetEyeLocation(iLeft, KInvalidValue, KInvalidValue);
 	SetEyeLocation(iRight, KInvalidValue, KInvalidValue);
@@ -67,7 +63,7 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::~TiEyeBox()
 {
-	delete iProximities;
+	delete iUserPositionQualityEstimator;
 }
 
 //---------------------------------------------------------------------------
@@ -76,7 +72,7 @@ void __fastcall TiEyeBox::show(TiProfile* aProfile)
 	if (iIsVisible)
 		return;
 
-	iAvgProximity = SiProximity();
+	iEstimateUserPositionQuality = true;
 	iProfile = aProfile;
 
 	iBackground->show();
@@ -109,7 +105,16 @@ void __fastcall TiEyeBox::left(EyeDataStruct& aEyeData)
 	SetEyeLocation(iLeft, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iLeft, aEyeData.eyePositionZ);
 
-	EstimatePositionQuality(aEyeData);
+	if (!iEstimateUserPositionQuality)
+		return;
+
+	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimator->feed(aEyeData);
+	if (quality == TiUserPositionQualityEstimator::pqOK)
+	{
+		iEstimateUserPositionQuality = false;
+		if (FOnDone)
+			FOnDone(this);
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -192,49 +197,8 @@ void __fastcall TiEyeBox::SetEyeScale(TiAnimation* aEye, double aDist)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiEyeBox::EstimatePositionQuality(EyeDataStruct& aEyeData)
-{
-	if (iAvgProximity.Z < 0)
-		return;
-
-	SiProximity* proximity = new SiProximity();
-
-	double dx = aEyeData.eyePositionX - KIdealEyeX;
-	double dy = aEyeData.eyePositionY - KIdealEyeY;
-	proximity->XY = sqrt(dx*dx + dy*dy);
-	proximity->Z = fabs(KIdealDistance - aEyeData.eyePositionZ);
-
-	if (iProximities->Count == KProximityBufferSize)
-		iProximities->remove(0l);
-
-	iProximities->add(proximity);
-
-	if (iProximities->Count == KProximityBufferSize)
-	{
-		double avgZ  = 0;
-		double avgXY = 0;
-		double weights = 0;
-		for (int i = 0; i < iProximities->Count; i++)
-		{
-			proximity = iProximities->get(i);
-			avgZ += proximity->Z;
-			avgXY += proximity->XY;
-			weights += 1;
-		}
-		iAvgProximity.Z = avgZ / weights;
-		iAvgProximity.XY = avgXY / weights;
-
-		if (iAvgProximity.Z < KThresholdZ && iAvgProximity.XY < KThresholdXY && FOnDone)
-		{
-			iAvgProximity.Z = -1;
-			FOnDone(this);
-		}
-	}
-}
-
-//---------------------------------------------------------------------------
 double __fastcall TiEyeBox::GetScale(double aDist)
 {
-	return sqrt(max(KMinEyeScale, 3.0 - 2*(aDist - KMinDistance)/(KIdealDistance - KMinDistance)));
+	return sqrt(max(KMinEyeScale, 3.0 - 2*(aDist - KMinDistance)/(TiUserPositionQualityEstimator::getIdealUserDistance() - KMinDistance)));
 }
 

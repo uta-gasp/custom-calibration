@@ -13,7 +13,8 @@
       build\Rewards.obj build\Status.obj build\InstructionShape.obj 
       build\LevelInstruction.obj build\LevelLegend.obj build\GhostBox.obj 
       build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
-      build\utils.obj build\PositionTracker.obj"/>
+      build\utils.obj build\PositionTracker.obj 
+      build\UserPositionQualityEstimator.obj"/>
     <RESFILES value="ProfiledGameTest.res build\assets_pg.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\src\ProfiledGame.dfm"/>

@@ -70,7 +70,6 @@ class TiFireflyAndPoints : public TForm
 		bool iIsWaitingToAcceptPoint;
 		bool iLastPointAborted;
 		bool iGameAfterCalibration;
-		bool iGazeControlInGame;
 		TPoint iMouseInitialPosition;
 
 		FireflyAndPoints::TiLamps* iCalibPoints;
@@ -119,7 +118,7 @@ class TiFireflyAndPoints : public TForm
 		void __fastcall SetOnEvent(FiOnEvent aFOnEvent);
 
 	public:
-		__fastcall TiFireflyAndPoints(TComponent* aOwner);
+		__fastcall TiFireflyAndPoints(TComponent* aOwner, EiAttractorType aAttractorType);
 		__fastcall ~TiFireflyAndPoints();
 
 		void __fastcall setSample(SampleStruct& aSample);
@@ -141,7 +140,6 @@ class TiFireflyAndPoints : public TForm
 		void __fastcall saveSettings(TiXML_INI* aStorage);
 
 		__property bool GameAfterCalibration = {read = iGameAfterCalibration, write = iGameAfterCalibration};
-		__property bool GazeControlInGame = {read = iGazeControlInGame, write = iGazeControlInGame};
 		__property EiAttractorType AttractorType = {read = iAttractorType, write = iAttractorType};
 
 		__property FiOnEvent OnEvent = {read = FOnEvent, write = SetOnEvent};

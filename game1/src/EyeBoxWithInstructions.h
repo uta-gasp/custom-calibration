@@ -41,7 +41,7 @@ class TiEyeBoxWithInstructions : public TObject
 		void __fastcall SetVisible(bool aValue);
 
 	public:
-		__fastcall TiEyeBoxWithInstructions(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize);
+		__fastcall TiEyeBoxWithInstructions(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize, int aInstructionBottomRcID);
 		__fastcall ~TiEyeBoxWithInstructions();
 
 		void __fastcall left(EyeDataStruct& aEyeData);

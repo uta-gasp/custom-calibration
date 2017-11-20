@@ -21,11 +21,12 @@ const double KMinStartDistance = 450.0;
 const double KMaxStartDistance = 650.0;
 const double KIdealDistance = 530.0;
 const int KEyeSize = 32;
-const int KInstructionWidth = 1200;
-const int KInstructionHeight = 300;
+const int KInstructionWidth = 950;
+const int KInstructionHeight = 170;
 
 //---------------------------------------------------------------------------
-__fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize) :
+__fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager* aManager,
+		TRect aBox, TiSize aScreenSize, int aInstructionBottomRcID) :
 		TObject(),
 		iVisible(false),
 		iInstabilityCounter(0),
@@ -50,12 +51,12 @@ __fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager
 	iWarning->FadingDuration = 200;
 
 	iInstructionTop = new TiAnimation(iVisible);
-	iInstructionTop->addFrames(IDR_CALIB_INSTRUCTION_TOP, KInstructionWidth, KInstructionHeight);
-	iInstructionTop->placeTo(aScreenSize.Width / 2, KInstructionHeight / 2);
+	iInstructionTop->addFrames(IDR_EYEBOX_INSTRUCTION_TOP, KInstructionWidth, KInstructionHeight);
+	iInstructionTop->placeTo(aScreenSize.Width / 2, iInstructionTop->Height / 2);
 
 	iInstructionBottom = new TiAnimation(iVisible);
-	iInstructionBottom->addFrames(IDR_CALIB_INSTRUCTION_BOTTOM, KInstructionWidth, KInstructionHeight);
-	iInstructionBottom->placeTo(aScreenSize.Width / 2, aScreenSize.Height - KInstructionHeight / 2);
+	iInstructionBottom->addFrames(aInstructionBottomRcID, KInstructionWidth, KInstructionHeight);
+	iInstructionBottom->placeTo(aScreenSize.Width / 2, aScreenSize.Height - iInstructionBottom->Height / 2);
 
 	iStart = new TiAnimation(iVisible, false);
 	iStart->addFrames(IDR_START, 160, 48);

@@ -70,7 +70,8 @@ class TiOlioHunting : public TObject
 		TiAnimation* iBestScoreLogo2;
 		TiAnimation* iInstruction;
 		TiOlioHuntingTimer* iCountdown;
-		TiAnimation* iPointer;
+		TiAnimation* iPointerGaze;
+		TiAnimation* iPointerMouse;
 
 		TiSize iScreenSize;
 		int iBestScore;
@@ -107,8 +108,9 @@ class TiOlioHunting : public TObject
 		void __fastcall start(int aOliosToShow);
 		void __fastcall stop(TObject* aSender = NULL);
 
-		void __fastcall click(int aX = -1, int aY = -1);
-		void __fastcall placePointer(int aGazeX, int aGazeY, int aCorrectionX, int aCorrectionY);
+		void __fastcall click();
+		void __fastcall placeGazePointer(int aX, int aY, int aCorrectionX, int aCorrectionY);
+		void __fastcall placeMousePointer(int aX, int aY);
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 

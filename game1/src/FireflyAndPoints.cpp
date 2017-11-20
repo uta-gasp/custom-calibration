@@ -40,7 +40,7 @@ const String KIniResultScore = "Score";
 const String KIniResultIsBest = "IsBest";
 
 //---------------------------------------------------------------------------
-__fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner) :
+__fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner, EiAttractorType aAttractorType) :
 		TForm(aOwner),
 		iTimeout(NULL),
 		iPointAcceptTimeout(NULL),
@@ -49,10 +49,9 @@ __fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner) :
 		iGame(NULL),
 		iStaticBitmap(NULL),
 		iGameAfterCalibration(true),
-		iGazeControlInGame(true),
 		iMouseInitialPosition(-1, -1),
 		iAttractor(NULL),
-		iAttractorType(atCircle),
+		iAttractorType(aAttractorType),
 		FOnEvent(NULL),
 		FOnSample(NULL),
 		FOnStart(NULL),
@@ -104,12 +103,14 @@ void __fastcall TiFireflyAndPoints::setSample(SampleStruct& aSample)
 
 	if (iGame->IsRunning)
 	{
-		int dx = KMouseGazeCorrectionFactor * (Mouse->CursorPos.x - iMouseInitialPosition.x);
-		int dy = KMouseGazeCorrectionFactor * (Mouse->CursorPos.y - iMouseInitialPosition.y);
-		iGame->placePointer(aSample.leftEye.gazeX, aSample.leftEye.gazeY, dx, dy);
-
 		TiCalibQualityEstimator::TiPointI cqePoint(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
 		iCalibQualityEstimator->addSample(cqePoint);
+
+		int dx = KMouseGazeCorrectionFactor * (Mouse->CursorPos.x - iMouseInitialPosition.x);
+		int dy = KMouseGazeCorrectionFactor * (Mouse->CursorPos.y - iMouseInitialPosition.y);
+		iGame->placeGazePointer(aSample.leftEye.gazeX, aSample.leftEye.gazeY, dx, dy);
+
+		iGame->placeMousePointer(Mouse->CursorPos.x, Mouse->CursorPos.y);
 
 		if (FOnSample)
 			FOnSample(this, aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
@@ -418,9 +419,7 @@ void __fastcall TiFireflyAndPoints::onGameFisnihed(TObject* aSender)
 void __fastcall TiFireflyAndPoints::StartCalibration()
 {
 	if (FOnEvent)
-		FOnEvent(this, String().sprintf("calibration start\t%s\t%s",
-				iGameAfterCalibration ? "game" : "no game",
-				iGazeControlInGame ? "gaze" : "mouse" ));
+		FOnEvent(this, String().sprintf("calibration start"));
 	if (FOnStart)
 		FOnStart(this);
 
@@ -615,9 +614,6 @@ void __fastcall TiFireflyAndPoints::ShowGameInstructions(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::StartGame(TObject* aSender)
 {
-	if (!iGazeControlInGame)
-		Cursor = crDefault;
-
 	iGame->start(10);
 
 	if (FOnGameStarted)
@@ -674,9 +670,14 @@ void __fastcall TiFireflyAndPoints::FormCreate(TObject *Sender)
 	iCalibPoints = new TiLamps(iObjects, Width, Height);
 
 	iEyeBox = new TiEyeBoxWithInstructions(iObjects, TRect(
-		(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
-		(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
-	), TiSize( Width, Height ));
+			(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
+			(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
+		),
+		TiSize( Width, Height ),
+		iAttractorType == atFirefly ?
+				IDR_EYEBOX_INSTRUCTION_BOTTOM_FIREFLY :
+				IDR_EYEBOX_INSTRUCTION_BOTTOM_STANDARD
+	);
 	iEyeBox->OnHidden = onEyeBoxHidden;
 	iEyeBox->Background->OnFadingTransition = onEyeBoxFadingTransition;
 
@@ -728,15 +729,13 @@ void __fastcall TiFireflyAndPoints::FormDestroy(TObject *Sender)
 void __fastcall TiFireflyAndPoints::FormMouseUp(TObject *Sender,
 			TMouseButton Button, TShiftState Shift, int X, int Y)
 {
-	if (Button != mbLeft)
-		return;
+//	if (Button != mbLeft)
+//		return;
 
 	if (iEyeBox->IsVisible)
 	{
 		if (iEyeBox->Start->hitTest(X, Y))
 			StartCalibration();
-		//else if (iEyeBox->Close->hitTest(X, Y))
-		//	Done();
 	}
 	else if (iGame->IsInstructionVisible)
 	{
@@ -744,10 +743,7 @@ void __fastcall TiFireflyAndPoints::FormMouseUp(TObject *Sender,
 	}
 	else if (iGame->IsRunning && !iTimeout)
 	{
-		if (iGazeControlInGame)
-			iGame->click();
-		else
-			iGame->click(X, Y);
+		iGame->click();
 	}
 	else if (iIsWaitingToAcceptPoint)
 	{
@@ -759,6 +755,7 @@ void __fastcall TiFireflyAndPoints::FormMouseUp(TObject *Sender,
 void __fastcall TiFireflyAndPoints::FormKeyUp(TObject *Sender, WORD &Key,
 			TShiftState Shift)
 {
+#ifdef _DEBUG
 	if (iEyeBox->IsVisible)
 	{
 		if (Key == VK_SPACE)
@@ -807,6 +804,7 @@ void __fastcall TiFireflyAndPoints::FormKeyUp(TObject *Sender, WORD &Key,
 				Done();
 		}
 	}
+#endif
 }
 
 //---------------------------------------------------------------------------

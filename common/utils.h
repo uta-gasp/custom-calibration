@@ -14,12 +14,10 @@
 #pragma option pop
 
 //---------------------------------------------------------------------------
-#ifdef __DEBUG
-#ifndef debug
+#ifdef _DEBUG
 #define debug(x) \
-	if(__DEBUG)    \
+	if(_DEBUG)    \
 		::MessageBox(NULL, String((x)).c_str(), "KidCalib Debug", MB_OK);
-#endif
 #else
 #define debug(x)
 #endif

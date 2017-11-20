@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "Animation.h"
 #include "Profile.h"
+#include "UserPositionQualityEstimator.h"
 #include "utils.h"
 
 #ifndef RET_SUCCESS
@@ -13,23 +14,11 @@
 #endif
 
 //---------------------------------------------------------------------------
-#include <dynarray.h>
-
-//---------------------------------------------------------------------------
 namespace ProfiledGame {
 
 //---------------------------------------------------------------------------
 class TiEyeBox : public TiScene
 {
-	struct SiProximity
-	{
-		double Z;
-		double XY;
-		SiProximity() : Z(0), XY(0) {}
-	};
-
-	typedef TiDynArray<SiProximity> TiProximities;
-
 	private:
 		TiRect iEyeArea;
 
@@ -39,12 +28,11 @@ class TiEyeBox : public TiScene
 
 		TiProfile* iProfile;
 
-		TiProximities* iProximities;
-		SiProximity iAvgProximity;
+		TiUserPositionQualityEstimator* iUserPositionQualityEstimator;
+		bool iEstimateUserPositionQuality;
 
 		void __fastcall SetEyeLocation(TiAnimation* aEye, double aX, double aY);
 		void __fastcall SetEyeScale(TiAnimation* aEye, double aDist);
-		void __fastcall EstimatePositionQuality(EyeDataStruct& aEyeData);
 		double __fastcall GetScale(double aDist);
 
 	public:

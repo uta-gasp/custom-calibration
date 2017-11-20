@@ -10,8 +10,6 @@
 #include <ComCtrls.hpp>
 #include <ExtCtrls.hpp>
 
-//#define __DEBUG true
-
 #include "utils.h"
 #include "Animation.h"
 #include "FireflyAndPoints.h"
@@ -35,6 +33,8 @@ __published:	// IDE-managed Components
 	TButton *btnStartCalibAndGame;
 	TButton *btnStartCalibOnly;
 	TButton *btnStartGameOnly;
+	TComboBox *cmbTarget;
+	TLabel *Label4;
 	void __fastcall Button1Click(TObject *Sender);
 	void __fastcall TrackBar1Change(TObject *Sender);
 	void __fastcall TrackBar2Change(TObject *Sender);

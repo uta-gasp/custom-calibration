@@ -15,7 +15,8 @@
       build\InstructionCalibrate.obj build\Login.obj build\GameResult.obj 
       build\Rewards.obj build\Status.obj build\InstructionShape.obj 
       build\LevelInstruction.obj build\LevelLegend.obj build\GhostBox.obj 
-      build\Controller.obj build\PositionTracker.obj"/>
+      build\Controller.obj build\PositionTracker.obj 
+      build\UserPositionQualityEstimator.obj"/>
     <RESFILES value="KidCalibTest.res build\assets_ffap.res build\assets_pg.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\game1\src\FireflyAndPoints.dfm 

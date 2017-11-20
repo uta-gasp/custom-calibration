@@ -35,6 +35,7 @@ USEUNIT("..\..\common\CalibQuality.cpp");
 USEUNIT("..\..\common\CalibQualityEstimator.cpp");
 USEUNIT("..\..\common\utils.cpp");
 USEUNIT("..\src\PositionTracker.cpp");
+USEUNIT("..\src\UserPositionQualityEstimator.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

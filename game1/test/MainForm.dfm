@@ -41,6 +41,13 @@ object frmMainForm: TfrmMainForm
     Height = 13
     Caption = 'Rotation speed'
   end
+  object Label4: TLabel
+    Left = 12
+    Top = 264
+    Width = 31
+    Height = 13
+    Caption = 'Target'
+  end
   object Button1: TButton
     Left = 12
     Top = 8
@@ -99,9 +106,9 @@ object frmMainForm: TfrmMainForm
   end
   object log: TMemo
     Left = 0
-    Top = 352
+    Top = 372
     Width = 185
-    Height = 217
+    Height = 197
     Anchors = [akLeft, akTop, akRight]
     Font.Charset = RUSSIAN_CHARSET
     Font.Color = clWindowText
@@ -160,7 +167,7 @@ object frmMainForm: TfrmMainForm
   end
   object btnStartCalibAndGame: TButton
     Left = 12
-    Top = 260
+    Top = 288
     Width = 169
     Height = 25
     Anchors = [akLeft, akTop, akRight]
@@ -170,7 +177,7 @@ object frmMainForm: TfrmMainForm
   end
   object btnStartCalibOnly: TButton
     Left = 12
-    Top = 288
+    Top = 316
     Width = 169
     Height = 25
     Anchors = [akLeft, akTop, akRight]
@@ -180,12 +187,25 @@ object frmMainForm: TfrmMainForm
   end
   object btnStartGameOnly: TButton
     Left = 12
-    Top = 316
+    Top = 344
     Width = 169
     Height = 25
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Game only'
     TabOrder = 11
     OnClick = btnStartClick
+  end
+  object cmbTarget: TComboBox
+    Left = 76
+    Top = 260
+    Width = 105
+    Height = 21
+    Style = csDropDownList
+    Anchors = [akTop, akRight]
+    ItemHeight = 13
+    TabOrder = 12
+    Items.Strings = (
+      'firefly'
+      'ball')
   end
 end

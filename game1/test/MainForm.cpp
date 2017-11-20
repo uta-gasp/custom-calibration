@@ -16,9 +16,15 @@ using namespace FireflyAndPoints;
 
 //---------------------------------------------------------------------------
 TfrmMainForm *frmMainForm;
+
+//---------------------------------------------------------------------------
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
+static double sMeanGazeOffsetX = Utils::randInRange(-20, 20);
+static double sMeanGazeOffsetY = Utils::randInRange(-20, 20); 
+
+//---------------------------------------------------------------------------
 const String KIniFileName = "settings1.xml";
 
 const CalibrationPointStruct KCalibPoints[] = {
@@ -76,6 +82,8 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	TrackBar1->Position = iFly->AnimationSpeed;
 	TrackBar2->Position = iFly->MoveSpeed;
 	TrackBar3->Position = iFly->RotationSpeed;
+
+	cmbTarget->ItemIndex = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -95,7 +103,8 @@ void __fastcall TfrmMainForm::CreateCalibration()
 	iEvents = new TiLogger("events");
 	iSamples = new TiLogger("samples");
 
-	iCustomCalibration = new TiFireflyAndPoints(this);
+	iCustomCalibration = new TiFireflyAndPoints(this,
+			cmbTarget->ItemIndex == 0 ? TiFireflyAndPoints::atFirefly : TiFireflyAndPoints::atCircle);
 	iCustomCalibration->OnEvent = onCalibrationEvent;
 	iCustomCalibration->OnSample = onCalibrationSample;
 	iCustomCalibration->OnStart = onCalibrationStart;
@@ -109,7 +118,6 @@ void __fastcall TfrmMainForm::CreateCalibration()
 	iCustomCalibration->OnGameStarted = onCalibrationGameStarted;
 	iCustomCalibration->OnGameFinished = onCalibrationGameFinished;
 
-	iCustomCalibration->AttractorType = TiFireflyAndPoints::atFirefly;
 	iCustomCalibration->OnMouseMove = onCalibrationMouseMove;
 
 	if (FileExists(KIniFileName))
@@ -355,9 +363,13 @@ static double sLastDist = 500;
 		//iCalibration->setTrackingStability(Y < Panel1->Height / 2);
 	}
 
+	double lx = X + sMeanGazeOffsetX + Utils::randInRange(-25, 25);
+	double ly = Y + sMeanGazeOffsetY + Utils::randInRange(-25, 25);
+	double rx = X + sMeanGazeOffsetX + Utils::randInRange(-25, 25);
+	double ry = Y + sMeanGazeOffsetY + Utils::randInRange(-25, 25);
 	SampleStruct sample = {__int64(0),
-			{double(X), double(Y), 70.0, sLastEyeX-35, sLastEyeY, sLastDist},
-			{double(X), double(Y), 70.0, sLastEyeX+35, sLastEyeY, sLastDist}
+			{lx, ly, 70.0, sLastEyeX-35, sLastEyeY, sLastDist},
+			{rx, ry, 70.0, sLastEyeX+35, sLastEyeY, sLastDist}
 	};
 	iCustomCalibration->setSample(sample);
 }
@@ -449,7 +461,7 @@ void __fastcall TfrmMainForm::Button2Click(TObject *Sender)
 void __fastcall TfrmMainForm::btnStartClick(TObject *Sender)
 {
 	CreateCalibration();
-	
+
 	iCustomCalibration->GameAfterCalibration =
 			Sender == btnStartCalibAndGame ||
 			Sender == btnStartGameOnly;
