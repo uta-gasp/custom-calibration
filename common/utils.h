@@ -124,7 +124,7 @@ class TiLogger
 		__fastcall TiLogger(String aName);
 		__fastcall ~TiLogger();
 
-		static String __fastcall folder(String& aName);
+		static String __fastcall folder(const String& aName);
 
 		void __fastcall line(String& aText);
 };
@@ -136,7 +136,7 @@ class TiStrings
 		TiStrings() { }
 
 	public:
-		static TStrings* split(String& aText, String& aSeparator);
+		static TStrings* split(const String& aText, const String& aSeparator);
 };
 
 //---------------------------------------------------------------------------

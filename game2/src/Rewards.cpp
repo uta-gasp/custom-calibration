@@ -157,7 +157,7 @@ void __fastcall TiRewards::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aU
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiRewards::DrawScoreBackground(Gdiplus::Graphics* aGraphics, double aValue, Gdiplus::Color& aColor)
+void __fastcall TiRewards::DrawScoreBackground(Gdiplus::Graphics* aGraphics, double aValue, const Gdiplus::Color& aColor)
 {
 	double rate = aValue / iLevelScoreMax;
 	int width = rate * KScoreBackgroundRect.Width;

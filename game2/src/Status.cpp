@@ -135,7 +135,7 @@ void __fastcall TiStatus::DrawNumber(Gdiplus::Graphics* aGraphics, int aNumber, 
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiStatus::DrawString(Gdiplus::Graphics* aGraphics, WideString& aText, int aX, int aY,
+void __fastcall TiStatus::DrawString(Gdiplus::Graphics* aGraphics, const WideString& aText, int aX, int aY,
 		const Gdiplus::Color& aColor, Gdiplus::StringAlignment aAlignment)
 {
 	WCHAR string[256];

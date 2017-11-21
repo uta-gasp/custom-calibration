@@ -23,7 +23,7 @@ class TiStatus : public TiScene
 
 		void __fastcall DrawNumber(Gdiplus::Graphics* aGraphics, int aNumber, int aX, int aY,
 			const Gdiplus::Color& aColor, Gdiplus::StringAlignment aAlignment = Gdiplus::StringAlignmentNear);
-		void __fastcall DrawString(Gdiplus::Graphics* aGraphics, WideString& aText, int aX, int aY,
+		void __fastcall DrawString(Gdiplus::Graphics* aGraphics, const WideString& aText, int aX, int aY,
 			const Gdiplus::Color& aColor, Gdiplus::StringAlignment aAlignment = Gdiplus::StringAlignmentNear);
 
 		void __fastcall DrawScoreBackground(Gdiplus::Graphics* aGraphics);

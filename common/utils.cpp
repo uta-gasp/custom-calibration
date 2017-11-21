@@ -214,7 +214,7 @@ __fastcall TiLogger::~TiLogger()
 }
 
 //---------------------------------------------------------------------------
-String __fastcall TiLogger::folder(String& aName)
+String __fastcall TiLogger::folder(const String& aName)
 {
 	char userFolder[MAX_PATH];
 	::SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, SHGFP_TYPE_CURRENT, userFolder);
@@ -242,7 +242,7 @@ void __fastcall TiLogger::line(String& aText)
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-TStrings* TiStrings::split(String& aText, String& aSeparator)
+TStrings* TiStrings::split(const String& aText, const String& aSeparator)
 {
 	TStringList* result = new TStringList();
 	char* buffer = new char[aText.Length() + 1];

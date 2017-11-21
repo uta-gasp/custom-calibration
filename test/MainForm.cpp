@@ -102,7 +102,7 @@ void __fastcall TfrmMainForm::VerifyCalibration()
 
 	for (int i = 1; i <= ARRAYSIZE(KCalibPoints); i++)
 	{
-		CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
+		const CalibrationPointStruct& calibPoint = KCalibPoints[i - 1];
 
 		CalibrationPointQualityStruct left, right;
 		int x = calibPoint.positionX * iScaleX;
@@ -141,7 +141,7 @@ void __fastcall TfrmMainForm::onCtrl_CalibrationStarted(TObject* aSender)
 
 	for (int i = 0; i < ARRAYSIZE(KCalibPoints); i++)
 	{
-		CalibrationPointStruct& calibPoint = KCalibPoints[i];
+		const CalibrationPointStruct& calibPoint = KCalibPoints[i];
 		CalibrationPointStruct* cp = new CalibrationPointStruct();
 		cp->number = calibPoint.number;
 		cp->positionX = calibPoint.positionX * iScaleX;
