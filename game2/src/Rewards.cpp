@@ -108,9 +108,9 @@ void __fastcall TiRewards::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aU
 {
 	if (iIsVisible && aUpdateType & updStatic)
 	{
-		DrawScoreBackground(aGraphics, iLevelScoreMax, KColorBackgroundScoreAll);
 		if (iIsNewLevel)
 		{
+			DrawScoreBackground(aGraphics, iLevelScoreMax, KColorBackgroundScoreNew);
 			DrawString(aGraphics, String().sprintf("Taso %d!", iLevel + 1),
 					KScoreBackgroundRect.X + KScoreBackgroundRect.Width / 2,
 					KPositionScoreY,
@@ -118,6 +118,7 @@ void __fastcall TiRewards::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aU
 		}
 		else
 		{
+			DrawScoreBackground(aGraphics, iLevelScoreMax, KColorBackgroundScoreAll);
 			DrawScoreBackground(aGraphics, iScore, KColorBackgroundScoreNew);
 			DrawScoreBackground(aGraphics, max(0, iScore - iGainedScore), KColorBackgroundScoreOld);
 		}

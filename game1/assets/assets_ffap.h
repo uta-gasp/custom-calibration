@@ -1,6 +1,7 @@
 #define IDR_BACKGROUND    		010
 #define IDR_FIREFLY       		100
 #define IDR_CIRCLE       		  101
+#define IDR_CIRCLE_GREEN 		  102
 #define IDR_TARGET        		110
 #define IDR_EYEBOX        		200
 #define IDR_EYE           		201

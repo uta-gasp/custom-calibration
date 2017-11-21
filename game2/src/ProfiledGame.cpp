@@ -226,7 +226,7 @@ void __fastcall TiProfiledGame::onObjectPaint(TObject* aSender, EiUpdateType aUp
 		Gdiplus::Rect fillRect(0, 0, Width, Height);
 		graphics->FillRectangle(&backgroundBrush, fillRect);
 
-		iBackground->paintTo(graphics);
+		//iBackground->paintTo(graphics);
 
 		iCalibPoints->paintTo(graphics, updStatic);
 		iLogin->paintTo(graphics, updStatic);
@@ -470,16 +470,6 @@ void __fastcall TiProfiledGame::onCalibPointsDone(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::AfterCalibPoints(TObject *Sender)
 {
-	/*
-	if (FOnEvent)
-		for (int i = 0; i < iProfile->TargetPoints->Count; i++)
-		{
-			TiProfile::SiTargetPoint* pt = iProfile->TargetPoints->get(i);
-			FOnEvent(this, String().sprintf("target point\t%d\t%d\t%d\t%d",
-					pt->TargetID, pt->Speed, pt->Duration, pt->Success));
-		}
-	*/
-
 	iProfile->updateScore();
 
 	if (iProfile->IsSucceeded)
@@ -612,8 +602,9 @@ void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
 		if (!iIsVerifying)
 		{
 			iCalibQuality->reset();
-			tmrKostylTimer(NULL);
-			//tmrKostyl->Enabled = true;
+
+			if (FOnFinished)
+				FOnFinished(this);
 		}
 		else
 		{
@@ -791,10 +782,10 @@ void __fastcall TiProfiledGame::FormCreate(TObject *Sender)
 
 	iProfile = new TiProfile(iObjects, screenSize, viewport);
 
-	iBackground = new TiAnimation(false);
+	//iBackground = new TiAnimation(false);
 	//iBackground->addFrames(IDR_BACKGROUND, KViewportWidth, KViewportHeight);
 	//iBackground->placeTo(Width / 2, Height / 2);
-	iObjects->add(iBackground);
+	//iObjects->add(iBackground);
 
 	iLogin = new TiLogin(iObjects, screenSize, viewport, pnlNameContainer);
 	iLogin->OnDone = onLoginDone;
@@ -1007,15 +998,6 @@ void __fastcall TiProfiledGame::FormKeyDown(TObject *Sender,
 		if (iCalibPoints->IsWaitingToAcceptPoint && !iPositionTracker->IsVisible)
 			PointDone();
 	}
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiProfiledGame::tmrKostylTimer(TObject *Sender)
-{
-	tmrKostyl->Enabled = false;
-
-	if (FOnFinished)
-		FOnFinished(this);
 }
 
 //---------------------------------------------------------------------------

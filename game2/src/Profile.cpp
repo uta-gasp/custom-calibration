@@ -23,7 +23,7 @@ const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
 const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
 
 // Getting a bonus: thresholds
-const double KBonusScoreThreshold = 0.90;	// % of max possible
+const double KBonusScoreThreshold = 0.80;	// % of max possible
 const double KBonusFailedThreshold = 2;		// max number of failed targets
 
 //---------------------------------------------------------------------------

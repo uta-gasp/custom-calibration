@@ -55,6 +55,9 @@ __fastcall TiController::~TiController()
 //---------------------------------------------------------------------------
 void __fastcall TiController::loadInstructions(String& aFile)
 {
+	if (!FileExists(aFile))
+		return;
+		
 	TStringList* lines = new TStringList();
 	lines->LoadFromFile(aFile);
 

@@ -70,6 +70,7 @@ class TiFireflyAndPoints : public TForm
 		bool iIsWaitingToAcceptPoint;
 		bool iLastPointAborted;
 		bool iGameAfterCalibration;
+		bool iIsVerifying;
 		TPoint iMouseInitialPosition;
 
 		FireflyAndPoints::TiLamps* iCalibPoints;
@@ -107,9 +108,12 @@ class TiFireflyAndPoints : public TForm
 		void __fastcall PointDone(TObject* aSender = NULL);
 		void __fastcall PointAbort(TObject* aSender = NULL);
 		void __fastcall MoveToNextPoint(int aPointNumber);
-		void __fastcall Abort();
 		void __fastcall Finish();
+		void __fastcall StartVerification();
+		void __fastcall AddVerificationPoints();
+		void __fastcall Abort();
 
+		void __fastcall ReportPointAcceptance();
 		void __fastcall ShowGameInstructions(TObject* aSender = NULL);
 		void __fastcall StartGame(TObject* aSender = NULL);
 		void __fastcall FadeOut(TObject* aSender = NULL);

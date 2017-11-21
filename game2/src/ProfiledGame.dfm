@@ -1,6 +1,6 @@
 object iProfiledGame: TiProfiledGame
-  Left = 499
-  Top = 186
+  Left = 620
+  Top = 253
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 550
@@ -50,12 +50,5 @@ object iProfiledGame: TiProfiledGame
       OnKeyDown = memNameKeyDown
       OnKeyPress = memNameKeyPress
     end
-  end
-  object tmrKostyl: TTimer
-    Enabled = False
-    Interval = 10
-    OnTimer = tmrKostylTimer
-    Left = 16
-    Top = 12
   end
 end

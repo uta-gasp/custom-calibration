@@ -30,7 +30,7 @@ const double KMinAllowedCalibQualityValue = 0.5;
 
 const double KMouseGazeCorrectionFactor = 0; //0.05;
 
-const String KIniRoot = "OlioHunting";
+const String KIniRoot = "OlioHunting";         
 const String KIniBestScore = "BestScore";
 const String KIniBestScoreDate = "BestScoreDate";
 const String KIniResults = "Results";
@@ -40,12 +40,19 @@ const String KIniResultScore = "Score";
 const String KIniResultIsBest = "IsBest";
 
 //---------------------------------------------------------------------------
+const int KVerificationPointCountX = 3;
+const int KVerificationPointCountY = 2;
+
+const int KVerificationCellMargin = 80;
+
+//---------------------------------------------------------------------------
 __fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner, EiAttractorType aAttractorType) :
 		TForm(aOwner),
 		iTimeout(NULL),
 		iPointAcceptTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
 		iLastPointAborted(false),
+		iIsVerifying(false),
 		iGame(NULL),
 		iStaticBitmap(NULL),
 		iGameAfterCalibration(true),
@@ -114,6 +121,14 @@ void __fastcall TiFireflyAndPoints::setSample(SampleStruct& aSample)
 
 		if (FOnSample)
 			FOnSample(this, aSample.leftEye.gazeX + dx, aSample.leftEye.gazeY + dy);
+	}
+	else if (iIsVerifying)
+	{
+		TiCalibQualityEstimator::TiPointI cqePoint(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
+		iCalibQualityEstimator->addSample(cqePoint);
+		
+		if (FOnSample)
+			FOnSample(this, aSample.leftEye.gazeX, aSample.leftEye.gazeY);
 	}
 }
 
@@ -197,10 +212,17 @@ bool __fastcall TiFireflyAndPoints::processCalibrationResult()
 	else
 	{
 		iCalibPoints->fadeOut();
-		if (GameAfterCalibration)
-			TiTimeout::run(500, playGame, &iTimeout);
+		if (iAttractorType == atFirefly)
+		{
+			if (GameAfterCalibration)
+				TiTimeout::run(500, playGame, &iTimeout);
+			else
+				TiTimeout::run(1000, Done, &iTimeout);
+		}
 		else
-			TiTimeout::run(1000, Done, &iTimeout);
+		{
+			StartVerification();
+		}
 	}
 
 	return finished;
@@ -349,7 +371,7 @@ void __fastcall TiFireflyAndPoints::onAttractorMoveFisnihed(TObject* aSender)
 		if (FOnEvent)
 //			FOnEvent(this, String().sprintf("arrived to point\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
 //					iCalibPoints->Current->X, iCalibPoints->Current->Y));
-		if (FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
+		if (!iIsVerifying && FOnPointReady && iCalibPoints->CurrentPointIndex >= 0)
 			FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
 		if (iAttractor == iFireFly)
@@ -369,8 +391,10 @@ void __fastcall TiFireflyAndPoints::onCalibPointTimeout(TObject* aSender)
 
 	if (iAttractor->IsVisible)
 	{
-		if (FOnEvent)
-			FOnEvent(this, String().sprintf("ready to accept\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
+		if (FOnEvent && !iIsVerifying)
+			FOnEvent(this, String().sprintf("ready to %s\t%d\t%d %d",
+					iIsVerifying ? "verify" : "accept",
+					iCalibPoints->CurrentPointIndex,
 					iCalibPoints->Current->X, iCalibPoints->Current->Y));
 
 		iIsWaitingToAcceptPoint = true;
@@ -411,7 +435,10 @@ void __fastcall TiFireflyAndPoints::onGameFisnihed(TObject* aSender)
 	if (FOnGameFinished)
 		FOnGameFinished(this);
 
-	TiTimeout::run(4000, FadeOut, &iTimeout);
+	if (iIsVerifying)
+		TiTimeout::run(1000, Done, &iTimeout);
+	else
+		TiTimeout::run(4000, FadeOut, &iTimeout);
 }
 
 //---------------------------------------------------------------------------
@@ -423,6 +450,7 @@ void __fastcall TiFireflyAndPoints::StartCalibration()
 	if (FOnStart)
 		FOnStart(this);
 
+	iIsVerifying = false;
 	Cursor = crNone;
 
 	iEyeBox->IsVisible = false;
@@ -486,11 +514,38 @@ void __fastcall TiFireflyAndPoints::PointDone(TObject* aSender)
 
 	if (iCalibPoints->CurrentPointIndex >= 0)
 	{
-		if (FOnEvent)
-			FOnEvent(this, String().sprintf("point accepted\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
-					iCalibPoints->Current->X, iCalibPoints->Current->Y));
-		if (FOnPointAccepted)
+		ReportPointAcceptance();
+
+		if (iIsVerifying)
+			iCalibQualityEstimator->addSelection(iCalibPoints->Current->X, iCalibPoints->Current->Y);
+
+		if (!iIsVerifying && FOnPointAccepted)
 			FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+
+		if (iIsVerifying)
+			nextPoint(iCalibPoints->CurrentPointIndex + 2);
+	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::ReportPointAcceptance()
+{
+	if (!FOnEvent)
+		return;
+
+	if (iIsVerifying)
+	{
+		TiCalibQualityEstimator::TiPointD pt = iCalibQualityEstimator->Point;
+		double dx = pt.X - iCalibPoints->Current->X;
+		double dy = pt.Y - iCalibPoints->Current->Y;
+		double distance = sqrt(dx*dx + dy*dy);
+		FOnEvent(this, String().sprintf("verification point\t%d %d\t%d %d\t%.2f",
+			iCalibPoints->Current->X, iCalibPoints->Current->Y, int(pt.X), int(pt.Y), distance ));
+	}
+	else
+	{
+		FOnEvent(this, String().sprintf("point accepted\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
+				iCalibPoints->Current->X, iCalibPoints->Current->Y));
 	}
 }
 
@@ -518,7 +573,7 @@ void __fastcall TiFireflyAndPoints::MoveToNextPoint(int aPointNumber)
 	TiLamp* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
 	{
-		if (FOnEvent)
+		if (FOnEvent && !iIsVerifying)
 			FOnEvent(this, "move to next point");
 
 		bool isAtPlaceAlready = !iAttractor->moveTo(calibPoint->X, calibPoint->Y);
@@ -555,9 +610,25 @@ void __fastcall TiFireflyAndPoints::MoveToNextPoint(int aPointNumber)
 		iCalibQuality->reset();
 
 		if (FOnEvent)
-			FOnEvent(this, "calibration finished");
+		{
+			if (iIsVerifying)
+				FOnEvent(this, "verification finished");
+			else
+				FOnEvent(this, "calibration finished");
+		}
 
-		tmrKostyl->Enabled = true;
+		if (!iIsVerifying)
+		{
+			if (iAttractor == iFireFly)
+				tmrKostyl->Enabled = true;
+			else
+				tmrKostylTimer(NULL);
+		}
+		else
+		{
+			onGameFisnihed(NULL);
+			iIsVerifying = false;
+		}
 	}
 }
 
@@ -584,6 +655,45 @@ void __fastcall TiFireflyAndPoints::Finish()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::StartVerification()
+{
+	if (FOnEvent)
+		FOnEvent(this, "verification start");
+
+	iIsVerifying = true;
+	//iCircle->AnimationIndex = 1;
+
+	if (OnGameStarted)
+		OnGameStarted(this);
+
+	AddVerificationPoints();
+
+	iAttractor->fadeIn();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::AddVerificationPoints()
+{
+	clearPoints();
+
+	int cellWidth = Width / KVerificationPointCountX;
+	int cellHeight = Height / KVerificationPointCountY;
+
+	for (int i = 0; i < KVerificationPointCountX; i++)
+		for (int j = 0; j < KVerificationPointCountY; j++)
+		{
+			CalibrationPointStruct cp;
+			cp.number = i * KVerificationPointCountY + j + 1;
+			cp.positionX = i * cellWidth + KVerificationCellMargin + random(cellWidth - 2 * KVerificationCellMargin);
+			cp.positionY = j * cellHeight + KVerificationCellMargin + random(cellHeight - 2 * KVerificationCellMargin);
+
+			addPoint(cp);
+		}
+
+	iCalibPoints->prepare();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::Abort()
 {
 	if (FOnEvent)
@@ -601,8 +711,6 @@ void __fastcall TiFireflyAndPoints::Abort()
 	iCalibPoints->lightOff();
 
 	TiTimeout::run(1000, Done);
-
-	//iEyeBox->IsVisible = true;
 }
 
 //---------------------------------------------------------------------------
@@ -697,6 +805,7 @@ void __fastcall TiFireflyAndPoints::FormCreate(TObject *Sender)
 
 	iCircle = new TiAnimation(false, false);
 	iCircle->addFrames(IDR_CIRCLE, 45);
+	iCircle->addFrames(IDR_CIRCLE_GREEN, 45);
 	iCircle->LoopAnimation = true;
 	iCircle->RewindAnimationAfterStop = true;
 	iCircle->AllowAnimationReversion = true;

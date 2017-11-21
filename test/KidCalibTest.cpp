@@ -5,6 +5,7 @@
 //---------------------------------------------------------------------------
 USERES("KidCalibTest.res");
 USEFORM("MainForm.cpp", frmMainForm);
+USEUNIT("Controller.cpp");
 USELIB("GdiPlus.lib");
 USELIB("..\..\XML\XML.lib");
 USEUNIT("..\common\Animation.cpp");
@@ -40,7 +41,6 @@ USEUNIT("..\game2\src\InstructionShape.cpp");
 USEUNIT("..\game2\src\LevelInstruction.cpp");
 USEUNIT("..\game2\src\LevelLegend.cpp");
 USEUNIT("..\game2\src\GhostBox.cpp");
-USEUNIT("Controller.cpp");
 USEUNIT("..\game2\src\PositionTracker.cpp");
 USEUNIT("..\game2\src\UserPositionQualityEstimator.cpp");
 //---------------------------------------------------------------------------
