@@ -80,6 +80,7 @@ class TiController : public TObject
 		TNotifyEvent FOnVerificationStarted;
 		TNotifyEvent FOnVerificationFinished;
 		TNotifyEvent FOnAborted;
+		TNotifyEvent FOnFinished;
 		FiOnDebug FOnDebug;
 
 		void __fastcall CreateCalibration(EiCalibType aType);
@@ -130,6 +131,7 @@ class TiController : public TObject
 		__property TNotifyEvent OnVerificationStarted = {read = FOnVerificationStarted, write = FOnVerificationStarted};
 		__property TNotifyEvent OnVerificationFinished = {read = FOnVerificationFinished, write = FOnVerificationFinished};
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
+		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 		__property FiOnDebug OnDebug = {read = FOnDebug, write = FOnDebug};
 };
 

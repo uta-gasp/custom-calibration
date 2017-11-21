@@ -26,6 +26,8 @@ const CalibrationPointStruct KCalibPoints[] = {
 const String KIniFileName = "settings.xml";
 const String KSessionsFileName = "sessions.txt";
 
+const bool KDebug = false;
+
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
 	frmMainForm->log->Lines->Add(aMsg);
@@ -61,7 +63,7 @@ __fastcall TfrmMainForm::~TfrmMainForm()
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::CreateController()
 {
-	iController = new TiController(true, iSettingsFileName);
+	iController = new TiController(KDebug, iSettingsFileName);
 	iController->OnDebug = onCtrl_Debug;
 	iController->OnCalibrationStarted = onCtrl_CalibrationStarted;
 	iController->OnCalibrationDisplayReady = onCtrl_CalibrationDisplayReady;
@@ -208,21 +210,30 @@ void __fastcall TfrmMainForm::onCtrl_CalibrationFinished(TObject* aSender)
 //void __fastcall TfrmMainForm::onCtrl_VerifFinished(TObject* aSender) {}
 
 //---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCtrl_Finished(TObject* aSender)
+{
+	MessageBox(Handle, "Finished", "KidCalib", MB_OK);
+}
+
+//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::btnStartCalib1Click(TObject *Sender)
 {
+	iController->OnFinished = NULL;
 	iController->run(TiController::ctStandard);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::btnStartCalib2Click(TObject *Sender)
 {
+	iController->OnFinished = NULL;
 	iController->run(TiController::ctFirefly);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::btnStartCalib3Click(TObject *Sender)
 {
+	iController->OnFinished = NULL;
 	iController->run(TiController::ctProfiledGame);
 }
 
@@ -235,6 +246,7 @@ void __fastcall TfrmMainForm::cmbUsersOrDaysChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::btnRunUserDayClick(TObject *Sender)
 {
+	iController->OnFinished = onCtrl_Finished;
 	iController->run(cmbUsers->Text, cmbDays->ItemIndex);
 }
 

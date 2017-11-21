@@ -12,6 +12,13 @@ const String KSessionSeparator = ",";
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
+static sMouseInput =
+#ifdef _DEBUG
+	true;
+#else
+	false;
+#endif
+
 //---------------------------------------------------------------------------
 __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 		TObject(),
@@ -35,6 +42,7 @@ __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 		FOnVerificationStarted(NULL),
 		FOnVerificationFinished(NULL),
 		FOnAborted(NULL),
+		FOnFinished(NULL),
 		FOnDebug(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
@@ -113,7 +121,19 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 	iCurrentSessionIndex = 0;
 	iCurrentDayIndex = aDay;
 
-	RunNextSession();
+	if (iDebug)
+	{
+		RunNextSession();
+	}
+	else
+	{
+		while (iCurrentDaySessions)
+		{
+			RunNextSession();
+			iCurrentSessionIndex++;
+		}
+		DestroyCalibration();
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -189,14 +209,19 @@ void __fastcall TiController::verify(TiCalibrationQualityPoints* aPoints)
 			iProfiledGame->reportCalibrationResult(pt->ID, pt->Left, pt->Right);
 	}
 
-	//bool isFinished;
 	if (iFireflyAndPoints)
 		iFireflyAndPoints->processCalibrationResult();
 	else if (iProfiledGame)
 		iProfiledGame->processCalibrationResult();
+}
 
-	//if (isFinished)
-	//	Log("CALIB_FINISHED");
+//---------------------------------------------------------------------------
+void __fastcall TiController::feedSample(SampleStruct& aSample)
+{
+	if (iFireflyAndPoints)
+		iFireflyAndPoints->setSample(aSample);
+	else if (iProfiledGame)
+		iProfiledGame->setSample(aSample);
 }
 
 //---------------------------------------------------------------------------
@@ -239,7 +264,7 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 		iFireflyAndPoints->GameAfterCalibration = true;
 
-		if (iDebug)
+		if (sMouseInput)
 			iFireflyAndPoints->OnMouseMove = onCalib_MouseMove;
 
 		iCalibrationForm = iFireflyAndPoints;
@@ -259,7 +284,7 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
 		iProfiledGame->OnVerifFinished = onCalib_VerifFinished;
 
-		if (iDebug)
+		if (sMouseInput)
 			iProfiledGame->OnMouseMove = onCalib_MouseMove;
 
 		iCalibrationForm = iProfiledGame;
@@ -271,12 +296,20 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 	if (FileExists(iSettingsFileName))
 	{
-		TiXML_INI* ini = new TiXML_INI(iSettingsFileName, "KidCalib", false);
+		TiXML_INI* settings = new TiXML_INI(iSettingsFileName, "KidCalib", false);
 		if (iFireflyAndPoints)
-			iFireflyAndPoints->loadSettings(ini);
+		{
+			if (iCurrentUser)
+				settings->openNode(iCurrentUser->Name, true);
+			iFireflyAndPoints->loadSettings(settings);
+			if (iCurrentUser)
+				settings->closeNode();
+		}
 		else if (iProfiledGame)
-			iProfiledGame->loadSettings(ini);
-		delete ini;
+		{
+			iProfiledGame->loadSettings(settings);
+		}
+		delete settings;
 	}
 }
 
@@ -285,21 +318,26 @@ void __fastcall TiController::DestroyCalibration(TObject* aSender)
 {
 	if (iCalibrationForm)
 	{
-		TiXML_INI* ini = new TiXML_INI(iSettingsFileName, "KidCalib", true);
+		TiXML_INI* settings = new TiXML_INI(iSettingsFileName, "KidCalib", true);
 
 		if (iFireflyAndPoints)
 		{
-			iFireflyAndPoints->saveSettings(ini);
+			if (iCurrentUser)
+				settings->openNode(iCurrentUser->Name, true);
+			iFireflyAndPoints->saveSettings(settings);
+			if (iCurrentUser)
+				settings->closeNode();
+
 			iFireflyAndPoints = NULL;
 		}
 		else if (iProfiledGame)
 		{
-			iProfiledGame->saveSettings(ini);
+			iProfiledGame->saveSettings(settings);
 			iProfiledGame = NULL;
 		}
 
-		ini->save(false);
-		delete ini;
+		settings->save(false);
+		delete settings;
 
 		delete iCalibrationForm;
 		iCalibrationForm = NULL;
@@ -329,16 +367,15 @@ void __fastcall TiController::RunNextSession(TObject* aSender)
 {
 	DestroyCalibration();
 
-	if (!iCurrentDaySessions)
-		return;
-
 	if (iCurrentSessionIndex >= SESSION_COUNT)
 	{
 		iCurrentUser = NULL;
 		iCurrentDaySessions = NULL;
 		iCurrentSessionIndex = -1;
 
-		MessageBox(NULL, "Finished", "KidCalib", MB_OK);
+		if (FOnFinished)
+			FOnFinished(this);
+
 		return;
 	}
 
@@ -498,14 +535,16 @@ void __fastcall TiController::onCalib_MouseMove(TObject* aSender, TShiftState aS
 //---------------------------------------------------------------------------
 void __fastcall TiController::onCalibForm_Closed(TObject* aSender, TCloseAction& Action)
 {
-	if (iCurrentDaySessions)
+	if (!iCurrentDaySessions)
+	{
+		TiTimeout::run(200, DestroyCalibration);
+		if (FOnFinished)
+			FOnFinished(this);
+	}
+	else if (iDebug)
 	{
 		iCurrentSessionIndex++;
 		TiTimeout::run(1000, RunNextSession);
-	}
-	else
-	{
-		TiTimeout::run(200, DestroyCalibration);
 	}
 }
 

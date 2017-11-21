@@ -122,7 +122,7 @@ void __fastcall TiProfiledGame::showLogin(String& aName)
 
 	iLogin->show();
 
-	if (memName->CanFocus())
+	if (Visible && memName->CanFocus())
 		memName->SetFocus();
 }
 

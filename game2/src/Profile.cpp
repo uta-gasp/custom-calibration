@@ -23,8 +23,8 @@ const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
 const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
 
 // Getting a bonus: thresholds
-const double KBonusScoreThreshold = 0.80;	// % of max possible
-const double KBonusFailedThreshold = 2;		// max number of failed targets
+const double KBonusScoreThreshold = 0.001; // 0.80;	// % of max possible
+const double KBonusFailedThreshold = 20; // 2;		// max number of failed targets
 
 //---------------------------------------------------------------------------
 TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
@@ -48,28 +48,6 @@ TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aV
 	iSavedData = new TiXMLDataList(true);
 	iTargetPoints = new TiTargetPoints(true);
 }
-
-/*/---------------------------------------------------------------------------
-TiProfile::TiProfile(TiAnimationManager* aManager, WideString aName) :
-		iManager(aManager)
-		iStatus(psNoName),
-		iSkinColorID(0),
-		iHairColorID(0),
-		iEyesColorID(0),
-		iShirtColorID(0),
-		iLevel(0),
-		iScore(0),
-		iSaldo(0),
-		iBonus(0),
-		iGameCoins(0),
-		iGameBonus(0)
-{
-	iSavedData = new TiXMLDataList(true);
-	iTargetPoints = new TiTargetPoints(true);
-	iPrizes = new TiAnimations(false);
-
-	SetName(aName);
-}*/
 
 //---------------------------------------------------------------------------
 TiProfile::~TiProfile()
@@ -209,7 +187,10 @@ void __fastcall TiProfile::updateScore()
 		{
 			iGameBonus = GetRandomBonus();
 			if (iGameBonus)
+			{
 				iBonus = iBonus | (1 << (iGameBonus - 1));
+				iAvatar->setPrizes(iBonus);
+			}
 		}
 	}
 

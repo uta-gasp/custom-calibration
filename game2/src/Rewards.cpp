@@ -82,6 +82,15 @@ void __fastcall TiRewards::show(TiProfile* aProfile)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiRewards::hide()
+{
+	if (iGainedPrizeIndex >= 0 && iGainedPrizeIndex < iPrizes->Count)
+		iPrizes->get(iGainedPrizeIndex)->hide();
+
+	TiScene::hide();
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiRewards::showBonus()
 {
 	if (!iIsVisible)

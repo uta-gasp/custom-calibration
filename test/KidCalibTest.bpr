@@ -4,18 +4,18 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\KidCalibTest.exe"/>
-    <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\Animation.obj 
-      build\CalibQuality.obj build\CalibQualityEstimator.obj build\utils.obj 
-      build\FireflyAndPoints.obj build\EyeBoxWithInstructions.obj build\Lamp.obj 
-      build\Lamps.obj build\OlioHunting.obj build\ProfiledGame.obj 
-      build\EyeBox.obj build\CalibPoint.obj build\CalibPoints.obj 
-      build\Profile.obj build\ProfileEditor.obj build\Avatar.obj 
-      build\InstructionSitting.obj build\Scene.obj build\InstructionStart.obj 
-      build\Factory.obj build\InstructionColor.obj build\Door.obj 
-      build\InstructionCalibrate.obj build\Login.obj build\GameResult.obj 
-      build\Rewards.obj build\Status.obj build\InstructionShape.obj 
-      build\LevelInstruction.obj build\LevelLegend.obj build\GhostBox.obj 
-      build\Controller.obj build\PositionTracker.obj 
+    <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\Controller.obj 
+      build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
+      build\utils.obj build\FireflyAndPoints.obj 
+      build\EyeBoxWithInstructions.obj build\Lamp.obj build\Lamps.obj 
+      build\OlioHunting.obj build\ProfiledGame.obj build\EyeBox.obj 
+      build\CalibPoint.obj build\CalibPoints.obj build\Profile.obj 
+      build\ProfileEditor.obj build\Avatar.obj build\InstructionSitting.obj 
+      build\Scene.obj build\InstructionStart.obj build\Factory.obj 
+      build\InstructionColor.obj build\Door.obj build\InstructionCalibrate.obj 
+      build\Login.obj build\GameResult.obj build\Rewards.obj build\Status.obj 
+      build\InstructionShape.obj build\LevelInstruction.obj 
+      build\LevelLegend.obj build\GhostBox.obj build\PositionTracker.obj 
       build\UserPositionQualityEstimator.obj"/>
     <RESFILES value="KidCalibTest.res build\assets_ffap.res build\assets_pg.res"/>
     <DEFFILE value=""/>

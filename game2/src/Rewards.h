@@ -40,6 +40,7 @@ class TiRewards : public TiScene
 		__fastcall ~TiRewards();
 
 		virtual void __fastcall show(TiProfile* aProfile);
+		virtual void __fastcall hide();
 		virtual void __fastcall showBonus();
 
 		virtual void __fastcall mouseClick(TMouseButton aButton, TShiftState aShift, int aX, int aY);

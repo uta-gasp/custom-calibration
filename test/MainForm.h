@@ -55,6 +55,7 @@ private:	// User declarations
 	//void __fastcall onCtrl_VerificationStarted(TObject* aSender);
 	//void __fastcall onCtrl_VerificationFinished(TObject* aSender);
 	//void __fastcall onCtrl_Aborted(TObject* aSender);
+	void __fastcall onCtrl_Finished(TObject* aSender);
 
 public:		// User declarations
 	__fastcall TfrmMainForm(TComponent* Owner);
