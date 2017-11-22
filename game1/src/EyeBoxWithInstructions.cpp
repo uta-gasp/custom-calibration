@@ -21,15 +21,17 @@ const double KMinStartDistance = 450.0;
 const double KMaxStartDistance = 650.0;
 const double KIdealDistance = 530.0;
 const int KEyeSize = 32;
-const int KInstructionWidth = 950;
+
+const int KInstructionWidth = 650;
 const int KInstructionHeight = 170;
 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager* aManager,
-		TRect aBox, TiSize aScreenSize, int aInstructionBottomRcID) :
+		TRect aBox, TiSize aScreenSize) :
 		TObject(),
 		iVisible(false),
 		iInstabilityCounter(0),
+		FOnShown(NULL),
 		FOnHidden(NULL)
 {
 	iBox = aBox;
@@ -50,31 +52,18 @@ __fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager
 	iWarning->placeTo(aBox.Left + aBox.Width()/2, aBox.Top + iWarning->Height);
 	iWarning->FadingDuration = 200;
 
-	iInstructionTop = new TiAnimation(iVisible);
-	iInstructionTop->addFrames(IDR_EYEBOX_INSTRUCTION_TOP, KInstructionWidth, KInstructionHeight);
-	iInstructionTop->placeTo(aScreenSize.Width / 2, iInstructionTop->Height / 2);
-
-	iInstructionBottom = new TiAnimation(iVisible);
-	iInstructionBottom->addFrames(aInstructionBottomRcID, KInstructionWidth, KInstructionHeight);
-	iInstructionBottom->placeTo(aScreenSize.Width / 2, aScreenSize.Height - iInstructionBottom->Height / 2);
-
 	iStart = new TiAnimation(iVisible, false);
 	iStart->addFrames(IDR_START, 160, 48);
 	iStart->addFrames(IDR_START_HOVER, 160, 48);
 	iStart->FadingDuration = 500;
 	iStart->placeTo(
-			//iBackground->X - iStart->Width/2 - 4,
 			iBackground->X,
 			iBackground->Y + iBackground->Height/2 + 4 + iStart->Height/2
 	);
 
-	//iClose = new TiAnimation();
-	//iClose->addFrames(IDR_CLOSE, 120, 48);
-	//iClose->addFrames(IDR_CLOSE_HOVER, 120, 48);
-	//iClose->placeTo(
-	//		iBackground->X + iClose->Width/2 + 4,
-	//		iBackground->Y + iBackground->Height/2 + 4 + iClose->Height/2
-	//);
+	iInstruction = new TiAnimation(iVisible);
+	iInstruction->addFrames(IDR_EYEBOX_INSTRUCTION, KInstructionWidth, KInstructionHeight);
+	iInstruction->placeTo(aScreenSize.Width / 2, iStart->Y + iStart->Height / 2 + 28 + iInstruction->Height / 2 );
 
 	if (aManager)
 	{
@@ -82,10 +71,8 @@ __fastcall TiEyeBoxWithInstructions::TiEyeBoxWithInstructions(TiAnimationManager
 		aManager->add(iLeft);
 		aManager->add(iRight);
 		aManager->add(iWarning);
-		aManager->add(iInstructionTop);
-		aManager->add(iInstructionBottom);
+		aManager->add(iInstruction);
 		aManager->add(iStart);
-		//aManager->add(iClose);
 	}
 
 	SetEyeLocation(iLeft, KInvalidValue, KInvalidValue);
@@ -146,8 +133,7 @@ void __fastcall TiEyeBoxWithInstructions::paintTo(Gdiplus::Graphics* aGraphics, 
 	if (aUpdateType & updStatic)
 	{
 		iBackground->paintTo(aGraphics);
-		iInstructionTop->paintTo(aGraphics);
-		iInstructionBottom->paintTo(aGraphics);
+		iInstruction->paintTo(aGraphics);
 	}
 
 	if (aUpdateType & updNonStatic)
@@ -184,6 +170,8 @@ void __fastcall TiEyeBoxWithInstructions::paintTo(Gdiplus::Graphics* aGraphics, 
 //---------------------------------------------------------------------------
 void __fastcall TiEyeBoxWithInstructions::onBackgroundFadingFinished(TObject* aSender)
 {
+	if (iBackground->IsVisible && FOnShown)
+		FOnShown(this);
 	if (!iBackground->IsVisible && FOnHidden)
 		FOnHidden(this);
 }
@@ -236,18 +224,14 @@ void __fastcall TiEyeBoxWithInstructions::SetVisible(bool aValue)
 		iLeft->fadeOut();
 		iRight->fadeOut();
 		iWarning->fadeOut();
-		iInstructionTop->fadeOut();
-		iInstructionBottom->fadeOut();
+		iInstruction->fadeOut();
 		iStart->fadeOut();
-		//iClose->fadeOut();
 	}
 	else if (!iVisible && aValue)
 	{
 		iBackground->fadeIn();
-		iInstructionTop->fadeIn();
-		iInstructionBottom->fadeIn();
+		iInstruction->fadeIn();
 		iStart->fadeIn();
-		//iClose->fadeIn();
 	}
 
 	iVisible = aValue;

@@ -196,7 +196,7 @@ void __fastcall TfrmMainForm::onCreaturesPaint(TObject* aSender, EiUpdateType aU
 
 	//Gdiplus::Bitmap* background = iBackground->Clone(destRect, iBackground->GetPixelFormat());
 	Gdiplus::Bitmap* background;
-	Utils::loadBitmapFromPNG(IDR_BACKGROUND, &background);
+	Utils::loadBitmapFromPNG(IDR_GAME_BACKGROUND, &background);
 
 	Gdiplus::Graphics g(background);
 	iCreatures->paintTo(&g);

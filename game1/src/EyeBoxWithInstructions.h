@@ -22,14 +22,14 @@ class TiEyeBoxWithInstructions : public TObject
 		TiAnimation* iLeft;
 		TiAnimation* iRight;
 		TiAnimation* iWarning;
-		TiAnimation* iInstructionTop;
-		TiAnimation* iInstructionBottom;
+		TiAnimation* iInstruction;
 		TiAnimation* iStart;
 		TiAnimation* iClose;
 
 		bool iVisible;
 		int iInstabilityCounter;
 
+		TNotifyEvent FOnShown;
 		TNotifyEvent FOnHidden;
 
 		void __fastcall onBackgroundFadingFinished(TObject* aSender);
@@ -41,7 +41,7 @@ class TiEyeBoxWithInstructions : public TObject
 		void __fastcall SetVisible(bool aValue);
 
 	public:
-		__fastcall TiEyeBoxWithInstructions(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize, int aInstructionBottomRcID);
+		__fastcall TiEyeBoxWithInstructions(TiAnimationManager* aManager, TRect aBox, TiSize aScreenSize);
 		__fastcall ~TiEyeBoxWithInstructions();
 
 		void __fastcall left(EyeDataStruct& aEyeData);
@@ -60,6 +60,7 @@ class TiEyeBoxWithInstructions : public TObject
 
 		__property bool IsVisible = {read = iVisible, write = SetVisible};
 
+		__property TNotifyEvent OnShown = {read = FOnShown, write = FOnShown};
 		__property TNotifyEvent OnHidden = {read = FOnHidden, write = FOnHidden};
 };
 

@@ -52,13 +52,14 @@ class TiFireflyAndPoints : public TForm
 		FireflyAndPoints::TiEyeBoxWithInstructions* iEyeBox;
 		FireflyAndPoints::TiOlioHunting* iGame;
 
-		TiAnimation* iBackground;
+		TiAnimation* iCalibrationInstruction;
 		TiAnimation* iTarget;
 
 		TiAnimation* iFireFly;
 		TiAnimation* iCircle;
 		TiAnimation* iAttractor;
 
+		TiAnimation* iGameBackground;
 		TiAnimationManager* iObjects;
 
 		Gdiplus::Color iBackgroundColor;
@@ -95,11 +96,13 @@ class TiFireflyAndPoints : public TForm
 
 		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
 		void __fastcall onEyeBoxFadingTransition(TObject* aSender, double iAlpha);
+		void __fastcall onEyeBoxShown(TObject* aSender);
 		void __fastcall onEyeBoxHidden(TObject* aSender);
 		void __fastcall onAttractorFadingFisnihed(TObject* aSender);
 		void __fastcall onAttractorMoveFisnihed(TObject* aSender);
 		void __fastcall onCalibPointTimeout(TObject* aSender);
-		void __fastcall onBackgroundFadingFisnihed(TObject* aSender);
+		void __fastcall onCalibInstructionFadingFisnihed(TObject* aSender);
+		void __fastcall onGameBackgroundFadingFisnihed(TObject* aSender);
 		void __fastcall onGameSelect(TObject* aSender, int aTargetX, int aTargetY);
 		void __fastcall onGameFisnihed(TObject* aSender);
 

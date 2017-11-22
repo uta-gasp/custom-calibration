@@ -20,8 +20,7 @@ using namespace FireflyAndPoints;
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
-//TfrmCalibration* frmCalibration;
-
+//---------------------------------------------------------------------------
 const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
 
@@ -30,7 +29,8 @@ const double KMinAllowedCalibQualityValue = 0.5;
 
 const double KMouseGazeCorrectionFactor = 0; //0.05;
 
-const String KIniRoot = "OlioHunting";         
+//---------------------------------------------------------------------------
+const String KIniRoot = "OlioHunting";
 const String KIniBestScore = "BestScore";
 const String KIniBestScoreDate = "BestScoreDate";
 const String KIniResults = "Results";
@@ -84,6 +84,8 @@ __fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner, EiAttracto
 	iCalibQualityEstimator->OnEvent = FOnEvent;
 
 	iCalibQuality = new TiCalibQuality();
+
+	tmrKostyl->Interval = iAttractorType == atFirefly ? 500 : 10;
 	
 #ifndef _DEBUG
 	FormStyle = fsStayOnTop;
@@ -232,7 +234,7 @@ bool __fastcall TiFireflyAndPoints::processCalibrationResult()
 void __fastcall TiFireflyAndPoints::playGame(TObject* aSender)
 {
 	Cursor = crNone;
-	iBackground->fadeIn();
+	iGameBackground->fadeIn();
 
 	TiTimeout::run(700, ShowGameInstructions);
 }
@@ -294,7 +296,8 @@ void __fastcall TiFireflyAndPoints::onObjectPaint(TObject* aSender, EiUpdateType
 		Gdiplus::Rect fillRect(0, 0, Width, Height);
 		graphics->FillRectangle(&backgroundBrush, fillRect);
 
-		iBackground->paintTo(graphics);
+		iGameBackground->paintTo(graphics);
+		iCalibrationInstruction->paintTo(graphics);
 		iCalibPoints->paintTo(graphics, updStatic);
 		iEyeBox->paintTo(graphics, updStatic);
 
@@ -335,6 +338,19 @@ void __fastcall TiFireflyAndPoints::onEyeBoxFadingTransition(TObject* aSender, d
 	);
 }
 
+//---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::onEyeBoxShown(TObject* aSender)
+{
+	switch (iAttractorType)
+	{
+		case atFirefly:
+			iCalibrationBackgroundColor = Gdiplus::Color(255, 0, 0, 0);
+			break;
+		case atCircle:
+			iCalibrationBackgroundColor = Gdiplus::Color(255, 0xDD, 0xDD, 0xDD);
+			break;
+	}
+}
 
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::onEyeBoxHidden(TObject* aSender)
@@ -402,9 +418,14 @@ void __fastcall TiFireflyAndPoints::onCalibPointTimeout(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiFireflyAndPoints::onBackgroundFadingFisnihed(TObject* aSender)
+void __fastcall TiFireflyAndPoints::onCalibInstructionFadingFisnihed(TObject* aSender)
 {
-	if (!iBackground->IsVisible)
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::onGameBackgroundFadingFisnihed(TObject* aSender)
+{
+	if (!iGameBackground->IsVisible)
 		Done();
 }
 
@@ -453,17 +474,13 @@ void __fastcall TiFireflyAndPoints::StartCalibration()
 	iIsVerifying = false;
 	Cursor = crNone;
 
-	iEyeBox->IsVisible = false;
-
 	switch (iAttractorType)
 	{
 		case atFirefly:
 			iAttractor = iFireFly;
-			iCalibrationBackgroundColor = Gdiplus::Color(255, 0, 0, 0);
 			break;
 		case atCircle:
 			iAttractor = iCircle;
-			iCalibrationBackgroundColor = Gdiplus::Color(255, 0xDD, 0xDD, 0xDD);
 			break;
 	}
 
@@ -666,6 +683,8 @@ void __fastcall TiFireflyAndPoints::StartVerification()
 	AddVerificationPoints();
 
 	iAttractor->fadeIn();
+
+	nextPoint(1);
 }
 
 //---------------------------------------------------------------------------
@@ -728,8 +747,8 @@ void __fastcall TiFireflyAndPoints::StartGame(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::FadeOut(TObject* aSender)
 {
-	iBackground->FadingDuration = 400;
-	iBackground->fadeOut();
+	iGameBackground->FadingDuration = 400;
+	iGameBackground->fadeOut();
 }
 
 //---------------------------------------------------------------------------
@@ -766,11 +785,11 @@ void __fastcall TiFireflyAndPoints::FormCreate(TObject *Sender)
 	iObjects = new TiAnimationManager();
 	iObjects->OnPaint = onObjectPaint;
 
-	iBackground = new TiAnimation(false);
-	iBackground->addFrames(IDR_BACKGROUND, 1366, 768);
-	iBackground->placeTo(Width / 2, Height / 2);
-	iBackground->OnFadingFinished = onBackgroundFadingFisnihed;
-	iObjects->add(iBackground);
+	iGameBackground = new TiAnimation(false);
+	iGameBackground->addFrames(IDR_GAME_BACKGROUND, 1366, 768);
+	iGameBackground->placeTo(Width / 2, Height / 2);
+	iGameBackground->OnFadingFinished = onGameBackgroundFadingFisnihed;
+	iObjects->add(iGameBackground);
 
 	iCalibPoints = new TiLamps(iObjects, Width, Height);
 
@@ -778,13 +797,18 @@ void __fastcall TiFireflyAndPoints::FormCreate(TObject *Sender)
 			(Width - KEyeBoxWidth) / 2, (Height - KEyeBoxHeight) / 2,
 			(Width + KEyeBoxWidth) / 2, (Height + KEyeBoxHeight) / 2
 		),
-		TiSize( Width, Height ),
-		iAttractorType == atFirefly ?
-				IDR_EYEBOX_INSTRUCTION_BOTTOM_FIREFLY :
-				IDR_EYEBOX_INSTRUCTION_BOTTOM_STANDARD
+		TiSize( Width, Height )
 	);
+	iEyeBox->OnShown = onEyeBoxShown;
 	iEyeBox->OnHidden = onEyeBoxHidden;
 	iEyeBox->Background->OnFadingTransition = onEyeBoxFadingTransition;
+
+	iCalibrationInstruction = new TiAnimation(false);
+	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_FIREFLY, 950, 170);
+	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_CIRCLE, 950, 170);
+	iCalibrationInstruction->placeTo(Width / 2, Height / 2);
+	iCalibrationInstruction->OnFadingFinished = onCalibInstructionFadingFisnihed;
+	iObjects->add(iCalibrationInstruction);
 
 	iTarget = new TiAnimation(false);
 	iTarget->addFrames(IDR_TARGET, 45);
@@ -841,7 +865,16 @@ void __fastcall TiFireflyAndPoints::FormMouseUp(TObject *Sender,
 	if (iEyeBox->IsVisible)
 	{
 		if (iEyeBox->Start->hitTest(X, Y))
-			StartCalibration();
+		{
+			iEyeBox->IsVisible = false;
+			iCalibrationInstruction->AnimationIndex = iAttractorType == atFirefly ? 0 : 1;
+			iCalibrationInstruction->fadeIn();
+		}
+	}
+	else if (iCalibrationInstruction->IsVisible)
+	{
+		iCalibrationInstruction->hide();
+		StartCalibration();
 	}
 	else if (iGame->IsInstructionVisible)
 	{
