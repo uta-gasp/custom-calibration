@@ -28,7 +28,8 @@ class TiEyeBox : public TiScene
 
 		TiProfile* iProfile;
 
-		TiUserPositionQualityEstimator* iUserPositionQualityEstimator;
+		TiUserPositionQualityEstimator* iUserPositionQualityEstimatorLeft;
+		TiUserPositionQualityEstimator* iUserPositionQualityEstimatorRight;
 		bool iEstimateUserPositionQuality;
 
 		void __fastcall SetEyeLocation(TiAnimation* aEye, double aX, double aY);

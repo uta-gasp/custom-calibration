@@ -619,10 +619,7 @@ void __fastcall TiFireflyAndPoints::MoveToNextPoint(int aPointNumber)
 
 		if (!iIsVerifying)
 		{
-			if (iAttractor == iFireFly)
-				tmrKostyl->Enabled = true;
-			else
-				tmrKostylTimer(NULL);
+			tmrKostyl->Enabled = true;
 		}
 		else
 		{
@@ -927,7 +924,7 @@ void __fastcall TiFireflyAndPoints::tmrKostylTimer(TObject *Sender)
 
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::FormMouseMove(TObject *Sender,
-      TShiftState Shift, int X, int Y)
+			TShiftState Shift, int X, int Y)
 {
 	if (iGame->IsRunning && iMouseInitialPosition.x < 0)
 	{

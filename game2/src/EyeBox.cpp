@@ -24,11 +24,11 @@ const double KMaxStartDistance = 650.0; // mm
 const int KEyeSize = 36;								// px
 const int KEyeCircleWidth = 8;
 
-const int KEyeBoxWidth = 640;
-const int KEyeBoxHeight = 480;
+const int KEyeBoxWidth = 800;
+const int KEyeBoxHeight = 600;
 
 const int KThresholdZ = 80;
-const int KThresholdXY = 7;
+const int KThresholdXY = 10;
 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
@@ -42,19 +42,16 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, 
 	);
 
 	iBackground = new TiAnimation(false);
-	//iBackground->addFrames(IDR_EYEBOX_BACKGROUND, 160, 120);
-	//iBackground->placeTo(aScreenSize.Width/2, aScreenSize.Height/2);
 	aManager->add(iBackground);
 
 	iLeft = new TiAnimation(false, false);
-	//iLeft->addFrames(IDR_EYEBOX_EYE, KEyeSize);
 	aManager->add(iLeft);
 
 	iRight = new TiAnimation(false, false);
-	//iRight->addFrames(IDR_EYEBOX_EYE, KEyeSize);
 	aManager->add(iRight);
 
-	iUserPositionQualityEstimator = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
+	iUserPositionQualityEstimatorLeft = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
+	iUserPositionQualityEstimatorRight = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
 
 	SetEyeLocation(iLeft, KInvalidValue, KInvalidValue);
 	SetEyeLocation(iRight, KInvalidValue, KInvalidValue);
@@ -63,7 +60,8 @@ __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::~TiEyeBox()
 {
-	delete iUserPositionQualityEstimator;
+	delete iUserPositionQualityEstimatorLeft;
+	delete iUserPositionQualityEstimatorRight;
 }
 
 //---------------------------------------------------------------------------
@@ -108,7 +106,7 @@ void __fastcall TiEyeBox::left(EyeDataStruct& aEyeData)
 	if (!iEstimateUserPositionQuality)
 		return;
 
-	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimator->feed(aEyeData);
+	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimatorLeft->feed(aEyeData);
 	if (quality == TiUserPositionQualityEstimator::pqOK)
 	{
 		iEstimateUserPositionQuality = false;
@@ -125,6 +123,17 @@ void __fastcall TiEyeBox::right(EyeDataStruct& aEyeData)
 
 	SetEyeLocation(iRight, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iRight, aEyeData.eyePositionZ);
+
+	if (!iEstimateUserPositionQuality)
+		return;
+
+	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimatorRight->feed(aEyeData);
+	if (quality == TiUserPositionQualityEstimator::pqOK)
+	{
+		iEstimateUserPositionQuality = false;
+		if (FOnDone)
+			FOnDone(this);
+	}
 }
 
 //---------------------------------------------------------------------------

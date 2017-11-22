@@ -23,8 +23,8 @@ const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
 const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
 
 // Getting a bonus: thresholds
-const double KBonusScoreThreshold = 0.001; // 0.80;	// % of max possible
-const double KBonusFailedThreshold = 20; // 2;		// max number of failed targets
+const double KBonusScoreThreshold = 0.85;	// % of max possible
+const double KBonusFailedThreshold = 1;		// max number of failed targets
 
 //---------------------------------------------------------------------------
 TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
@@ -205,6 +205,16 @@ void __fastcall TiProfile::updateScore()
 	{
 		iIsGainedNewLevel = true;
 		iLevel++;
+	}
+
+	if (iIsGainedNewLevel && !iBonus)
+	{
+		iGameBonus = GetRandomBonus();
+		if (iGameBonus)
+		{
+			iBonus = iBonus | (1 << (iGameBonus - 1));
+			iAvatar->setPrizes(iBonus);
+		}
 	}
 }
 

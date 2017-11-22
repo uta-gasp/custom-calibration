@@ -20,7 +20,13 @@ class TiPositionTracker : public TiScene
 		TiRect iButtonContinue;
 		bool iEnabled;
 
+		TiUserPositionQualityEstimator::PositionQuality* iEstimatesBuffer;
+		int iEstimatesBufferHead;
+
 		TiUserPositionQualityEstimator* iUserPositionQualityEstimator;
+
+		void __fastcall ResetBuffer();
+		double __fastcall GetWrongPositionShare();
 
 	public:
 		__fastcall TiPositionTracker(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);

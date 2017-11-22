@@ -41,6 +41,9 @@ class TiProfiledGame : public TForm
 	__published:
 	TPanel *pnlNameContainer;
 	TMemo *memName;
+	TTimer *tmrKostyl1;
+	TTimer *tmrKostyl2;
+	TTimer *tmrKostyl3;
 		void __fastcall FormCreate(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 		void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
@@ -51,6 +54,9 @@ class TiProfiledGame : public TForm
 	void __fastcall memNameKeyPress(TObject *Sender, char &Key);
 	void __fastcall FormKeyDown(TObject *Sender, WORD &Key,
 					TShiftState Shift);
+	void __fastcall tmrKostyl1Timer(TObject *Sender);
+	void __fastcall tmrKostyl2Timer(TObject *Sender);
+	void __fastcall tmrKostyl3Timer(TObject *Sender);
 
 	public:
 		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);

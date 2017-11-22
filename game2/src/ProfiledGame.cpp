@@ -143,7 +143,8 @@ void __fastcall TiProfiledGame::nextPoint(int aPointID)
 {
 	iNextPointID = aPointID;
 	if (!iIsRecalibrating || iLastPointID == aPointID)
-		TiTimeout::run(1000, AfterPointDone, &iTimeout);        // GT-driven
+		tmrKostyl2->Enabled = true;
+		//TiTimeout::run(1000, AfterPointDone, &iTimeout);        // GT-driven
 	else
 		AfterPointDone();
 }
@@ -166,9 +167,7 @@ bool __fastcall TiProfiledGame::processCalibrationResult()
 		TStringList* calibQuality = new TStringList();
 		iCalibQuality->log(calibQuality);
 		for (int i = 0; i < calibQuality->Count; i++)
-		{
 			FOnEvent(this, String("quality\t") + calibQuality->Strings[i]);
-		}
 
 		delete calibQuality;
 	}
@@ -187,7 +186,8 @@ bool __fastcall TiProfiledGame::processCalibrationResult()
 	}
 	else
 	{
-		TiTimeout::run(10, StartVerification, &iTimeout);
+		tmrKostyl3->Enabled = true;
+		//TiTimeout::run(10, StartVerification, &iTimeout);
 	}
 
 	return finished;
@@ -349,7 +349,8 @@ void __fastcall TiProfiledGame::onInstructionSittingDone(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::onEyeBoxDone(TObject* aSender)
 {
-	TiTimeout::run(1500, AfterEyeBox, &iTimeout);
+	tmrKostyl1->Enabled = true;
+	//TiTimeout::run(1500, AfterEyeBox, &iTimeout);
 }
 
 //---------------------------------------------------------------------------
@@ -897,6 +898,7 @@ void __fastcall TiProfiledGame::FormMouseUp(TObject *Sender,
 void __fastcall TiProfiledGame::FormKeyUp(TObject *Sender, WORD &Key,
 			TShiftState Shift)
 {
+#ifdef _DEBUG
 	if (iLogin->IsVisible)
 	{
 	}
@@ -987,6 +989,13 @@ void __fastcall TiProfiledGame::FormKeyUp(TObject *Sender, WORD &Key,
 		if (Key == VK_ESCAPE)
 			Done();
 	}
+#else
+	if (iInstructionCalibrate->IsVisible)
+	{
+		if (Key == VK_SPACE)
+			onInstructionCalibrateDone();
+	}
+#endif
 }
 
 //---------------------------------------------------------------------------
@@ -1019,6 +1028,28 @@ void __fastcall TiProfiledGame::memNameKeyPress(TObject *Sender,
 	{
 		Key = Key & 0xDF;
 	}
+}
+
+//---------------------------------------------------------------------------
+// Kostyli
+void __fastcall TiProfiledGame::tmrKostyl1Timer(TObject *Sender)
+{
+	tmrKostyl1->Enabled = false;
+	AfterEyeBox();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::tmrKostyl2Timer(TObject *Sender)
+{
+	tmrKostyl2->Enabled = false;
+	AfterPointDone();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::tmrKostyl3Timer(TObject *Sender)
+{
+	tmrKostyl3->Enabled = false;
+	StartVerification();
 }
 
 //---------------------------------------------------------------------------

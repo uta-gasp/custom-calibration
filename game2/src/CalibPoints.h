@@ -23,8 +23,8 @@ class TiCalibPoints : public TiScene
 		enum EiAnimationDuration	// ms
 		{
 			adSlow = 500,
-			adModerate = 490,
-			adFast = 480
+			adModerate = 450,
+			adFast = 410
 		};
 
 		enum EiItemResultType

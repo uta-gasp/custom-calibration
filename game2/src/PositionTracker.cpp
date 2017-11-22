@@ -12,6 +12,9 @@ using namespace ProfiledGame;
 const int KThresholdZ = 80;
 const int KThresholdXY = 60;
 
+const int KEstimatesBufferSize = 6;
+const double KWrongPositionShareThreshold = 0.7;
+
 //---------------------------------------------------------------------------
 __fastcall TiPositionTracker::TiPositionTracker(TiAnimationManager* aManager,
 		TiSize aScreenSize, TiSize aViewport) :
@@ -26,6 +29,11 @@ __fastcall TiPositionTracker::TiPositionTracker(TiAnimationManager* aManager,
 
 	iButtonContinue = TiRect(Offset.x + 583, Offset.y + 475, 200, 60);
 
+	iEstimatesBuffer = new TiUserPositionQualityEstimator::PositionQuality[KEstimatesBufferSize];
+	iEstimatesBufferHead = 0;
+
+	ResetBuffer();
+
 	iUserPositionQualityEstimator = new TiUserPositionQualityEstimator(KThresholdZ, KThresholdXY);
 }
 
@@ -33,6 +41,7 @@ __fastcall TiPositionTracker::TiPositionTracker(TiAnimationManager* aManager,
 __fastcall TiPositionTracker::~TiPositionTracker()
 {
 	delete iUserPositionQualityEstimator;
+	delete [] iEstimatesBuffer;
 }
 
 //---------------------------------------------------------------------------
@@ -51,14 +60,41 @@ bool __fastcall TiPositionTracker::isPositionWrong(SampleStruct& aSample)
 	if (!iEnabled || IsVisible)
 		return false;
 
-	//bool isWrong = aSample.leftEye.eyePositionX > 120;
-
 	TiUserPositionQualityEstimator::PositionQuality quality = iUserPositionQualityEstimator->feed(aSample.leftEye);
-	bool isWrong = quality > TiUserPositionQualityEstimator::pqOK;
 
-	if (isWrong && !IsVisible)
+	bool result = false;
+	if (quality != TiUserPositionQualityEstimator::pqUndefined)
+	{
+		iEstimatesBuffer[iEstimatesBufferHead] = quality;
+		if (++iEstimatesBufferHead == KEstimatesBufferSize)
+			iEstimatesBufferHead = 0;
+
+		result = GetWrongPositionShare() > KWrongPositionShareThreshold;
+	}
+
+	if (result && !IsVisible)
+	{
+		ResetBuffer();
 		show();
+	}
 
-	return isWrong;
+	return result;
 }
 
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+void __fastcall TiPositionTracker::ResetBuffer()
+{
+	for (int i = 0; i < KEstimatesBufferSize; i++)
+		iEstimatesBuffer[i] = false;
+}
+
+//---------------------------------------------------------------------------
+double __fastcall TiPositionTracker::GetWrongPositionShare()
+{
+	int wrongPosCount = 0;
+	for (int i = 0; i < KEstimatesBufferSize; i++)
+		wrongPosCount += iEstimatesBuffer[i] > TiUserPositionQualityEstimator::pqOK ? 1 : 0;
+
+	return double(wrongPosCount) / KEstimatesBufferSize;
+}
