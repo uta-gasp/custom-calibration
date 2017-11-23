@@ -1,6 +1,6 @@
 object iProfiledGame: TiProfiledGame
-  Left = 441
-  Top = 180
+  Left = 620
+  Top = 253
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 550

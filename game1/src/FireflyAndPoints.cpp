@@ -16,12 +16,12 @@
 //---------------------------------------------------------------------------
 using namespace FireflyAndPoints;
 
-//static bool sIsDebug = true;
-//static TStringList* sLog = new TStringList();
-void d(String s) { /*if (sIsDebug) sLog->Add(s);*/ }
+static bool sIsDebug = true;
+static TStringList* sLog = new TStringList();
+void d(String s) { if (sIsDebug) sLog->Add(s); }
 void ShowLog() {
-/*
 	TForm* f = new TForm((TComponent*)NULL);
+	f->FormStyle = fsStayOnTop;
 	TMemo* m = new TMemo(f);
 	m->Align = alClient;
 	m->ScrollBars = ssVertical;
@@ -29,8 +29,6 @@ void ShowLog() {
 	m->Lines->AddStrings(sLog);
 	f->ShowModal();
 	delete f;
-	sLog->Clear();
-*/
 }
 
 //---------------------------------------------------------------------------
@@ -40,6 +38,9 @@ static ULONG_PTR m_gdiplusToken = NULL;
 //---------------------------------------------------------------------------
 const int KEyeBoxWidth = 160;
 const int KEyeBoxHeight = 120;
+
+const int KCalibInstructionWidth = 750;
+const int KCalibInstructionHeight = 250;
 
 const int KMaxAllowedCalibQualityOffset = 40;
 const double KMinAllowedCalibQualityValue = 0.1;
@@ -578,11 +579,11 @@ void __fastcall TiFireflyAndPoints::ReportPointAcceptance()
 		TiCalibQualityEstimator::TiPointD pt = iCalibQualityEstimator->Point;
 		double dx = pt.X - iCalibPoints->Current->X;
 		double dy = pt.Y - iCalibPoints->Current->Y;
-		double distance;
+		double distance = 9999999;
 		try {
 			distance = sqrt(dx * dx + dy * dy);
 		} catch (...) {
-			MessageBox(NULL, "Oops1", "KC", MB_OK);
+			//MessageBox(NULL, "Oops1", "KC", MB_OK);
 		}
 		FOnEvent(this, String().sprintf("verification point\t%d %d\t%d %d\t%.2f",
 			iCalibPoints->Current->X, iCalibPoints->Current->Y, int(pt.X), int(pt.Y), distance ));
@@ -836,8 +837,8 @@ void __fastcall TiFireflyAndPoints::FormCreate(TObject *Sender)
 	iEyeBox->Background->OnFadingTransition = onEyeBoxFadingTransition;
 
 	iCalibrationInstruction = new TiAnimation(false);
-	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_FIREFLY, 950, 170);
-	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_CIRCLE, 950, 170);
+	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_FIREFLY, KCalibInstructionWidth, KCalibInstructionHeight);
+	iCalibrationInstruction->addFrames(IDR_CALIB_INSTRUCTION_CIRCLE, KCalibInstructionWidth, KCalibInstructionHeight);
 	iCalibrationInstruction->placeTo(Width / 2, Height / 2);
 	iCalibrationInstruction->OnFadingFinished = onCalibInstructionFadingFisnihed;
 	iObjects->add(iCalibrationInstruction);

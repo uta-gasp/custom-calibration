@@ -86,7 +86,7 @@ bool __fastcall TiPositionTracker::isPositionWrong(SampleStruct& aSample)
 void __fastcall TiPositionTracker::ResetBuffer()
 {
 	for (int i = 0; i < KEstimatesBufferSize; i++)
-		iEstimatesBuffer[i] = false;
+		iEstimatesBuffer[i] = TiUserPositionQualityEstimator::pqOK;
 }
 
 //---------------------------------------------------------------------------

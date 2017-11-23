@@ -136,7 +136,7 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 		while (iCurrentDaySessions)
 		{
 			if (iCurrentSessionIndex < SESSION_COUNT)
-				ShowPreInstruction(!iCurrentSessionIndex ? TfrmPreInstruction::instStart : TfrmPreInstruction::instPause);
+				ShowPreInstruction((TfrmPreInstruction::EiInstruction)iCurrentDaySessions[iCurrentSessionIndex]);
 
 			RunNextSession();
 			iCurrentSessionIndex++;

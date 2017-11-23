@@ -7,11 +7,11 @@
 #include <Controls.hpp>
 #include <StdCtrls.hpp>
 #include <Forms.hpp>
+#include <ExtCtrls.hpp>
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
 #include "utils.h"
-#include <ExtCtrls.hpp>
 
 //---------------------------------------------------------------------------
 class TfrmPreInstruction : public TForm
@@ -25,9 +25,10 @@ class TfrmPreInstruction : public TForm
 	public:
 		enum EiInstruction
 		{
-			instStart = 0,
-			instPause,
-			instFinished
+			instFinished = 0,
+			instStandard = 's',
+			instFirefly = 'f',
+			instProfiled = 'p'
 		};
 
 	private:	// User declarations

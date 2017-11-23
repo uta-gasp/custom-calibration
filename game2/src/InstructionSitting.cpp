@@ -20,7 +20,7 @@ __fastcall TiInstructionSitting::TiInstructionSitting(TiAnimationManager* aManag
 
 	iStaticAssets->add(background);
 
-	iButtonContinue = TiRect(Offset.x + 583, Offset.y + 575, 200, 60);
+	iButtonContinue = TiRect(Offset.x + 595, Offset.y + 517, 200, 60);
 }
 
 //---------------------------------------------------------------------------

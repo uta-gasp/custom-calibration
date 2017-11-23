@@ -4,12 +4,12 @@
 
 //---------------------------------------------------------------------------
 USERES("KidCalibTest.res");
-USERC("assets/assets.rc");
 USEFORM("MainForm.cpp", frmMainForm);
-USEFORM("PreInstruction.cpp", frmPreInstruction);
-USEUNIT("Controller.cpp");
 USELIB("GdiPlus.lib");
 USELIB("..\..\XML\XML.lib");
+USERC("..\controller\assets\assets_ctrl.rc");
+USEFORM("..\controller\src\PreInstruction.cpp", frmPreInstruction);
+USEUNIT("..\controller\src\Controller.cpp");
 USEUNIT("..\common\Animation.cpp");
 USEUNIT("..\common\CalibQuality.cpp");
 USEUNIT("..\common\CalibQualityEstimator.cpp");

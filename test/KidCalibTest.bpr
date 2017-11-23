@@ -17,17 +17,18 @@
       build\InstructionShape.obj build\LevelInstruction.obj 
       build\LevelLegend.obj build\GhostBox.obj build\PositionTracker.obj 
       build\UserPositionQualityEstimator.obj"/>
-    <RESFILES value="KidCalibTest.res build\assets.res build\assets_ffap.res build\assets_pg.res"/>
+    <RESFILES value="KidCalibTest.res build\assets_ctrl.res build\assets_ffap.res 
+      build\assets_pg.res"/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) MainForm.dfm PreInstruction.dfm 
+    <RESDEPEN value="$(RESFILES) MainForm.dfm ..\controller\src\PreInstruction.dfm 
       ..\game1\src\FireflyAndPoints.dfm ..\game2\src\ProfiledGame.dfm"/>
     <LIBFILES value="GdiPlus.lib ..\..\XML\XML.lib"/>
     <LIBRARIES value="Vclx50.lib Vcl50.lib"/>
     <SPARELIBS value="Vcl50.lib Vclx50.lib"/>
     <PACKAGES value="Vcl50.bpi Vclx50.bpi"/>
-    <PATHCPP value=".;..\common;..\game1\src;..\game2\src"/>
+    <PATHCPP value=".;..\controller\src;..\common;..\game1\src;..\game2\src"/>
     <PATHPAS value=".;"/>
-    <PATHRC value=".;assets;..\game1\assets;..\game2\assets"/>
+    <PATHRC value=".;..\controller\assets;..\game1\assets;..\game2\assets"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
@@ -35,8 +36,8 @@
     <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
-    <INCLUDEPATH value="assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-pch -w-par -w-hid"/>
   </MACROS>
   <OPTIONS>
@@ -81,12 +82,16 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=1
-Item0=assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
+Count=3
+Item0=..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
+Item1=..\controller\src;..\controller\assets;assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
+Item2=assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=1
-Item0=assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Count=3
+Item0=..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item1=..\controller\src;..\controller\assets;assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
+Item2=assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

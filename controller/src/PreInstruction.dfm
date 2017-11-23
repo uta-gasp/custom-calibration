@@ -1,6 +1,6 @@
 object frmPreInstruction: TfrmPreInstruction
-  Left = 255
-  Top = 128
+  Left = 358
+  Top = 180
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 493

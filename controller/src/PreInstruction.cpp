@@ -1,10 +1,14 @@
 //---------------------------------------------------------------------------
 #include "PreInstruction.h"
-#include "assets.h"
+#include "assets_ctrl.h"
 
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
+
+//---------------------------------------------------------------------------
+const int KInstructionWidth = 600;
+const int KInstructionHeight = 170;
 
 //---------------------------------------------------------------------------
 __fastcall TfrmPreInstruction::TfrmPreInstruction(TComponent* aOwner) :
@@ -23,7 +27,14 @@ TfrmPreInstruction::EiInstruction __fastcall TfrmPreInstruction::GetInstruction(
 //---------------------------------------------------------------------------
 void __fastcall TfrmPreInstruction::SetInstruction(EiInstruction aValue)
 {
-	iInstruction->AnimationIndex = (int)aValue;
+	switch (aValue)
+	{
+		case instFinished: iInstruction->AnimationIndex = 0; break;
+		case instStandard: iInstruction->AnimationIndex = 1; break;
+		case instFirefly:	 iInstruction->AnimationIndex = 2; break;
+		case instProfiled: iInstruction->AnimationIndex = 3; break;
+	}
+
 	iHasInstruction = true;
 }
 
@@ -36,9 +47,10 @@ void __fastcall TfrmPreInstruction::FormCreate(TObject *Sender)
 	iGraphics = new Gdiplus::Graphics(Handle, false);
 
 	iInstruction = new TiAnimation(true);
-	iInstruction->addFrames(IDR_PREINSTRUCTION_START, 950, 170);
-	iInstruction->addFrames(IDR_PREINSTRUCTION_PAUSE, 950, 170);
-	iInstruction->addFrames(IDR_PREINSTRUCTION_FINISHED, 950, 170);
+	iInstruction->addFrames(IDR_PREINSTRUCTION_FINISHED, KInstructionWidth, KInstructionHeight);
+	iInstruction->addFrames(IDR_PREINSTRUCTION_CIRCLE, KInstructionWidth, KInstructionHeight);
+	iInstruction->addFrames(IDR_PREINSTRUCTION_FIREFLY, KInstructionWidth, KInstructionHeight);
+	iInstruction->addFrames(IDR_PREINSTRUCTION_PROFILED, KInstructionWidth, KInstructionHeight);
 	iInstruction->placeTo(Width / 2, Height / 2);
 }
 

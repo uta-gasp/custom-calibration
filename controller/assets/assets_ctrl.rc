@@ -1,0 +1,7 @@
+#include "assets_ctrl.h"
+
+IDR_PREINSTRUCTION_FINISHED			IMAGE "instruction_finished.png"
+IDR_PREINSTRUCTION_CIRCLE				IMAGE "instruction_circle.png"
+IDR_PREINSTRUCTION_FIREFLY			IMAGE "instruction_firefly.png"
+IDR_PREINSTRUCTION_PROFILED			IMAGE "instruction_profiled.png"
+

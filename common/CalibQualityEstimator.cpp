@@ -177,7 +177,8 @@ bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 	try {
 		aResult = TiPointD(sqrt(x / count), sqrt(y / count));
 	} catch (...) {
-		MessageBox(NULL, "Oops2", "KC", MB_OK);
+		//MessageBox(NULL, "Oops2", "KC", MB_OK);
+		return false;
 	}
 
 	return true;

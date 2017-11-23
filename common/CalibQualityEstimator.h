@@ -27,7 +27,7 @@ struct TiPoint
 		try {
 			result = sqrt(X*X + Y*Y);
 		} catch (...) {
-			MessageBox(NULL, "Oops3", "KC", MB_OK);
+			//MessageBox(NULL, "Oops3", "KC", MB_OK);
 		}
 		return result;
 	}
