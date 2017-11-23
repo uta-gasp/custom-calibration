@@ -12,12 +12,7 @@ const String KSessionSeparator = ",";
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
-static sMouseInput =
-#ifdef _DEBUG
-	true;
-#else
-	false;
-#endif
+extern bool sMouseInput;
 
 //---------------------------------------------------------------------------
 __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
@@ -134,6 +129,10 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 	}
 	else
 	{
+		iPreInstructionForm = new TfrmPreInstruction(NULL);
+		iPreInstructionForm->SendToBack();
+		iPreInstructionForm->Show();
+
 		while (iCurrentDaySessions)
 		{
 			if (iCurrentSessionIndex < SESSION_COUNT)
@@ -143,7 +142,11 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 			iCurrentSessionIndex++;
 		}
 		DestroyCalibration();
-		//ShowPreInstruction(TfrmPreInstruction::instFinished);
+
+		ShowPreInstruction(TfrmPreInstruction::instFinished);
+
+		delete iPreInstructionForm;
+		iPreInstructionForm = NULL;
 	}
 }
 
@@ -398,27 +401,10 @@ void __fastcall TiController::RunNextSession(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiController::ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction)
 {
-	bool createExtraForm = !iPreInstructionForm && aInstruction != TfrmPreInstruction::instFinished;
-	if (createExtraForm)
-	{
-		iPreInstructionForm = new TfrmPreInstruction(NULL);
-		iPreInstructionForm->Instruction = aInstruction;
-		iPreInstructionForm->Show();
-	}
-
 	TfrmPreInstruction* kostyl = new TfrmPreInstruction(NULL);
 	kostyl->Instruction = aInstruction;
 	kostyl->ShowModal();
 	delete kostyl;
-
-	TiTimeout::run(1000, HidePreInstruction);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiController::HidePreInstruction(TObject* aSender)
-{
-	delete iPreInstructionForm;
-	iPreInstructionForm = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -434,6 +420,8 @@ TStrings* __fastcall TiController::GetUsers()
 //---------------------------------------------------------------------------
 void __fastcall TiController::onCalib_Event(TObject* aSender, const String& aMsg)
 {
+	if (OnDebug && aMsg.Pos("CMD_"))
+		OnDebug(this, aMsg);
 	iEvents->line( String().sprintf("%d\t%s", iTimestamp->ms(), aMsg.c_str()) );
 }
 
@@ -542,6 +530,7 @@ void __fastcall TiController::onCalib_VerifFinished(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiController::onCalib_BeforeExit(TObject* aSender)
 {
+/*
 	if (!iPreInstructionForm)
 	{
 		iPreInstructionForm = new TfrmPreInstruction(NULL);
@@ -549,7 +538,7 @@ void __fastcall TiController::onCalib_BeforeExit(TObject* aSender)
 				TfrmPreInstruction::instFinished :
 				TfrmPreInstruction::instPause;
 		iPreInstructionForm->Show();
-	}
+	}*/
 }
 
 //---------------------------------------------------------------------------

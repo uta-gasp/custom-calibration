@@ -155,7 +155,7 @@ bool __fastcall TiCalibQualityEstimator::GetAverage(TiPointD& aResult, const TiP
 bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 	const TiPoints& aPoints, TiPointD* aMean)
 {
-	if (iGazePoints.empty())
+	if (!iGazePoints.size())
 		return false;
 
 	TiPointD mean;
@@ -174,7 +174,12 @@ bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 		y += pow(it->Y - mean.Y, 2);
 	}
 
-	aResult = TiPointD(sqrt(x / count), sqrt(y / count));
+	try {
+		aResult = TiPointD(sqrt(x / count), sqrt(y / count));
+	} catch (...) {
+		MessageBox(NULL, "Oops2", "KC", MB_OK);
+	}
+
 	return true;
 }
 

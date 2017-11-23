@@ -23,7 +23,13 @@ struct TiPoint
 	}
 
 	double length() const {
-		return sqrt(X*X + Y*Y);
+		double result = 0;
+		try {
+			result = sqrt(X*X + Y*Y);
+		} catch (...) {
+			MessageBox(NULL, "Oops3", "KC", MB_OK);
+		}
+		return result;
 	}
 };
 

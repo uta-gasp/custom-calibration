@@ -32,7 +32,7 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
-    <USERDEFINES value="_DEBUG"/>
+    <USERDEFINES value=""/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
     <INCLUDEPATH value="assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
@@ -81,10 +81,12 @@ ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=0
+Count=1
+Item0=assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=0
+Count=1
+Item0=assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;C:\Program Files (x86)\Borland\CBuilder5\Projects\;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1

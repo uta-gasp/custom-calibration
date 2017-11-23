@@ -17,12 +17,10 @@
 class TfrmPreInstruction : public TForm
 {
 	__published:	// IDE-managed Components
-	TTimer *trmInvalidator;
 		void __fastcall FormCreate(TObject *Sender);
 		void __fastcall FormPaint(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 	void __fastcall FormClick(TObject *Sender);
-	void __fastcall trmInvalidatorTimer(TObject *Sender);
 
 	public:
 		enum EiInstruction
@@ -37,6 +35,7 @@ class TfrmPreInstruction : public TForm
 
 		TiAnimation* iInstruction;
 		TiRect iButtonContinue;
+		bool iHasInstruction;
 
 		EiInstruction __fastcall GetInstruction();
 		void __fastcall SetInstruction(EiInstruction aValue);

@@ -68,7 +68,13 @@ TiCalibQuality::Point __fastcall TiCalibQuality::GetWorstPoint()
 		{
 			double dx = point->positionX - point->correctedPorX;
 			double dy = point->positionY - point->correctedPorY;
-			double offset = sqrt(dx * dx + dy * dy);
+			double offset;
+			try {
+				offset = sqrt(dx * dx + dy * dy);
+			} catch (...) {
+				MessageBox(NULL, "Oops1", "KC", MB_OK);
+			}
+
 			if (offset > result.Offset)
 			{
 				result.X = point->positionX;

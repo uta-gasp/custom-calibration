@@ -8,7 +8,8 @@
 
 //---------------------------------------------------------------------------
 __fastcall TfrmPreInstruction::TfrmPreInstruction(TComponent* aOwner) :
-		TForm(aOwner)
+		TForm(aOwner),
+		iHasInstruction(false)
 {
 	iButtonContinue = TiRect(Width / 2, 2 * Height / 2, 200, 60);
 }
@@ -23,6 +24,7 @@ TfrmPreInstruction::EiInstruction __fastcall TfrmPreInstruction::GetInstruction(
 void __fastcall TfrmPreInstruction::SetInstruction(EiInstruction aValue)
 {
 	iInstruction->AnimationIndex = (int)aValue;
+	iHasInstruction = true;
 }
 
 //---------------------------------------------------------------------------
@@ -43,6 +45,9 @@ void __fastcall TfrmPreInstruction::FormCreate(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPreInstruction::FormPaint(TObject *Sender)
 {
+	if (!iHasInstruction)
+		return;
+
 	Gdiplus::Bitmap buffer(Width, Height, iGraphics);
 	Gdiplus::Graphics g(&buffer);
 	Gdiplus::Graphics* graphics = &g;
@@ -69,12 +74,6 @@ void __fastcall TfrmPreInstruction::FormClick(TObject *Sender)
 	else
 		Close();
 //	}
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmPreInstruction::trmInvalidatorTimer(TObject *Sender)
-{
-	//Invalidate();
 }
 
 //---------------------------------------------------------------------------

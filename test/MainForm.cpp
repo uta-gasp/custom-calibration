@@ -13,6 +13,7 @@
 
 //---------------------------------------------------------------------------
 TfrmMainForm *frmMainForm;
+bool sMouseInput = true;
 
 //---------------------------------------------------------------------------
 const CalibrationPointStruct KCalibPoints[] = {

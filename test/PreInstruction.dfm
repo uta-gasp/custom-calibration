@@ -1,6 +1,6 @@
 object frmPreInstruction: TfrmPreInstruction
-  Left = 357
-  Top = 179
+  Left = 255
+  Top = 128
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 493
@@ -18,10 +18,4 @@ object frmPreInstruction: TfrmPreInstruction
   OnPaint = FormPaint
   PixelsPerInch = 96
   TextHeight = 13
-  object trmInvalidator: TTimer
-    Interval = 30
-    OnTimer = trmInvalidatorTimer
-    Left = 12
-    Top = 16
-  end
 end

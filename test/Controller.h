@@ -90,7 +90,6 @@ class TiController : public TObject
 
 		void __fastcall RunNextSession(TObject* aSender = NULL);
 		void __fastcall ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction);
-		void __fastcall HidePreInstruction(TObject* aSender);
 
 		TStrings* __fastcall GetUsers();
 
