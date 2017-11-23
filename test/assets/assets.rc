@@ -1,0 +1,6 @@
+#include "assets.h"
+
+IDR_PREINSTRUCTION_START  			IMAGE "instruction_start.png"
+IDR_PREINSTRUCTION_PAUSE  			IMAGE "instruction_pause.png"
+IDR_PREINSTRUCTION_FINISHED			IMAGE "instruction_finished.png"
+

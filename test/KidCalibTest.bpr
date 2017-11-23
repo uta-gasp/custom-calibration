@@ -4,9 +4,9 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\KidCalibTest.exe"/>
-    <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\Controller.obj 
-      build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
-      build\utils.obj build\FireflyAndPoints.obj 
+    <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\PreInstruction.obj 
+      build\Controller.obj build\Animation.obj build\CalibQuality.obj 
+      build\CalibQualityEstimator.obj build\utils.obj build\FireflyAndPoints.obj 
       build\EyeBoxWithInstructions.obj build\Lamp.obj build\Lamps.obj 
       build\OlioHunting.obj build\ProfiledGame.obj build\EyeBox.obj 
       build\CalibPoint.obj build\CalibPoints.obj build\Profile.obj 
@@ -17,17 +17,17 @@
       build\InstructionShape.obj build\LevelInstruction.obj 
       build\LevelLegend.obj build\GhostBox.obj build\PositionTracker.obj 
       build\UserPositionQualityEstimator.obj"/>
-    <RESFILES value="KidCalibTest.res build\assets_ffap.res build\assets_pg.res"/>
+    <RESFILES value="KidCalibTest.res build\assets.res build\assets_ffap.res build\assets_pg.res"/>
     <DEFFILE value=""/>
-    <RESDEPEN value="$(RESFILES) MainForm.dfm ..\game1\src\FireflyAndPoints.dfm 
-      ..\game2\src\ProfiledGame.dfm"/>
+    <RESDEPEN value="$(RESFILES) MainForm.dfm PreInstruction.dfm 
+      ..\game1\src\FireflyAndPoints.dfm ..\game2\src\ProfiledGame.dfm"/>
     <LIBFILES value="GdiPlus.lib ..\..\XML\XML.lib"/>
     <LIBRARIES value="Vclx50.lib Vcl50.lib"/>
     <SPARELIBS value="Vcl50.lib Vclx50.lib"/>
     <PACKAGES value="Vcl50.bpi Vclx50.bpi"/>
     <PATHCPP value=".;..\common;..\game1\src;..\game2\src"/>
     <PATHPAS value=".;"/>
-    <PATHRC value=".;..\game1\assets;..\game2\assets"/>
+    <PATHRC value=".;assets;..\game1\assets;..\game2\assets"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
@@ -35,8 +35,8 @@
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
-    <INCLUDEPATH value="..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="assets;..\common\assets;..\common;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="assets;..\common\assets;..\common;..\game2\src;..\game2\assets;..\game1\src;..\game1\assets;&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects\&quot;;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-pch -w-par -w-hid"/>
   </MACROS>
   <OPTIONS>

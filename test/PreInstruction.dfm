@@ -1,10 +1,10 @@
-object iFireflyAndPoints: TiFireflyAndPoints
-  Left = 347
-  Top = 152
+object frmPreInstruction: TfrmPreInstruction
+  Left = 357
+  Top = 179
   BorderIcons = []
   BorderStyle = bsNone
-  ClientHeight = 550
-  ClientWidth = 909
+  ClientHeight = 493
+  ClientWidth = 990
   Color = clBlack
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,18 +12,16 @@ object iFireflyAndPoints: TiFireflyAndPoints
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnClick = FormClick
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnKeyUp = FormKeyUp
-  OnMouseMove = FormMouseMove
-  OnMouseUp = FormMouseUp
+  OnPaint = FormPaint
   PixelsPerInch = 96
   TextHeight = 13
-  object tmrKostyl: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tmrKostylTimer
-    Left = 16
-    Top = 12
+  object trmInvalidator: TTimer
+    Interval = 30
+    OnTimer = trmInvalidatorTimer
+    Left = 12
+    Top = 16
   end
 end

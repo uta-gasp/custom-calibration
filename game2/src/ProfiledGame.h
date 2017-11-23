@@ -116,6 +116,7 @@ class TiProfiledGame : public TForm
 		TNotifyEvent FOnAborted;
 		TNotifyEvent FOnVerifStarted;
 		TNotifyEvent FOnVerifFinished;
+		TNotifyEvent FOnBeforeExit;
 
 		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
 		void __fastcall onCalibPointReady(TObject* aSender);
@@ -188,6 +189,7 @@ class TiProfiledGame : public TForm
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
 		__property TNotifyEvent OnVerifStarted = {read = FOnVerifStarted, write = FOnVerifStarted};
 		__property TNotifyEvent OnVerifFinished = {read = FOnVerifFinished, write = FOnVerifFinished};
+		__property TNotifyEvent OnBeforeExit = {read = FOnBeforeExit, write = FOnBeforeExit};
 };
 
 //---------------------------------------------------------------------------

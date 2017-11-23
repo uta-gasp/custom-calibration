@@ -55,7 +55,8 @@ __fastcall TiProfiledGame::TiProfiledGame(TComponent* aOwner) :
 		FOnFinished(NULL),
 		FOnAborted(NULL),
 		FOnVerifStarted(NULL),
-		FOnVerifFinished(NULL)
+		FOnVerifFinished(NULL),
+		FOnBeforeExit(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -525,9 +526,16 @@ void __fastcall TiProfiledGame::onStatusDone(TObject* aSender)
 	iStatus->hide();
 
 	if (!iProfile->TargetPoints->Count)
+	{
 		iInstructionSitting->show();
+	}
 	else
-		TiTimeout::run(100, Done, &iTimeout);
+	{
+		if (FOnBeforeExit)
+			FOnBeforeExit(this);
+
+		TiTimeout::run(1000, Done, &iTimeout);
+	}
 }
 
 //---------------------------------------------------------------------------

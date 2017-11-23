@@ -8,6 +8,7 @@
 #include "FireflyAndPoints.h"
 #include "ProfiledGame.h"
 
+#include "PreInstruction.h"
 
 //---------------------------------------------------------------------------
 #define DAY_COUNT 6
@@ -54,6 +55,7 @@ class TiController : public TObject
 		typedef TiDynArray<SiUser> TiUsers;
 
 	private:
+		TfrmPreInstruction* iPreInstructionForm;
 		TiFireflyAndPoints* iFireflyAndPoints;
 		TiProfiledGame* iProfiledGame;
 		TForm* iCalibrationForm;
@@ -87,6 +89,8 @@ class TiController : public TObject
 		void __fastcall DestroyCalibration(TObject* aSender = NULL);
 
 		void __fastcall RunNextSession(TObject* aSender = NULL);
+		void __fastcall ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction);
+		void __fastcall HidePreInstruction(TObject* aSender);
 
 		TStrings* __fastcall GetUsers();
 
@@ -102,6 +106,7 @@ class TiController : public TObject
 		void __fastcall onCalib_Aborted(TObject* aSender);
 		void __fastcall onCalib_VerifStarted(TObject* aSender);
 		void __fastcall onCalib_VerifFinished(TObject* aSender);
+		void __fastcall onCalib_BeforeExit(TObject* aSender);
 
 		void __fastcall onCalib_MouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 

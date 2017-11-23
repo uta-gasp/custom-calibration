@@ -70,7 +70,8 @@ __fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner, EiAttracto
 		FOnFinished(NULL),
 		FOnAborted(NULL),
 		FOnGameStarted(NULL),
-		FOnGameFinished(NULL)
+		FOnGameFinished(NULL),
+		FOnBeforeExit(NULL)
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -455,6 +456,8 @@ void __fastcall TiFireflyAndPoints::onGameFisnihed(TObject* aSender)
 
 	if (FOnGameFinished)
 		FOnGameFinished(this);
+	if (FOnBeforeExit)
+		FOnBeforeExit(this);
 
 	if (iIsVerifying)
 		TiTimeout::run(1000, Done, &iTimeout);

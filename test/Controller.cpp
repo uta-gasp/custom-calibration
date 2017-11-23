@@ -33,6 +33,7 @@ __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 		iCurrentUser(NULL),
 		iCurrentDaySessions(NULL),
 		iCurrentSessionIndex(-1),
+		iPreInstructionForm(NULL),
 		FOnCalibrationStarted(NULL),
 		FOnCalibrationDisplayReady(NULL),
 		FOnPointAccepted(NULL),
@@ -54,8 +55,14 @@ __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 __fastcall TiController::~TiController()
 {
 	DestroyCalibration();
-	
+
 	delete iUsers;
+
+	if (iPreInstructionForm)
+	{
+		delete iPreInstructionForm;
+		iPreInstructionForm = NULL;
+	}
 
 	Gdiplus::GdiplusShutdown(m_gdiplusToken);
 }
@@ -129,10 +136,14 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 	{
 		while (iCurrentDaySessions)
 		{
+			if (iCurrentSessionIndex < SESSION_COUNT)
+				ShowPreInstruction(!iCurrentSessionIndex ? TfrmPreInstruction::instStart : TfrmPreInstruction::instPause);
+
 			RunNextSession();
 			iCurrentSessionIndex++;
 		}
 		DestroyCalibration();
+		//ShowPreInstruction(TfrmPreInstruction::instFinished);
 	}
 }
 
@@ -261,6 +272,7 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iFireflyAndPoints->OnAborted = onCalib_Aborted;
 		iFireflyAndPoints->OnGameStarted = onCalib_VerifStarted;
 		iFireflyAndPoints->OnGameFinished = onCalib_VerifFinished;
+		iFireflyAndPoints->OnBeforeExit = onCalib_BeforeExit;
 
 		iFireflyAndPoints->GameAfterCalibration = true;
 
@@ -283,6 +295,7 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnAborted = onCalib_Aborted;
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
 		iProfiledGame->OnVerifFinished = onCalib_VerifFinished;
+		iProfiledGame->OnBeforeExit = onCalib_BeforeExit;
 
 		if (sMouseInput)
 			iProfiledGame->OnMouseMove = onCalib_MouseMove;
@@ -380,6 +393,32 @@ void __fastcall TiController::RunNextSession(TObject* aSender)
 	}
 
 	run(iCurrentDaySessions[iCurrentSessionIndex]);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiController::ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction)
+{
+	bool createExtraForm = !iPreInstructionForm && aInstruction != TfrmPreInstruction::instFinished;
+	if (createExtraForm)
+	{
+		iPreInstructionForm = new TfrmPreInstruction(NULL);
+		iPreInstructionForm->Instruction = aInstruction;
+		iPreInstructionForm->Show();
+	}
+
+	TfrmPreInstruction* kostyl = new TfrmPreInstruction(NULL);
+	kostyl->Instruction = aInstruction;
+	kostyl->ShowModal();
+	delete kostyl;
+
+	TiTimeout::run(1000, HidePreInstruction);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiController::HidePreInstruction(TObject* aSender)
+{
+	delete iPreInstructionForm;
+	iPreInstructionForm = NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -498,6 +537,19 @@ void __fastcall TiController::onCalib_VerifFinished(TObject* aSender)
 
 	if (OnVerificationFinished)
 		OnVerificationFinished(this);
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiController::onCalib_BeforeExit(TObject* aSender)
+{
+	if (!iPreInstructionForm)
+	{
+		iPreInstructionForm = new TfrmPreInstruction(NULL);
+		iPreInstructionForm->Instruction = iCurrentSessionIndex == SESSION_COUNT - 1 ?
+				TfrmPreInstruction::instFinished :
+				TfrmPreInstruction::instPause;
+		iPreInstructionForm->Show();
+	}
 }
 
 //---------------------------------------------------------------------------

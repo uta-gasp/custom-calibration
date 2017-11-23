@@ -4,7 +4,9 @@
 
 //---------------------------------------------------------------------------
 USERES("KidCalibTest.res");
+USERC("assets/assets.rc");
 USEFORM("MainForm.cpp", frmMainForm);
+USEFORM("PreInstruction.cpp", frmPreInstruction);
 USEUNIT("Controller.cpp");
 USELIB("GdiPlus.lib");
 USELIB("..\..\XML\XML.lib");
@@ -43,6 +45,7 @@ USEUNIT("..\game2\src\LevelLegend.cpp");
 USEUNIT("..\game2\src\GhostBox.cpp");
 USEUNIT("..\game2\src\PositionTracker.cpp");
 USEUNIT("..\game2\src\UserPositionQualityEstimator.cpp");
+
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

@@ -212,7 +212,8 @@ void __fastcall TfrmMainForm::onCtrl_CalibrationFinished(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCtrl_Finished(TObject* aSender)
 {
-	MessageBox(Handle, "Finished", "KidCalib", MB_OK);
+//	MessageBox(Handle, "Finished", "KidCalib", MB_OK);
+	Visible = true;
 }
 
 //---------------------------------------------------------------------------
@@ -246,6 +247,8 @@ void __fastcall TfrmMainForm::cmbUsersOrDaysChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::btnRunUserDayClick(TObject *Sender)
 {
+	Visible = false;
+
 	iController->OnFinished = onCtrl_Finished;
 	iController->run(cmbUsers->Text, cmbDays->ItemIndex);
 }

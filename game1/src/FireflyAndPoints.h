@@ -7,6 +7,7 @@
 #include <Controls.hpp>
 #include <StdCtrls.hpp>
 #include <Forms.hpp>
+#include <ExtCtrls.hpp>
 
 #include "Animation.h"
 #include "EyeBoxWithInstructions.h"
@@ -17,7 +18,6 @@
 #include "utils.h"
 
 #include "XML.h"
-#include <ExtCtrls.hpp>
 
 //---------------------------------------------------------------------------
 class TiFireflyAndPoints : public TForm
@@ -93,6 +93,7 @@ class TiFireflyAndPoints : public TForm
 		TNotifyEvent FOnAborted;
 		TNotifyEvent FOnGameStarted;
 		TNotifyEvent FOnGameFinished;
+		TNotifyEvent FOnBeforeExit;
 
 		void __fastcall onObjectPaint(TObject* aSender, EiUpdateType aUpdateType);
 		void __fastcall onEyeBoxFadingTransition(TObject* aSender, double iAlpha);
@@ -161,6 +162,7 @@ class TiFireflyAndPoints : public TForm
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
 		__property TNotifyEvent OnGameStarted = {read = FOnGameStarted, write = FOnGameStarted};
 		__property TNotifyEvent OnGameFinished = {read = FOnGameStarted, write = FOnGameFinished};
+		__property TNotifyEvent OnBeforeExit = {read = FOnBeforeExit, write = FOnBeforeExit};
 };
 
 //---------------------------------------------------------------------------
