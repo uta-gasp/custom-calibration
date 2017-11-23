@@ -1,7 +1,0 @@
-bin/
-build/
-npm-debug.log
-**/*.psd
-**/*.~*
-**/*.dsk
-**/*.zip

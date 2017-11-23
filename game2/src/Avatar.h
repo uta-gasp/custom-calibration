@@ -29,7 +29,7 @@ class TiAvatar {
 
 		TiAnimation* iParts[apCount];
 		TiAnimations* iPrizes;
-		int iBonus;
+		int iSelectedPrizes;
 
 		TiAnimationManager* iManager;
 		TiSize iScreenSize;
@@ -37,12 +37,14 @@ class TiAvatar {
 
 		int __fastcall GetPartIndex(EiPart aPart);
 
+		void __fastcall ShowPrizes();
+
 	public:
 		__fastcall TiAvatar(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
 		__fastcall TiAvatar::~TiAvatar();
 
 		void __fastcall add(EiPart aPart);
-		void __fastcall setPrizes(int aBonus);
+		void __fastcall setPrizes(int aSelectedPrizes);
 		void __fastcall placeTo(int aX, int aY);
 		void __fastcall setPartType(EiPart aPart, int aType);
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics);

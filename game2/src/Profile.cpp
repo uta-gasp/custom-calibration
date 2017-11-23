@@ -19,9 +19,6 @@ const int KSpeedOK 				= 8000;
 
 const int KLevelScoreMax	= 500;
 
-const int KBonusMaxBit	 = 10; // 8 * sizeof(int) - 1;
-const int KBonusCountMax = 10;	// correspond to all IDR_PRIZE
-
 // Getting a bonus: thresholds
 const double KBonusScoreThreshold = 0.85;	// % of max possible
 const double KBonusFailedThreshold = 1;		// max number of failed targets
@@ -40,6 +37,7 @@ TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aV
 		iScore(0),
 		iSaldo(0),
 		iBonus(0),
+		iSelectedPrizes(0),
 		iIsGainedNewLevel(false),
 		iGameScore(0),
 		iGameCoins(0),
@@ -76,6 +74,7 @@ void __fastcall TiProfile::load(TiXML_INI* aStorage)
 			data->Score = aStorage->getValue(name, L"Score", 0l);
 			data->Saldo = aStorage->getValue(name, L"Saldo", 0l);
 			data->Bonus = aStorage->getValue(name, L"Bonus", 0l);
+			data->SelectedPrizes = aStorage->getValue(name, L"SelectedPrizes", 0l);
 			data->Succeeded = aStorage->getValue(name, L"Succeeded", 0l);
 			data->Failured = aStorage->getValue(name, L"Failured", 0l);
 			data->Duration = aStorage->getValue(name, L"Duration", 0l);
@@ -122,6 +121,7 @@ void __fastcall TiProfile::save(TiXML_INI* aStorage)
 		aStorage->putValue(iName, L"Score", (long)iScore);
 		aStorage->putValue(iName, L"Saldo", (long)iSaldo);
 		aStorage->putValue(iName, L"Bonus", (long)iBonus);
+		aStorage->putValue(iName, L"SelectedPrizes", (long)iSelectedPrizes);
 		aStorage->putValue(iName, L"Succeeded", long(data->Succeeded + iGameResults.Success));
 		aStorage->putValue(iName, L"Failured", long(data->Failured + iGameResults.Failure));
 		aStorage->putValue(iName, L"Duration", long(data->Duration + iGameResults.Duration));
@@ -178,7 +178,7 @@ void __fastcall TiProfile::updateScore()
 	{
 		coins = coins / 2;
 	}
-	if (GetBonusCount(iBonus) < KBonusCountMax)
+	if (GetBonusCount(iBonus) < IDR_PRIZE_COUNT)
 	{
 		int maxPossibleScore = (KScores[0] + 2) * iTargetPoints->Count;
 
@@ -187,10 +187,7 @@ void __fastcall TiProfile::updateScore()
 		{
 			iGameBonus = GetRandomBonus();
 			if (iGameBonus)
-			{
 				iBonus = iBonus | (1 << (iGameBonus - 1));
-				iAvatar->setPrizes(iBonus);
-			}
 		}
 	}
 
@@ -211,17 +208,8 @@ void __fastcall TiProfile::updateScore()
 	{
 		iGameBonus = GetRandomBonus();
 		if (iGameBonus)
-		{
 			iBonus = iBonus | (1 << (iGameBonus - 1));
-			iAvatar->setPrizes(iBonus);
-		}
 	}
-}
-
-//---------------------------------------------------------------------------
-int __fastcall TiProfile::getBonusCountMax()
-{
-	return KBonusCountMax;
 }
 
 //---------------------------------------------------------------------------
@@ -247,8 +235,9 @@ void __fastcall TiProfile::SetName(WideString aValue)
 			iScore = saved->Score;
 			iSaldo = saved->Saldo;
 			iBonus = saved->Bonus;
-	
-			iAvatar->setPrizes(iBonus);
+			iSelectedPrizes = saved->SelectedPrizes;
+
+			iAvatar->setPrizes(iSelectedPrizes);
 
 			break;
 		}
@@ -302,11 +291,18 @@ bool __fastcall TiProfile::GetIsSucceeded()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiProfile::SetSelectedPrizes(int aValue)
+{
+	iSelectedPrizes = aValue;
+	iAvatar->setPrizes(iSelectedPrizes);
+}
+
+//---------------------------------------------------------------------------
 int __fastcall TiProfile::GetBonusCount(int aValue)
 {
 	int result = 0;
 	int value = aValue;
-	for (int i = 0; i < KBonusMaxBit; i++)
+	for (int i = 0; i < IDR_PRIZE_COUNT; i++)
 	{
 		result += (value & 1);
 		value = value >> 1;
@@ -321,7 +317,7 @@ int __fastcall TiProfile::GetRandomBonus()
 	int result = -1;
 	while (result < 0)
 	{
-		int bonus = random(KBonusMaxBit);
+		int bonus = random(IDR_PRIZE_COUNT);
 		if (((1 << bonus) & iBonus) == 0)
 		{
 			result = bonus;

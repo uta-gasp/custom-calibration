@@ -43,7 +43,7 @@ __fastcall TiRewards::TiRewards(TiAnimationManager* aManager,
 	aManager->add(iBonus);
 	iStaticAssets->add(iBonus);
 
-	for (int i = 0; i < TiProfile::getBonusCountMax(); i++)
+	for (int i = 0; i < IDR_PRIZE_COUNT; i++)
 	{
 		TiAnimation* prize = new TiAnimation(false);
 		prize->addFrames(IDR_PRIZE_ICON + i, aViewport.Width, aViewport.Height);

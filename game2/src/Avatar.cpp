@@ -13,11 +13,11 @@ __fastcall TiAvatar::TiAvatar(TiAnimationManager* aManager, TiSize aScreenSize, 
 		iManager(aManager),
 		iScreenSize(aScreenSize),
 		iViewport(aViewport),
-		iBonus(0)
+		iSelectedPrizes(0)
 {
 	iPrizes = new TiAnimations(false);
 
-	for (int i = 0; i < TiProfile::getBonusCountMax(); i++)
+	for (int i = 0; i < IDR_PRIZE_COUNT; i++)
 	{
 		TiAnimation* prize = new TiAnimation(false);
 		prize->addFrames(IDR_PRIZE_CENTER + i, aViewport.Width, aViewport.Height);
@@ -55,9 +55,10 @@ void __fastcall TiAvatar::add(TiAvatar::EiPart aPart)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAvatar::setPrizes(int aBonus)
+void __fastcall TiAvatar::setPrizes(int aSelectedPrizes)
 {
-	iBonus = aBonus;
+	iSelectedPrizes = aSelectedPrizes;
+	ShowPrizes();
 }
 
 //---------------------------------------------------------------------------
@@ -92,15 +93,7 @@ void __fastcall TiAvatar::show()
 	for (int i = 0; i < apCount; i++)
 		iParts[i]->show();
 
-	int bonus = iBonus;
-	int index = 0;
-	while (bonus && index < iPrizes->Count)
-	{
-		if (bonus & 1)
-			iPrizes->get(index)->show();
-		index++;
-		bonus >>= 1;
-	}
+	ShowPrizes();
 }
 
 //---------------------------------------------------------------------------
@@ -119,3 +112,21 @@ int __fastcall TiAvatar::GetPartIndex(EiPart aPart)
 	return (aPart & 0xFF) >> 4; // check assers.h to figure out why the index is computed this way
 }
 
+//---------------------------------------------------------------------------
+void __fastcall TiAvatar::ShowPrizes()
+{
+	int prizes = iSelectedPrizes;
+	int index = 0;
+	while (index < iPrizes->Count)
+	{
+		TiAnimation* prize = iPrizes->get(index);
+
+		if (prizes & 1)
+			prize->show();
+		else if (prize->IsVisible)
+			prize->hide();
+			
+		index++;
+		prizes >>= 1;
+	}
+}

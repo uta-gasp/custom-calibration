@@ -26,10 +26,12 @@ class TiProfile
 		int Score;
 		int Saldo;
 		int Bonus;
+		int SelectedPrizes;
 		int Succeeded;
 		int Failured;
 		int Duration;
-		SiXMLData() : Avatar(0), Level(0), Score(0), Saldo(0), Bonus(0), Succeeded(0), Failured(0), Duration(0) { }
+		SiXMLData() : Avatar(0), Level(0), Score(0), Saldo(0), Bonus(0),
+				SelectedPrizes(0), Succeeded(0), Failured(0), Duration(0) { }
 	};
 
 	typedef TiDynArray<SiXMLData> TiXMLDataList;
@@ -89,6 +91,7 @@ class TiProfile
 		int iScore;
 		int iSaldo;
 		int iBonus;
+		int iSelectedPrizes;
 
 		bool iIsGainedNewLevel;
 		int iGameScore;
@@ -104,6 +107,7 @@ class TiProfile
 		int __fastcall GetLevelScore();
 		int __fastcall GetLevelScoreMax();
 		bool __fastcall GetIsSucceeded();
+		void __fastcall SetSelectedPrizes(int aValue);
 
 		int __fastcall GetBonusCount(int aValue);
 		int __fastcall GetRandomBonus();
@@ -121,8 +125,6 @@ class TiProfile
 		void __fastcall addPoint(SiTargetPoint* aPoint);
 		void __fastcall updateScore();
 
-		static int __fastcall getBonusCountMax();
-
 		__property EiStatus Status = { read = iStatus };
 		__property WideString Name = { read = iName, write = SetName };
 		__property int SkinColorID = { read = iSkinColorID, write = SetSkinColorID };
@@ -138,7 +140,9 @@ class TiProfile
 		__property int LevelScore = { read = GetLevelScore };
 		__property int LevelScoreMax = { read = GetLevelScoreMax };
 		__property int Saldo = { read = iSaldo };
-		
+		__property int Bonus = { read = iBonus };
+		__property int SelectedPrizes = { read = iSelectedPrizes, write = SetSelectedPrizes };
+
 		__property bool IsGainedNewLevel = { read = iIsGainedNewLevel };
 		__property int GameScore = { read = iGameScore };
 		__property int GameCoins = { read = iGameCoins };

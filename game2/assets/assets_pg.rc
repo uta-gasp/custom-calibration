@@ -58,7 +58,23 @@ IDR_STORY_LEVEL2_GHOSTS_TRAPPED				IMAGE "level2/ghosts-trapped.png"
 
 IDR_STATUS_BACKGROUND									IMAGE "status/background.png"
 IDR_STATUS_PANEL											IMAGE "status/panel.png"
+IDR_STATUS_PRIZES											IMAGE "status/prizes.png"
 IDR_STATUS_BUTTON_CONTINUE        		IMAGE "status/button continue.png"
+IDR_STATUS_BUTTON_PRIZES        			IMAGE "status/button prizes.png"
+
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_BEAR_BROWN		 	IMAGE "status/prize-tile/bear brown.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_BEAR_PURPLE		 	IMAGE "status/prize-tile/bear purple.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_CAT_BROWN		 		IMAGE "status/prize-tile/cat brown.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_CAT_GREY		 		IMAGE "status/prize-tile/cat grey.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_LIGHTNING_RED		IMAGE "status/prize-tile/lightning red.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_LIGHTNING_TURQ	IMAGE "status/prize-tile/lightning turq.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_MASK_GREEN			IMAGE "status/prize-tile/mask green.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_MASK_PURPLE			IMAGE "status/prize-tile/mask purple.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_RABBIT					IMAGE "status/prize-tile/rabbit.png"
+IDR_STATUS_TILE_PRIZE + IDR_PRIZE_SHERIFF					IMAGE "status/prize-tile/sheriff.png"
+
+IDR_STATUS_TILE_PRIZE_REST												IMAGE "status/prize-tile/rest.png"
+IDR_STATUS_PRIZE_SELECTED													IMAGE "status/selected.png"
 
 IDR_PRIZE_ICON + IDR_PRIZE_BEAR_BROWN		 		IMAGE "prizes/icons/bear brown.png"
 IDR_PRIZE_ICON + IDR_PRIZE_BEAR_PURPLE		 	IMAGE "prizes/icons/bear purple.png"
