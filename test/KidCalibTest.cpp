@@ -10,6 +10,8 @@ USELIB("..\..\XML\XML.lib");
 USERC("..\controller\assets\assets_ctrl.rc");
 USEFORM("..\controller\src\PreInstruction.cpp", frmPreInstruction);
 USEUNIT("..\controller\src\Controller.cpp");
+USEUNIT("..\common\AnimationBase.cpp");
+USEUNIT("..\common\AnimationManager.cpp");
 USEUNIT("..\common\Animation.cpp");
 USEUNIT("..\common\CalibQuality.cpp");
 USEUNIT("..\common\CalibQualityEstimator.cpp");
@@ -45,7 +47,7 @@ USEUNIT("..\game2\src\LevelLegend.cpp");
 USEUNIT("..\game2\src\GhostBox.cpp");
 USEUNIT("..\game2\src\PositionTracker.cpp");
 USEUNIT("..\game2\src\UserPositionQualityEstimator.cpp");
-
+USEUNIT("..\common\AnimationSimple.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

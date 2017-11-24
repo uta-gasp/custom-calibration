@@ -9,45 +9,21 @@
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
 __fastcall TiAnimation::TiAnimation(bool aVisible, bool aIsStatic) :
-	TObject(),
-	iWidth(16),
-	iHeight(16),
-	iParent(NULL),
-	iAnimationFrames(NULL),
-	iX(0),
-	iY(0),
-	iScale(1.0),
-	iAngle(0.0),
-	iCenter(-1, -1),
-	iAnimationIndex(-1),
-	iFrameIndex(-1),
-	iIsStatic(aIsStatic),
-	iLoopAnimation(true),
-	iRewindAnimationAfterStop(true),
-	iAllowAnimationReversion(false),
-	iIsPaintRequested(false),
-	iMoveSpeed(300),
-	iRotationSpeed(300),
-	iFadingDirection(0),
-	iAnimationDirection(1),
-	iFadingStepCount(10),
-	FOnPaint(NULL),
-	FOnAnimationFinished(NULL),
-	FOnMoveFinished(NULL),
-	FOnRotationFinished(NULL),
-	FOnFadingFinished(NULL),
-	FOnFadingTransition(NULL)
+		TiAnimationBase(aIsStatic),
+		iAnimationFrames(NULL),
+		iScale(1.0),
+		iAngle(0.0),
+		iAnimationIndex(-1),
+		iMoveSpeed(300),
+		iRotationSpeed(300),
+		iFadingDirection(0),
+		iFadingStepCount(10),
+		FOnMoveFinished(NULL),
+		FOnRotationFinished(NULL),
+		FOnFadingFinished(NULL),
+		FOnFadingTransition(NULL)
 {
-	iAnimations.DeleteContent = true;
-
-	iAnimationTimer = new TTimer(NULL);
-	iAnimationTimer->Enabled = false;
-	iAnimationTimer->Interval = 50;
-	iAnimationTimer->OnTimer = onAnimationTimer;
-
 	iMoveTimer = new TTimer(NULL);
 	iMoveTimer->Enabled = false;
 	iMoveTimer->Interval = 20;
@@ -63,22 +39,15 @@ __fastcall TiAnimation::TiAnimation(bool aVisible, bool aIsStatic) :
 	iFadingTimer->Interval = 35;
 	iFadingTimer->OnTimer = onFadingTimer;
 
-	iUpdateTimer = new TTimer(NULL);
-	iUpdateTimer->Enabled = false;
-	iUpdateTimer->Interval = 10;
-	iUpdateTimer->OnTimer = onUpdateTimer;
-
 	iAlpha = aVisible ? 1.0 : 0.0;
 }
 
 //---------------------------------------------------------------------------
 __fastcall TiAnimation::~TiAnimation()
 {
-	delete iAnimationTimer;
 	delete iMoveTimer;
 	delete iRotationTimer;
 	delete iFadingTimer;
-	delete iUpdateTimer;
 }
 
 //---------------------------------------------------------------------------
@@ -110,62 +79,6 @@ void __fastcall TiAnimation::addFrames(UINT aID, int aWidth, int aHeight)
 		return;
 
 	AddFrames(frames, aWidth, aHeight);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::startAnimation()
-{
-	iAnimationTimer->Enabled = true;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::stopAnimation()
-{
-	iAnimationTimer->Enabled = false;
-
-	if (iRewindAnimationAfterStop)
-	{
-		iFrameIndex = 0;
-		iAnimationDirection = 1;
-
-		if (IsVisible)
-			iIsPaintRequested = true;
-	}
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::toggleAnimation()
-{
-	if (iAnimationTimer->Enabled)
-		stopAnimation();
-	else
-		startAnimation();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::resetAnimation()
-{
-	if (iFrameIndex > 0)
-	{
-		iFrameIndex = 0;
-		iAnimationDirection = 1;
-
-		if (IsVisible)
-			iIsPaintRequested = true;
-	}
-
-	iAnimationTimer->Enabled = false;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::setFrame(int aIndex)
-{
-	if (aIndex < 0 || aIndex >= iFrameCount)
-		aIndex = random(iFrameCount);
-
-	iFrameIndex = aIndex;
-	if (FOnPaint)
-		FOnPaint(this);
 }
 
 //---------------------------------------------------------------------------
@@ -221,16 +134,6 @@ void __fastcall TiAnimation::hide()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::placeTo(int aX, int aY)
-{
-	iX = aX;
-	iY = aY;
-
-	if (IsVisible)
-		iIsPaintRequested = true;
-}
-
-//---------------------------------------------------------------------------
 bool __fastcall TiAnimation::moveTo(int aX, int aY)
 {
 	if (X == aX && Y == aY)
@@ -240,8 +143,8 @@ bool __fastcall TiAnimation::moveTo(int aX, int aY)
 	}
 
 	iDestinationLocation = TPoint(aX, aY);
-	iStartX = iMoveX = iX;
-	iStartY = iMoveY = iY;
+	iStartX = iMoveX = X;
+	iStartY = iMoveY = Y;
 
 	if (!iMoveTimer->Enabled)
 		iMoveTimer->Enabled = true;
@@ -300,12 +203,12 @@ bool __fastcall TiAnimation::hitTest(int aX, int aY)
 	if (!IsVisible)
 		return false;
 
-	double w = iScale * iWidth;
-	double h = iScale * iHeight;
-	double cx = iScale * iCenter.x;
-	double cy = iScale * iCenter.y;
-	return aX > iX - cx && aX < iX + (w - cx) &&
-				 aY > iY - cy && aY < iY + (h - cy);
+	double w = iScale * Width;
+	double h = iScale * Height;
+	double cx = iScale * Center.x;
+	double cy = iScale * Center.y;
+	return aX > X - cx && aX < X + (w - cx) &&
+				 aY > Y - cy && aY < Y + (h - cy);
 }
 
 //---------------------------------------------------------------------------
@@ -314,20 +217,20 @@ double __fastcall TiAnimation::distanceTo(int aX, int aY)
 	if (!IsVisible)
 		return MaxInt;
 
-	double w = iScale * iWidth;
-	double h = iScale * iHeight;
-	double cx = iScale * iCenter.x;
-	double cy = iScale * iCenter.y;
-	bool isInside = aX > iX - cx && aX < iX + (w - cx) &&
-									aY > iY - cy && aY < iY + (h - cy);
+	double w = iScale * Width;
+	double h = iScale * Height;
+	double cx = iScale * Center.x;
+	double cy = iScale * Center.y;
+	bool isInside = aX > X - cx && aX < X + (w - cx) &&
+									aY > Y - cy && aY < Y + (h - cy);
 	if (isInside)
 	{
 		return 0;
 	}
 	else
 	{
-		double dx = aX < iX ? (iX - cx) - aX : aX - (iX + (w - cx));
-		double dy = aY < iY ? (iY - cy) - aY : aY - (iY + (h - cy));
+		double dx = aX < X ? (X - cx) - aX : aX - (X + (w - cx));
+		double dy = aY < Y ? (Y - cy) - aY : aY - (Y + (h - cy));
 		return sqrt(dx*dx + dy*dy);
 	}
 }
@@ -335,17 +238,9 @@ double __fastcall TiAnimation::distanceTo(int aX, int aY)
 //---------------------------------------------------------------------------
 TPoint __fastcall TiAnimation::clientToScreen(int aX, int aY)
 {
-	double dx = iScale * (aX - iCenter.x);
-	double dy = iScale * (aY - iCenter.y);
-	return TPoint(iX + dx, iY + dy);
-}
-
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::invalidate()
-{
-	if (IsVisible)
-		iIsPaintRequested = true;
+	double dx = iScale * (aX - Center.x);
+	double dy = iScale * (aY - Center.y);
+	return TPoint(X + dx, Y + dy);
 }
 
 //---------------------------------------------------------------------------
@@ -367,16 +262,16 @@ void __fastcall TiAnimation::paintTo(Gdiplus::Graphics* aGraphics)
 		attributes.SetColorMatrix(&colorMatrix, Gdiplus::ColorMatrixFlagsDefault);
 	}
 
-	double w = iScale * iWidth;
-	double h = iScale * iHeight;
-	double cx = iScale * iCenter.x;
-	double cy = iScale * iCenter.y;
-	Gdiplus::RectF destRect = Gdiplus::RectF(iX - cx, iY - cy, w, h);
+	double w = iScale * Width;
+	double h = iScale * Height;
+	double cx = iScale * Center.x;
+	double cy = iScale * Center.y;
+	Gdiplus::RectF destRect = Gdiplus::RectF(X - cx, Y - cy, w, h);
 
 	if (iAngle != 0.0)
 	{
 		Gdiplus::Matrix transformMatrix;
-		transformMatrix.Translate(iX, iY);
+		transformMatrix.Translate(X, Y);
 		transformMatrix.Rotate(Angle);
 
 		aGraphics->SetTransform(&transformMatrix);
@@ -384,7 +279,7 @@ void __fastcall TiAnimation::paintTo(Gdiplus::Graphics* aGraphics)
 	}
 
 	aGraphics->DrawImage(iAnimationFrames, destRect,
-					iWidth * iFrameIndex, 0, iWidth, iHeight,
+					Width * iFrameIndex, 0, Width, Height,
 					Gdiplus::UnitPixel,
 					iAlpha < 1.0 ? &attributes : NULL);
 					
@@ -407,31 +302,12 @@ void __fastcall TiAnimation::AddFrames(Gdiplus::Bitmap* aFrames, int aWidth, int
 		return;
 	}
 
-	iWidth = aWidth;
-	iHeight = aHeight > 0 ? aHeight : iWidth;
+	SetSize(aWidth, aHeight > 0 ? aHeight : aWidth);
 
-	if (iCenter.x < 0 && iCenter.y < 0)
-		iCenter = TPoint(iWidth / 2, iHeight / 2);
-
-	//iHeight = aFrames->GetHeight();
-
-	iAnimations.add(aFrames);
+	iBitmaps.add(aFrames);
 
 	if (!iAnimationFrames)
 		AnimationIndex = 0;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::SetParent(TiAnimationManager* aValue)
-{
-	iParent = aValue;
-	iUpdateTimer->Enabled = !iParent;
-}
-
-//---------------------------------------------------------------------------
-bool __fastcall TiAnimation::GetIsAnimating()
-{
-	return iAnimationTimer->Enabled;
 }
 
 //---------------------------------------------------------------------------
@@ -450,18 +326,6 @@ bool __fastcall TiAnimation::GetIsRotating()
 bool __fastcall TiAnimation::GetIsVisible()
 {
 	return iAlpha > 0.0;
-}
-
-//---------------------------------------------------------------------------
-double __fastcall TiAnimation::GetAnimationSpeed()
-{
-	return 1000.0 / iAnimationTimer->Interval;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::SetAnimationSpeed(double aValue)
-{
-	iAnimationTimer->Interval = floor(1000.0 / aValue + 0.5);
 }
 
 //---------------------------------------------------------------------------
@@ -490,25 +354,18 @@ void __fastcall TiAnimation::SetFadingStepCount(int aValue)
 //---------------------------------------------------------------------------
 void __fastcall TiAnimation::SetAnimationIndex(int aValue)
 {
-	if (aValue < 0 || aValue >= iAnimations.Count || aValue == iAnimationIndex)
+	if (aValue < 0 || aValue >= iBitmaps.Count || aValue == iAnimationIndex)
 		return;
 
 	iAnimationIndex = aValue;
-	iAnimationFrames = iAnimations[iAnimationIndex];
-	iFrameCount = iAnimationFrames->GetWidth() / iWidth;
+	iAnimationFrames = iBitmaps[iAnimationIndex];
+
+	iFrameCount = iAnimationFrames->GetWidth() / Width;
 	iFrameIndex = iFrameCount > 0 ? 0 : -1;
 	iAnimationDirection = 1;
 
 	if (IsVisible)
 		iIsPaintRequested = true;
-}
-
-//---------------------------------------------------------------------------
-bool __fastcall TiAnimation::GetIsPaintRequested()
-{
-	bool result = iIsPaintRequested;
-	iIsPaintRequested = false;
-	return result;
 }
 
 //---------------------------------------------------------------------------
@@ -520,13 +377,6 @@ void __fastcall TiAnimation::SetScale(double aValue)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::SetCenter(TPoint aCenter)
-{
-	iCenter = aCenter;
-	iIsPaintRequested = true;
-}
-
-//---------------------------------------------------------------------------
 void __fastcall TiAnimation::SetAngle(double aValue)
 {
 	iAngle = aValue;
@@ -535,47 +385,6 @@ void __fastcall TiAnimation::SetAngle(double aValue)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiAnimation::SetOnPaint(TNotifyEvent aValue)
-{
-	FOnPaint = aValue;
-	iUpdateTimer->Enabled = FOnPaint != NULL;
-}
-
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::onAnimationTimer(TObject* aSender)
-{
-	if (!IsVisible)
-		return;
-
-	int nextFrameIndex = iFrameIndex + iAnimationDirection;
-	if (nextFrameIndex == iFrameCount || nextFrameIndex == -1)
-	{
-		if (iAllowAnimationReversion)
-			iAnimationDirection = -iAnimationDirection;
-
-		if (!iLoopAnimation)
-		{
-			stopAnimation();
-			if (FOnAnimationFinished)
-				FOnAnimationFinished(this);
-		}
-		else
-		{
-			if (iAllowAnimationReversion)
-				iFrameIndex = nextFrameIndex + 2 * iAnimationDirection;
-			else
-				iFrameIndex = iAnimationDirection > 0 ? 0 : iFrameCount - 1;
-		}
-	}
-	else
-	{
-		iFrameIndex = nextFrameIndex;
-	}
-
-	iIsPaintRequested = true;
-}
-
 //---------------------------------------------------------------------------
 void __fastcall TiAnimation::onMoveTimer(TObject* aSender)
 {
@@ -595,8 +404,7 @@ void __fastcall TiAnimation::onMoveTimer(TObject* aSender)
 		iMoveY = iDestinationLocation.y;
 	}
 
-	iX = iMoveX;
-	iY = iMoveY;
+	SetLocation(iMoveX, iMoveY);
 
 	if (IsVisible)
 		iIsPaintRequested = true;
@@ -667,141 +475,5 @@ void __fastcall TiAnimation::onFadingTimer(TObject* aSender)
 	}
 }
 
-//---------------------------------------------------------------------------
-void __fastcall TiAnimation::onUpdateTimer(TObject* aSender)
-{
-	if (!FOnPaint || !iIsPaintRequested)
-		return;
 
-	FOnPaint(this);
-	iIsPaintRequested = false;
-}
-
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-__fastcall TiAnimationManager::TiAnimationManager() :
-	TObject(),
-	FOnPaint(NULL)
-{
-	iAnimations.DeleteContent = true;
-
-	iUpdateTimer = new TTimer(NULL);
-	iUpdateTimer->Enabled = true;
-	iUpdateTimer->Interval = 35;
-	iUpdateTimer->OnTimer = onUpdateTimer;
-}
-
-//---------------------------------------------------------------------------
-__fastcall TiAnimationManager::~TiAnimationManager()
-{
-	delete iUpdateTimer;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::add(TiAnimation* aAnimation)
-{
-	aAnimation->Parent = this;
-	iAnimations.add(aAnimation);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::paintTo(Gdiplus::Graphics* aGraphics)
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-	{
-		iAnimations[i]->paintTo(aGraphics);
-	}
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::startAnimation()
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->startAnimation();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::stopAnimation()
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->stopAnimation();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::toggleAnimation()
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->toggleAnimation();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::stopMove()
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->stopMove();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::setLoopAnimation(bool aValue)
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->LoopAnimation = aValue;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::setAnimationSpeed(int aValue)
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->AnimationSpeed = aValue;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::setMoveSpeed(double aValue)
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->MoveSpeed = aValue;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::setRotationSpeed(double aValue)
-{
-	for (int i = 0; i < iAnimations.Count; i++)
-		iAnimations[i]->RotationSpeed = aValue;
-}
-
-//---------------------------------------------------------------------------
-TiAnimation* TiAnimationManager::operator[](int aIndex)
-{
-	return aIndex < 0 || aIndex >= iAnimations.Count ? NULL : iAnimations[aIndex];
-}
-
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-int __fastcall TiAnimationManager::GetAnimationCount()
-{
-	return iAnimations.Count;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiAnimationManager::onUpdateTimer(TObject* aSender)
-{
-	if (!FOnPaint)
-		return;
-
-	bool updateRequested = false;
-	bool onlyNonStatic = true;
-	for (int i = 0; i < iAnimations.Count; i++)
-	{
-		TiAnimation* animation = iAnimations[i];
-		bool animationToUpdate = animation->IsPaintRequested;
-		updateRequested = animationToUpdate || updateRequested;
-
-		if (animationToUpdate && onlyNonStatic)
-			onlyNonStatic = !animation->IsStatic;
-	}
-
-	if (updateRequested)
-		FOnPaint(this, onlyNonStatic ? updNonStatic : updAll);
-}
 

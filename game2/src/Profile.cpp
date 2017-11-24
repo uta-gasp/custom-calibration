@@ -17,10 +17,10 @@ const int KSpeedExcellent = 3000;
 const int KSpeedGood 			= 5000;
 const int KSpeedOK 				= 8000;
 
-const int KLevelScoreMax	= 500;
+const int KLevelScoreMax	= 350;
 
 // Getting a bonus: thresholds
-const double KBonusScoreThreshold = 0.85;	// % of max possible
+const double KBonusScoreThreshold = 0.80;	// % of max possible
 const double KBonusFailedThreshold = 1;		// max number of failed targets
 
 //---------------------------------------------------------------------------

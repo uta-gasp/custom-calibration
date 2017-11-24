@@ -4,7 +4,7 @@
 
 //---------------------------------------------------------------------------
 #include "Scene.h"
-#include "Animation.h"
+#include "AnimationSimple.h"
 
 //---------------------------------------------------------------------------
 namespace ProfiledGame {
@@ -16,18 +16,14 @@ class TiDoor : public TiScene
 		enum EiMovement
 		{
 			dmUp,
-			dmDown,
-			dmOpen,
-			dmClose
+			dmDown
 		};
 
 	private:
-		TiAnimation* iDoorsClose;
-		TiAnimation* iDoorsOpen;
-		TiAnimation* iDoorsUp;
-		TiAnimation* iDoorsDown;
+		TiAnimationSimple* iDoorsUp;
+		TiAnimationSimple* iDoorsDown;
 
-		TiAnimation* iDoorVisible;
+		TiAnimationSimple* iDoorVisible;
 
 		bool iIsClosed;
 
@@ -36,7 +32,7 @@ class TiDoor : public TiScene
 	public:
 		__fastcall TiDoor(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);
 
-		void __fastcall show(EiMovement aMovement, int aDuration = 0);
+		void __fastcall show(EiMovement aMovement);
 		void __fastcall run();
 
 		__property bool IsClosed = { read = iIsClosed };

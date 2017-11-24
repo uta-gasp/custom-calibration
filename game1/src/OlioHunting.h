@@ -7,6 +7,7 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "utils.h"
 
 //---------------------------------------------------------------------------
@@ -43,8 +44,6 @@ class TiOlioHuntingTimer : public TiAnimation
 //---------------------------------------------------------------------------
 class TiOlioHunting : public TObject
 {
-	typedef TiDynArray<TiAnimation> TiAnimations;
-
 	public:
 		struct SiHidingOlio {
 			int X;

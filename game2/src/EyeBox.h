@@ -5,6 +5,7 @@
 //---------------------------------------------------------------------------
 #include "Scene.h"
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "Profile.h"
 #include "UserPositionQualityEstimator.h"
 #include "utils.h"

@@ -12,14 +12,11 @@
 using namespace ProfiledGame;
 
 //---------------------------------------------------------------------------
-const double KMinDistance = 300.0;	// mm
+const double KMinEyeDistance = 300.0;	// mm
 const double KMinEyeScale = 0.2 * 0.2;
 const double KCamWidth = 320;    // px
 const double KCamHeight = 240;   // px
 const double KInvalidValue = 0.0;
-
-const double KMinStartDistance = 450.0; // mm
-const double KMaxStartDistance = 650.0; // mm
 
 const int KEyeSize = 36;								// px
 const int KEyeCircleWidth = 8;
@@ -27,7 +24,7 @@ const int KEyeCircleWidth = 8;
 const int KEyeBoxWidth = 800;
 const int KEyeBoxHeight = 600;
 
-const int KThresholdZ = 80;
+const int KThresholdZ = 100;
 const int KThresholdXY = 10;
 
 //---------------------------------------------------------------------------
@@ -199,7 +196,7 @@ void __fastcall TiEyeBox::SetEyeLocation(TiAnimation* aEye, double aX, double aY
 //---------------------------------------------------------------------------
 void __fastcall TiEyeBox::SetEyeScale(TiAnimation* aEye, double aDist)
 {
-	if (aDist <= KMinDistance)
+	if (aDist <= KMinEyeDistance)
 		return;
 
 	aEye->Scale = GetScale(aDist);
@@ -208,6 +205,6 @@ void __fastcall TiEyeBox::SetEyeScale(TiAnimation* aEye, double aDist)
 //---------------------------------------------------------------------------
 double __fastcall TiEyeBox::GetScale(double aDist)
 {
-	return sqrt(max(KMinEyeScale, 3.0 - 2*(aDist - KMinDistance)/(TiUserPositionQualityEstimator::getIdealUserDistance() - KMinDistance)));
+	return sqrt(max(KMinEyeScale, 3.0 - 2*(aDist - KMinEyeDistance)/(TiUserPositionQualityEstimator::getIdealUserDistance() - KMinEyeDistance)));
 }
 

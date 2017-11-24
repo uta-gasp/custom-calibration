@@ -4,6 +4,7 @@
 
 //---------------------------------------------------------------------------
 #include "LevelLegend.h"
+#include "AnimationSimple.h"
 
 //---------------------------------------------------------------------------
 namespace ProfiledGame {
@@ -16,8 +17,8 @@ class TiGhostBox : public TiLevelLegend
 		TiAnimation* iBoxOpened;
 		TiAnimation* iButtonGreen;
 		TiAnimation* iButtonRed;
-		TiAnimation* iGhostsEscaping;
-		TiAnimation* iGhostsTrapping;
+		TiAnimationSimple* iGhostsEscaping;
+		TiAnimationSimple* iGhostsTrapping;
 
 		TiTimeout* iTimeout;
 		int iFlashesLeft;

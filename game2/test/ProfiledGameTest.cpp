@@ -4,10 +4,17 @@
 
 //---------------------------------------------------------------------------
 USERES("ProfiledGameTest.res");
+USEFORM("MainForm.cpp", frmMainForm);
 USELIB("GdiPlus.lib");
 USELIB("..\..\..\XML\XML.lib");
+USEUNIT("..\..\common\AnimationBase.cpp");
+USEUNIT("..\..\common\AnimationManager.cpp");
+USEUNIT("..\..\common\AnimationSimple.cpp");
+USEUNIT("..\..\common\Animation.cpp");
+USEUNIT("..\..\common\CalibQuality.cpp");
+USEUNIT("..\..\common\CalibQualityEstimator.cpp");
+USEUNIT("..\..\common\utils.cpp");
 USERC("..\assets\assets_pg.rc");
-USEFORM("MainForm.cpp", frmMainForm);
 USEFORM("..\src\ProfiledGame.cpp", iProfiledGame);
 USEUNIT("..\src\EyeBox.cpp");
 USEUNIT("..\src\CalibPoint.cpp");
@@ -30,12 +37,9 @@ USEUNIT("..\src\InstructionShape.cpp");
 USEUNIT("..\src\LevelInstruction.cpp");
 USEUNIT("..\src\LevelLegend.cpp");
 USEUNIT("..\src\GhostBox.cpp");
-USEUNIT("..\..\common\Animation.cpp");
-USEUNIT("..\..\common\CalibQuality.cpp");
-USEUNIT("..\..\common\CalibQualityEstimator.cpp");
-USEUNIT("..\..\common\utils.cpp");
 USEUNIT("..\src\PositionTracker.cpp");
 USEUNIT("..\src\UserPositionQualityEstimator.cpp");
+
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

@@ -275,7 +275,6 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iFireflyAndPoints->OnAborted = onCalib_Aborted;
 		iFireflyAndPoints->OnGameStarted = onCalib_VerifStarted;
 		iFireflyAndPoints->OnGameFinished = onCalib_VerifFinished;
-		iFireflyAndPoints->OnBeforeExit = onCalib_BeforeExit;
 
 		iFireflyAndPoints->GameAfterCalibration = true;
 
@@ -298,7 +297,6 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnAborted = onCalib_Aborted;
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
 		iProfiledGame->OnVerifFinished = onCalib_VerifFinished;
-		iProfiledGame->OnBeforeExit = onCalib_BeforeExit;
 
 		if (sMouseInput)
 			iProfiledGame->OnMouseMove = onCalib_MouseMove;
@@ -528,20 +526,6 @@ void __fastcall TiController::onCalib_VerifFinished(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiController::onCalib_BeforeExit(TObject* aSender)
-{
-/*
-	if (!iPreInstructionForm)
-	{
-		iPreInstructionForm = new TfrmPreInstruction(NULL);
-		iPreInstructionForm->Instruction = iCurrentSessionIndex == SESSION_COUNT - 1 ?
-				TfrmPreInstruction::instFinished :
-				TfrmPreInstruction::instPause;
-		iPreInstructionForm->Show();
-	}*/
-}
-
-//---------------------------------------------------------------------------
 void __fastcall TiController::onCalib_MouseMove(TObject* aSender, TShiftState aShift, int aX, int aY)
 {
 	static double sLastEyeX = 0;
@@ -563,8 +547,8 @@ void __fastcall TiController::onCalib_MouseMove(TObject* aSender, TShiftState aS
 	}
 
 	SampleStruct sample = {__int64(0),
-			{double(aX), double(aY), 70.0, sLastEyeX - 35, sLastEyeY, sLastDist},
-			{double(aX), double(aY), 70.0, sLastEyeX + 35, sLastEyeY, sLastDist}
+			{double(aX), double(aY), 70.0, sLastEyeX - 27, sLastEyeY, sLastDist},
+			{double(aX), double(aY), 70.0, sLastEyeX + 27, sLastEyeY, sLastDist}
 	};
 
 	if (iFireflyAndPoints)

@@ -14,56 +14,41 @@ __fastcall TiDoor::TiDoor(TiAnimationManager* aManager,
 		TiScene(aManager, aScreenSize, aViewport),
 		iDoorVisible(NULL)
 {
-	iDoorsClose = new TiAnimation(false, false);
-	iDoorsClose->addFrames(IDR_DOORS_CLOSE, aViewport.Width, aViewport.Height);
-	iDynamicAssets->add(iDoorsClose);
-
-	iDoorsOpen = new TiAnimation(false, false);
-	iDoorsOpen->addFrames(IDR_DOORS_OPEN, aViewport.Width, aViewport.Height);
-	iDynamicAssets->add(iDoorsOpen);
-
-	iDoorsDown = new TiAnimation(false, false);
-	iDoorsDown->addFrames(IDR_DOORS_DOWN, aViewport.Width, aViewport.Height);
+	iDoorsDown = new TiAnimationSimple(false);
+	for (int i = 0; i < IDR_DOORS_FRAME_COUNT; i++)
+		iDoorsDown->addFrames(IDR_DOORS_FRAMES + i);
+	iDoorsDown->addFrames(IDR_DOORS);
 	iDynamicAssets->add(iDoorsDown);
 
-	iDoorsUp = new TiAnimation(false, false);
-	iDoorsUp->addFrames(IDR_DOORS_UP, aViewport.Width, aViewport.Height);
+	iDoorsUp = new TiAnimationSimple(false);
+	iDoorsUp->addFrames(IDR_DOORS);
+	for (int i = IDR_DOORS_FRAME_COUNT; i > 0; i--)
+		iDoorsUp->addFrames(IDR_DOORS_FRAMES + i - 1);
 	iDynamicAssets->add(iDoorsUp);
 
 	for (int i = 0; i < iDynamicAssets->Count; i++)
 	{
-		TiAnimation* doors = iDynamicAssets->get(i);
+		TiAnimationBase* doors = iDynamicAssets->get(i);
 		doors->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
 		doors->LoopAnimation = false;
 		doors->RewindAnimationAfterStop = false;
-		doors->FadingStepCount = 5;
 		doors->OnAnimationFinished = onAnimationDone;
 		aManager->add(doors);
 	}
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiDoor::show(EiMovement aMovement, int aDuration)
+void __fastcall TiDoor::show(EiMovement aMovement)
 {
 	switch (aMovement)
 	{
 		case dmUp: 		iDoorVisible = iDoorsUp; 		break;
 		case dmDown: 	iDoorVisible = iDoorsDown; 	break;
-		case dmOpen: 	iDoorVisible = iDoorsOpen; 	break;
-		case dmClose: iDoorVisible = iDoorsClose; break;
 	}
 
-	iIsClosed = aMovement == dmDown || aMovement == dmClose;
+	iIsClosed = aMovement == dmDown;;
 
-	if (!aDuration)
-	{
-		iDoorVisible->show();
-	}
-	else
-	{
-		iDoorVisible->FadingDuration = aDuration;
-		iDoorVisible->fadeIn();
-	}
+	iDoorVisible->show();
 
 	iIsVisible = true;
 }

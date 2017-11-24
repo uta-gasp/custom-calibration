@@ -4,6 +4,7 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "utils.h"
 
 #ifndef RET_SUCCESS

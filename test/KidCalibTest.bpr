@@ -5,8 +5,9 @@
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\KidCalibTest.exe"/>
     <OBJFILES value="build\KidCalibTest.obj build\MainForm.obj build\PreInstruction.obj 
-      build\Controller.obj build\Animation.obj build\CalibQuality.obj 
-      build\CalibQualityEstimator.obj build\utils.obj build\FireflyAndPoints.obj 
+      build\Controller.obj build\AnimationBase.obj build\AnimationManager.obj 
+      build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
+      build\utils.obj build\FireflyAndPoints.obj 
       build\EyeBoxWithInstructions.obj build\Lamp.obj build\Lamps.obj 
       build\OlioHunting.obj build\ProfiledGame.obj build\EyeBox.obj 
       build\CalibPoint.obj build\CalibPoints.obj build\Profile.obj 
@@ -16,7 +17,7 @@
       build\Login.obj build\GameResult.obj build\Rewards.obj build\Status.obj 
       build\InstructionShape.obj build\LevelInstruction.obj 
       build\LevelLegend.obj build\GhostBox.obj build\PositionTracker.obj 
-      build\UserPositionQualityEstimator.obj"/>
+      build\UserPositionQualityEstimator.obj build\AnimationSimple.obj"/>
     <RESFILES value="KidCalibTest.res build\assets_ctrl.res build\assets_ffap.res 
       build\assets_pg.res"/>
     <DEFFILE value=""/>
@@ -33,11 +34,11 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
-    <USERDEFINES value=""/>
+    <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT"/>
     <MAINSOURCE value="KidCalibTest.cpp"/>
-    <INCLUDEPATH value="..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <INCLUDEPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;..\..\GDI+\Include;..\..\XML;$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="&quot;C:\Program Files (x86)\Borland\CBuilder5\Projects&quot;;..\common;..\controller\src;..\controller\assets;..\game1\src;..\game1\assets;..\game2\src;..\game2\assets;$(BCB)\Projects\Lib;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-pch -w-par -w-hid"/>
   </MACROS>
   <OPTIONS>

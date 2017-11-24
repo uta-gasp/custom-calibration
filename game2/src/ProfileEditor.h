@@ -5,9 +5,9 @@
 //---------------------------------------------------------------------------
 #include "Scene.h"
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "Profile.h"
 #include "utils.h"
-#include "assets_pg.h"
 
 //---------------------------------------------------------------------------
 namespace ProfiledGame {

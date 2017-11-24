@@ -12,14 +12,14 @@
 using namespace FireflyAndPoints;
 
 //---------------------------------------------------------------------------
-const double KMinDistance = 300.0;
-const double KMinEyeScale2 = 0.2 * 0.2;
+const double KMinEyeDistance = 300.0;
+const double KMinEyeScale = 0.2 * 0.2;
 const double KCamWidth = 320;
 const double KCamHeight = 240;
 const double KInvalidValue = 0.0;
-const double KMinStartDistance = 450.0;
-const double KMaxStartDistance = 650.0;
-const double KIdealDistance = 530.0;
+const double KMinUserDistance = 420.0;
+const double KMaxUserDistance = 650.0;
+const double KIdealUserDistance = 530.0;
 const int KEyeSize = 32;
 
 const int KInstructionWidth = 650;
@@ -93,7 +93,7 @@ void __fastcall TiEyeBoxWithInstructions::left(EyeDataStruct& aEyeData)
 	SetEyeLocation(iLeft, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iLeft, aEyeData.eyePositionZ);
 
-	setTrackingStability(aEyeData.eyePositionZ >= KMinStartDistance && aEyeData.eyePositionZ <= KMaxStartDistance);
+	setTrackingStability(aEyeData.eyePositionZ >= KMinUserDistance && aEyeData.eyePositionZ <= KMaxUserDistance);
 }
 
 //---------------------------------------------------------------------------
@@ -111,10 +111,6 @@ void __fastcall TiEyeBoxWithInstructions::setTrackingStability(bool aStable)
 {
 	iInstabilityCounter = min(15, max(0, iInstabilityCounter + (aStable ? -1 : 1)));
 
-	//if (iInstabilityCounter > 10 && (!iWarning->IsVisible && iWarning->FadingDirection != 1))
-	//	iWarning->fadeIn();
-	//else if (iInstabilityCounter < 5 && iWarning->IsVisible && iWarning->FadingDirection != -1)
-	//	iWarning->fadeOut();
 	if (aStable)
 	{
 		if (iStart->Opacity < 1.0)
@@ -142,7 +138,7 @@ void __fastcall TiEyeBoxWithInstructions::paintTo(Gdiplus::Graphics* aGraphics, 
 		iLeft->paintTo(aGraphics);
 		iRight->paintTo(aGraphics);
 
-		double size = GetScale(KIdealDistance) * KEyeSize;
+		double size = GetScale(KIdealUserDistance) * KEyeSize;
 		double penSize = 3;
 		Gdiplus::Pen idealSizePen(Gdiplus::Color(255 * iLeft->Opacity, 0, 192, 0), penSize);
 
@@ -203,7 +199,7 @@ void __fastcall TiEyeBoxWithInstructions::SetEyeLocation(TiAnimation* aEye, doub
 //---------------------------------------------------------------------------
 void __fastcall TiEyeBoxWithInstructions::SetEyeScale(TiAnimation* aEye, double aDist)
 {
-	if (aDist <= KMinDistance)
+	if (aDist <= KMinEyeDistance)
 		return;
 
 	aEye->Scale = GetScale(aDist);
@@ -212,7 +208,7 @@ void __fastcall TiEyeBoxWithInstructions::SetEyeScale(TiAnimation* aEye, double 
 //---------------------------------------------------------------------------
 double __fastcall TiEyeBoxWithInstructions::GetScale(double aDist)
 {
-	return sqrt(max(KMinEyeScale2, 1.0 - (aDist - KMinDistance)/350.0));
+	return sqrt(max(KMinEyeScale, 1.0 - (aDist - KMinEyeDistance)/350.0));
 }
 
 //---------------------------------------------------------------------------

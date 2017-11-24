@@ -8,6 +8,7 @@
 
 //---------------------------------------------------------------------------
 #include "Animation.h"
+#include "AnimationManager.h"
 #include "utils.h"
 
 //---------------------------------------------------------------------------
@@ -17,7 +18,7 @@ namespace ProfiledGame {
 class TiScene : public TObject
 {
 	protected:
-		typedef TiDynArray<TiAnimation> TiAssets;
+		typedef TiDynArray<TiAnimationBase> TiAssets;
 
 		TiAnimationManager* iManager;
 		TiSize iScreenSize;

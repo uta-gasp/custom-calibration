@@ -4,16 +4,17 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\ProfiledGameTest.exe"/>
-    <OBJFILES value="build\ProfiledGameTest.obj build\MainForm.obj build\ProfiledGame.obj 
-      build\EyeBox.obj build\CalibPoint.obj build\CalibPoints.obj 
-      build\Profile.obj build\ProfileEditor.obj build\Avatar.obj 
-      build\InstructionSitting.obj build\Scene.obj build\InstructionStart.obj 
-      build\Factory.obj build\InstructionColor.obj build\Door.obj 
-      build\InstructionCalibrate.obj build\Login.obj build\GameResult.obj 
-      build\Rewards.obj build\Status.obj build\InstructionShape.obj 
-      build\LevelInstruction.obj build\LevelLegend.obj build\GhostBox.obj 
-      build\Animation.obj build\CalibQuality.obj build\CalibQualityEstimator.obj 
-      build\utils.obj build\PositionTracker.obj 
+    <OBJFILES value="build\ProfiledGameTest.obj build\MainForm.obj build\AnimationBase.obj 
+      build\AnimationManager.obj build\AnimationSimple.obj build\Animation.obj 
+      build\CalibQuality.obj build\CalibQualityEstimator.obj build\utils.obj 
+      build\ProfiledGame.obj build\EyeBox.obj build\CalibPoint.obj 
+      build\CalibPoints.obj build\Profile.obj build\ProfileEditor.obj 
+      build\Avatar.obj build\InstructionSitting.obj build\Scene.obj 
+      build\InstructionStart.obj build\Factory.obj build\InstructionColor.obj 
+      build\Door.obj build\InstructionCalibrate.obj build\Login.obj 
+      build\GameResult.obj build\Rewards.obj build\Status.obj 
+      build\InstructionShape.obj build\LevelInstruction.obj 
+      build\LevelLegend.obj build\GhostBox.obj build\PositionTracker.obj 
       build\UserPositionQualityEstimator.obj"/>
     <RESFILES value="ProfiledGameTest.res build\assets_pg.res"/>
     <DEFFILE value=""/>
@@ -25,7 +26,7 @@
       ibsmp50.bpi vcldbx50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi TeeQR50.bpi 
       VCLIB50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi Inet50.bpi NMFast50.bpi 
       dclocx50.bpi bcb2kaxserver50.bpi ETUDriver.bpi Tet3.bpi GCG.bpi"/>
-    <PATHCPP value=".;..\src;..\..\common"/>
+    <PATHCPP value=".;..\..\common;..\src"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;..\assets"/>
     <PATHASM value=".;"/>

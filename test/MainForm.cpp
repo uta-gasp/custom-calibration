@@ -24,7 +24,7 @@ const CalibrationPointStruct KCalibPoints[] = {
 	{5, 200, 80},
 };
 
-const String KIniFileName = "settings.xml";
+const String KSettingsFileName = "settings.xml";
 const String KSessionsFileName = "sessions.txt";
 
 const bool KDebug = false;
@@ -47,7 +47,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner) :
 	Canvas->Brush->Color = this->Color;
 
 	String fileName = ExtractFilePath(Application->ExeName);
-	iSettingsFileName = fileName + "\\" + KIniFileName;
+	iSettingsFileName = fileName + "\\" + KSettingsFileName;
 
 	for (int i = 0; i < DAY_COUNT; i++)
 		cmbDays->Items->Add(String().sprintf("Day %d", i + 1));

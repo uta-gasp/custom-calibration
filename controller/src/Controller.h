@@ -105,7 +105,6 @@ class TiController : public TObject
 		void __fastcall onCalib_Aborted(TObject* aSender);
 		void __fastcall onCalib_VerifStarted(TObject* aSender);
 		void __fastcall onCalib_VerifFinished(TObject* aSender);
-		void __fastcall onCalib_BeforeExit(TObject* aSender);
 
 		void __fastcall onCalib_MouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 

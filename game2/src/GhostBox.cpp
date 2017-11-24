@@ -49,23 +49,26 @@ __fastcall TiGhostBox::TiGhostBox(TiAnimationManager* aManager,
 	aManager->add(iButtonRed);
 	iStaticAssets->add(iButtonRed);
 
-	iGhostsEscaping = new TiAnimation(false, false);
-	iGhostsEscaping->addFrames(IDR_STORY_LEVEL2_GHOSTS_ESCAPE, aViewport.Width, aViewport.Height);
+	iGhostsEscaping = new TiAnimationSimple(false);
+	iGhostsEscaping->addFrames(IDR_STORY_LEVEL2_GHOSTS_ESCAPE + IDR_STORY_LEVEL2_GHOSTS_ESCAPE_COUNT - 1);
+	for (int i = 0; i < IDR_STORY_LEVEL2_GHOSTS_ESCAPE_COUNT; i++)
+		iGhostsEscaping->addFrames(IDR_STORY_LEVEL2_GHOSTS_ESCAPE + i);
 	iGhostsEscaping->LoopAnimation = false;
 	iGhostsEscaping->RewindAnimationAfterStop = false;
 	iGhostsEscaping->AllowAnimationReversion = false;
-	iGhostsEscaping->AnimationSpeed = 10;
+//	iGhostsEscaping->AnimationSpeed = 10;
 	iGhostsEscaping->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
 	iGhostsEscaping->OnAnimationFinished = onGhostsEscapingAnimationFinished;
 	aManager->add(iGhostsEscaping);
 	iDynamicAssets->add(iGhostsEscaping);
 
-	iGhostsTrapping = new TiAnimation(false, false);
-	iGhostsTrapping->addFrames(IDR_STORY_LEVEL2_GHOSTS_TRAPPED, aViewport.Width, aViewport.Height);
+	iGhostsTrapping = new TiAnimationSimple(false);
+	for (int i = 0; i < IDR_STORY_LEVEL2_GHOSTS_TRAPPED_COUNT; i++)
+		iGhostsTrapping->addFrames(IDR_STORY_LEVEL2_GHOSTS_TRAPPED + i);
 	iGhostsTrapping->LoopAnimation = false;
 	iGhostsTrapping->RewindAnimationAfterStop = false;
 	iGhostsTrapping->AllowAnimationReversion = false;
-	iGhostsTrapping->AnimationSpeed = 10;
+//	iGhostsTrapping->AnimationSpeed = 10;
 	iGhostsTrapping->placeTo(aScreenSize.Width / 2, aScreenSize.Height / 2);
 	iGhostsTrapping->OnAnimationFinished = onGhostsTrappingAnimationFinished;
 	aManager->add(iGhostsTrapping);
@@ -149,6 +152,7 @@ void __fastcall TiGhostBox::FlashButtonGreen(TObject* aSender)
 		iBoxOpened->show();
 		iButtonRed->show();
 		iGhostsEscaping->show();
+
 		TiTimeout::run(KDurationBeforeEscape, AnimateGhostsEscaping, &iTimeout);
 	}
 }
@@ -171,6 +175,7 @@ void __fastcall TiGhostBox::FlashButtonRed(TObject* aSender)
 	{
 		iButtonGreen->show();
 		iGhostsTrapping->show();
+
 		TiTimeout::run(KDurationBeforeTrapped, AnimateGhostsTrapping, &iTimeout);
 	}
 }
