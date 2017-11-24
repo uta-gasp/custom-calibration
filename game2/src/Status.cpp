@@ -144,6 +144,8 @@ void __fastcall TiStatus::mouseClick(TMouseButton aButton, TShiftState aShift, i
 			int bit = 1 << i;
 			if (!(iProfile->Bonus & bit))
 				tile->Cover->show();
+			if (iProfile->SelectedPrizes & bit)
+				tile->Selected->show();
 		}
 	}
 	else if (iPrizes->IsVisible)

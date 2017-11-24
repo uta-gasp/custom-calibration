@@ -249,8 +249,8 @@ void __fastcall TfrmMainForm::onCalibrationMouseMove(TObject* aSender, TShiftSta
 	}
 
 	SampleStruct sample = {__int64(0),
-			{double(X), double(Y), 70.0, sLastEyeX-30, sLastEyeY, sLastDist},
-			{double(X), double(Y), 70.0, sLastEyeX+30, sLastEyeY, sLastDist}
+			{double(X), double(Y), 70.0, sLastEyeX-27, sLastEyeY, sLastDist},
+			{double(X), double(Y), 70.0, sLastEyeX+27, sLastEyeY, sLastDist}
 	};
 	iCustomCalibration->setSample(sample);
 }
