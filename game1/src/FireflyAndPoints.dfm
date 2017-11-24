@@ -1,6 +1,6 @@
 object iFireflyAndPoints: TiFireflyAndPoints
-  Left = 489
-  Top = 215
+  Left = 491
+  Top = 217
   BorderIcons = []
   BorderStyle = bsNone
   ClientHeight = 550
