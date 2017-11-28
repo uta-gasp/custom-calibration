@@ -64,7 +64,7 @@ bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY
 			aTargetX, aTargetY
 	));
 
-	TiPointD fixation;
+	TiPointD fixation(0, 0);
 	if (!GetAverage(fixation, iGazePoints))
 		return false;
 
@@ -78,7 +78,7 @@ bool __fastcall TiCalibQualityEstimator::addSelection(int aTargetX, int aTargetY
 			offset.X, offset.Y
 	));
 
-	TiPointD sd;
+	TiPointD sd(0, 0);
 	if (!GetStandardDeviation(sd, iGazePoints, &fixation))
 		return false;
 
@@ -158,7 +158,7 @@ bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 	if (!iGazePoints.size())
 		return false;
 
-	TiPointD mean;
+	TiPointD mean(0, 0);
 	if (aMean)
 		mean = *aMean;
 	else if (!GetAverage(mean, aPoints))
@@ -174,12 +174,7 @@ bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 		y += pow(it->Y - mean.Y, 2);
 	}
 
-	try {
-		aResult = TiPointD(sqrt(x / count), sqrt(y / count));
-	} catch (...) {
-		//MessageBox(NULL, "Oops2", "KC", MB_OK);
-		return false;
-	}
+	aResult = TiPointD(sqrt(x / count), sqrt(y / count));
 
 	return true;
 }
@@ -187,7 +182,7 @@ bool __fastcall TiCalibQualityEstimator::GetStandardDeviation(TiPointD& aResult,
 //---------------------------------------------------------------------------
 TiCalibQualityEstimator::TiPointD __fastcall TiCalibQualityEstimator::GetPoint()
 {
-	TiPointD fixation;
+	TiPointD fixation(0, 0);
 	GetAverage(fixation, iGazePoints);
 
 	return fixation;

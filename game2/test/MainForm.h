@@ -22,8 +22,10 @@ class TfrmMainForm : public TForm
 __published:	// IDE-managed Components
 	TMemo *log;
 	TButton *btnStartCalibAndGame;
+	TTimer *tmrMouse;
 	void __fastcall FormDestroy(TObject *Sender);
 	void __fastcall btnStartClick(TObject *Sender);
+	void __fastcall tmrMouseTimer(TObject *Sender);
 
 private:	// User declarations
 	double iScaleX;
@@ -51,6 +53,7 @@ private:	// User declarations
 	void __fastcall onRecalibratePoint(TObject* aSender, int aPointID, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
+	void __fastcall onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode);
 	void __fastcall onCalibrationFinished(TObject* aSender);
 	void __fastcall onCalibrationAborted(TObject* aSender);
 	void __fastcall onCalibrationVerificationStarted(TObject* aSender);

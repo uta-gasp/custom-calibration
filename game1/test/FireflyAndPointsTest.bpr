@@ -4,10 +4,11 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="bin\FireflyAndPointsTest.exe"/>
-    <OBJFILES value="build\FireflyAndPointsTest.obj build\MainForm.obj 
+    <OBJFILES value="build\FireflyAndPointsTest.obj build\MainForm.obj build\AnimationBase.obj 
+      build\AnimationManager.obj build\AnimationSimple.obj build\Animation.obj 
+      build\CalibQuality.obj build\CalibQualityEstimator.obj build\utils.obj 
       build\FireflyAndPoints.obj build\EyeBoxWithInstructions.obj build\Lamp.obj 
-      build\Lamps.obj build\OlioHunting.obj build\Animation.obj 
-      build\CalibQuality.obj build\CalibQualityEstimator.obj build\utils.obj"/>
+      build\Lamps.obj build\OlioHunting.obj"/>
     <RESFILES value="FireflyAndPointsTest.res build\assets_ffap.res"/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) MainForm.dfm ..\src\FireflyAndPoints.dfm"/>
@@ -18,7 +19,7 @@
       ibsmp50.bpi vcldbx50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi TeeQR50.bpi 
       VCLIB50.bpi bcbie50.bpi vclie50.bpi Inetdb50.bpi Inet50.bpi NMFast50.bpi 
       dclocx50.bpi bcb2kaxserver50.bpi ETUDriver.bpi Tet3.bpi GCG.bpi"/>
-    <PATHCPP value=".;..\src;..\..\common"/>
+    <PATHCPP value=".;..\..\common;..\src"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;..\assets"/>
     <PATHASM value=".;"/>

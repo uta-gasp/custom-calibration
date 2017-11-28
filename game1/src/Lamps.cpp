@@ -9,6 +9,9 @@
 using namespace FireflyAndPoints;
 
 //---------------------------------------------------------------------------
+const int KMaxPointCalibrationCount = 3;
+
+//---------------------------------------------------------------------------
 __fastcall TiLamps::TiLamps(TiAnimationManager* aManager, int aWindowWidth, int aWindowHeight) :
 		iCurrentPointIndex(-1),
 		iAnimationManager(aManager)
@@ -97,6 +100,15 @@ void __fastcall TiLamps::prepare(int aCalibPointNumber)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiLamps::accept()
+{
+	if (!Current)
+		return;
+
+	Current->accept();
+}
+
+//---------------------------------------------------------------------------
 TiLamp* __fastcall TiLamps::next(int aPointNumber)
 {
 	if (!aPointNumber)
@@ -128,9 +140,15 @@ void __fastcall TiLamps::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpd
 }
 
 //---------------------------------------------------------------------------
-TiLamp* TiLamps::operator[](int aIndex)
+bool __fastcall TiLamps::canRecalibratePoint(int aIndex)
 {
-	return aIndex < 0 || aIndex >= iPoints.Count ? NULL : iPoints[aIndex];
+	return aIndex < 0 || aIndex >= iPoints.Count ? false : iPoints[aIndex]->AcceptanceCount < KMaxPointCalibrationCount;
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TiLamps::pointRecalibrationCount(int aIndex)
+{
+	return aIndex < 0 || aIndex >= iPoints.Count ? 0 : iPoints[aIndex]->AcceptanceCount - 1;
 }
 
 //---------------------------------------------------------------------------

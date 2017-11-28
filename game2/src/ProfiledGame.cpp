@@ -27,7 +27,9 @@ const int KViewportHeight = 768;
 const Gdiplus::Color KBackgroundColor(255, 0, 0, 0);
 
 const int KMaxAllowedCalibQualityOffset = 40;
+const int KMaxAllowedCalibQualityOffsetExtra = 20;
 const double KMinAllowedCalibQualityValue = 0.5;
+const double KMinAllowedCalibQualityValueExtra = 0.2;
 
 const int KVerificationPointCountX = 3;
 const int KVerificationPointCountY = 2;
@@ -38,6 +40,8 @@ const int KVerificationCellMargin = 80;
 __fastcall TiProfiledGame::TiProfiledGame(TComponent* aOwner) :
 		TForm(aOwner),
 		iTimeout(NULL),
+		iPointAcceptTimeout(NULL),
+		iPointHangTimeout(NULL),
 		iStaticBitmap(NULL),
 		iProfileEditor(NULL),
 		iIsVerifying(false),
@@ -52,6 +56,7 @@ __fastcall TiProfiledGame::TiProfiledGame(TComponent* aOwner) :
 		FOnRecalibratePoint(NULL),
 		FOnPointReady(NULL),
 		FOnPointAccepted(NULL),
+		FOnPointAborted(NULL),
 		FOnFinished(NULL),
 		FOnAborted(NULL),
 		FOnVerifStarted(NULL),
@@ -173,23 +178,48 @@ bool __fastcall TiProfiledGame::processCalibrationResult()
 		delete calibQuality;
 	}
 
-	TiCalibQuality::Point worstCalibPoint = iCalibQuality->WorstPoint;
+	//TiCalibQuality::Point worstCalibPoint = iCalibQuality->WorstPoint;
+	TiCalibQuality::Point worstCalibPoint;
+	int worstCalibPoint_RecalibCount;
+
+	for (int i = 0; i < iCalibPoints->Count; i++)
+	{
+		if (!iCalibPoints->canRecalibratePoint(i))
+			continue;
+
+		TiCalibQuality::Point candidateToWorstCalibPoint = iCalibQuality->getPointQuality(i + 1);
+		int candidateToWorstCalibPoint_RecalibCount = iCalibPoints->pointRecalibrationCount(i);;
+
+		int worstCalibPoint_Offset = worstCalibPoint.Offset - worstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+		int candidateToWorstCalibPoint_Offset = candidateToWorstCalibPoint.Offset - candidateToWorstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+
+		if (worstCalibPoint.ID < 0 || worstCalibPoint_Offset < candidateToWorstCalibPoint_Offset)
+		{
+			worstCalibPoint = candidateToWorstCalibPoint;
+			worstCalibPoint_RecalibCount = iCalibPoints->pointRecalibrationCount(i);
+		}
+	}
+
 	if (FOnEvent)
 		FOnEvent(this, String().sprintf("worst quality\t%d\t%.1f\t%.3f",
 				worstCalibPoint.ID - 1, worstCalibPoint.Offset, worstCalibPoint.Quality));
 
-	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset ||
-			worstCalibPoint.Quality < KMinAllowedCalibQualityValue)
+	if (worstCalibPoint.ID > 0)
 	{
-		finished = false;
-		iIsRecalibrating = true;
-		RecalibratePoint(worstCalibPoint.ID);
+		int maxAllowedCalibQualityOffset = KMaxAllowedCalibQualityOffset + worstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+		int minAllowedCalibQualityValue = KMinAllowedCalibQualityValue - worstCalibPoint_RecalibCount * KMinAllowedCalibQualityValueExtra;
+
+		if (worstCalibPoint.Offset > maxAllowedCalibQualityOffset ||
+				worstCalibPoint.Quality < minAllowedCalibQualityValue)
+		{
+			finished = false;
+			iIsRecalibrating = true;
+			RecalibratePoint(worstCalibPoint.ID);
+		}
 	}
-	else
-	{
+
+	if (finished)
 		tmrKostyl3->Enabled = true;
-		//TiTimeout::run(10, StartVerification, &iTimeout);
-	}
 
 	return finished;
 }
@@ -292,6 +322,8 @@ void __fastcall TiProfiledGame::onCalibPointReady(TObject* aSender)
 		FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
 
 	iCalibPoints->waitAcceptance();
+
+	//TiTimeout::run(3000, PointAbort, &iPointAcceptTimeout);
 }
 
 //---------------------------------------------------------------------------
@@ -586,6 +618,9 @@ void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
 	if (iCalibPoints->Current)
 		iCalibPoints->Current->hide();
 
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
+
 	TiCalibPoint* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
 		iLastPointID = iCalibPoints->CurrentPointIndex + 1;
@@ -647,6 +682,9 @@ void __fastcall TiProfiledGame::PointDone(TObject* aSender)
 	if (!iCalibPoints->IsWaitingToAcceptPoint)
 		return;
 
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
+
 	iIsRecalibrating = false;
 	ReportPointAcceptance();
 
@@ -661,6 +699,8 @@ void __fastcall TiProfiledGame::PointDone(TObject* aSender)
 
 	if (iIsVerifying)
 		iCalibQualityEstimator->addSelection(iCalibPoints->Current->X, iCalibPoints->Current->Y);
+	else
+		TiTimeout::run(3000, PointAbort, &iPointHangTimeout);
 
 	if (!iIsVerifying && FOnPointAccepted)
 		FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
@@ -679,6 +719,15 @@ void __fastcall TiProfiledGame::AfterPointDone(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::PointAbort(TObject* aSender)
+{
+	if (FOnEvent)
+		FOnEvent(this, String().sprintf("point aborted\t%d", iCalibPoints->CurrentPointIndex));
+	if (FOnPointAborted)
+		FOnPointAborted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::Abort(String aMessage)
 {
 	if (FOnEvent)
@@ -689,6 +738,10 @@ void __fastcall TiProfiledGame::Abort(String aMessage)
 
 	if (iTimeout)
 		iTimeout->kill();
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
 
 	iCalibPoints->reset();
 
@@ -873,7 +926,11 @@ void __fastcall TiProfiledGame::FormDestroy(TObject *Sender)
 	delete iGraphics;
 
 	if (iTimeout)
-		delete iTimeout;
+		iPointAcceptTimeout->kill();
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
 }
 
 //---------------------------------------------------------------------------
@@ -1002,6 +1059,11 @@ void __fastcall TiProfiledGame::FormKeyUp(TObject *Sender, WORD &Key,
 	{
 		if (Key == VK_SPACE)
 			onInstructionCalibrateDone();
+	}
+	else if (iCalibPoints->Current)
+	{
+		if (Key == VK_ESCAPE)
+			Abort();
 	}
 #endif
 }

@@ -43,7 +43,9 @@ const int KCalibInstructionWidth = 750;
 const int KCalibInstructionHeight = 250;
 
 const int KMaxAllowedCalibQualityOffset = 40;
-const double KMinAllowedCalibQualityValue = 0.1;
+const int KMaxAllowedCalibQualityOffsetExtra = 20;
+const double KMinAllowedCalibQualityValue = 0.5;
+const double KMinAllowedCalibQualityValueExtra = 0.2;
 
 const double KMouseGazeCorrectionFactor = 0; //0.05;
 
@@ -68,8 +70,9 @@ __fastcall TiFireflyAndPoints::TiFireflyAndPoints(TComponent* aOwner, EiAttracto
 		TForm(aOwner),
 		iTimeout(NULL),
 		iPointAcceptTimeout(NULL),
+		iPointHangTimeout(NULL),
 		iIsWaitingToAcceptPoint(false),
-		iLastPointAborted(false),
+		iIsLastPointAborted(false),
 		iIsVerifying(false),
 		iGame(NULL),
 		iStaticBitmap(NULL),
@@ -217,18 +220,46 @@ bool __fastcall TiFireflyAndPoints::processCalibrationResult()
 		delete calibQuality;
 	}
 
-	TiCalibQuality::Point worstCalibPoint = iCalibQuality->WorstPoint;
+	//TiCalibQuality::Point worstCalibPoint = iCalibQuality->WorstPoint;
+	TiCalibQuality::Point worstCalibPoint;
+	int worstCalibPoint_RecalibCount;
+
+	for (int i = 0; i < iCalibPoints->Count; i++)
+	{
+		if (!iCalibPoints->canRecalibratePoint(i))
+			continue;
+
+		TiCalibQuality::Point candidateToWorstCalibPoint = iCalibQuality->getPointQuality(i + 1);
+		int candidateToWorstCalibPoint_RecalibCount = iCalibPoints->pointRecalibrationCount(i);;
+
+		int worstCalibPoint_Offset = worstCalibPoint.Offset - worstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+		int candidateToWorstCalibPoint_Offset = candidateToWorstCalibPoint.Offset - candidateToWorstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+
+		if (worstCalibPoint.ID < 0 || worstCalibPoint_Offset < candidateToWorstCalibPoint_Offset)
+		{
+			worstCalibPoint = candidateToWorstCalibPoint;
+			worstCalibPoint_RecalibCount = iCalibPoints->pointRecalibrationCount(i);
+		}
+	}
+
 	if (FOnEvent)
 		FOnEvent(this, String().sprintf("worst quality\t%d\t%.1f\t%.3f",
 				worstCalibPoint.ID - 1, worstCalibPoint.Offset, worstCalibPoint.Quality));
 
-	if (worstCalibPoint.Offset > KMaxAllowedCalibQualityOffset ||
-			worstCalibPoint.Quality < KMinAllowedCalibQualityValue)
-	{                                                               d(String().sprintf("Process - recalib %d", worstCalibPoint.ID - 1));
-		finished = false;
-		RestartCalibration(worstCalibPoint.ID);
+	if (worstCalibPoint.ID > 0)
+	{
+		int maxAllowedCalibQualityOffset = KMaxAllowedCalibQualityOffset + worstCalibPoint_RecalibCount * KMaxAllowedCalibQualityOffsetExtra;
+		int minAllowedCalibQualityValue = KMinAllowedCalibQualityValue - worstCalibPoint_RecalibCount * KMinAllowedCalibQualityValueExtra;
+
+		if (worstCalibPoint.Offset > maxAllowedCalibQualityOffset ||
+				worstCalibPoint.Quality < minAllowedCalibQualityValue)
+		{                                                               d(String().sprintf("Process - recalib %d", worstCalibPoint.ID - 1));
+			finished = false;
+			RestartCalibration(worstCalibPoint.ID);
+		}
 	}
-	else
+
+	if (finished)
 	{                                                               d("Process - OK");
 		iCalibPoints->fadeOut();
 		if (iAttractorType == atFirefly)
@@ -243,7 +274,7 @@ bool __fastcall TiFireflyAndPoints::processCalibrationResult()
 			StartVerification();
 		}
 	}
-                                                                  d("  /Process");
+																																	d("  /Process");
 	return finished;
 }
 
@@ -431,6 +462,7 @@ void __fastcall TiFireflyAndPoints::onCalibPointTimeout(TObject* aSender)
 					iCalibPoints->Current->X, iCalibPoints->Current->Y));
 
 		iIsWaitingToAcceptPoint = true;                         d("AttractorStopped - allow selection");
+		//TiTimeout::run(3000, PointAbort, &iPointAcceptTimeout);    d("AttractorStopped - abort timer started");
 	}                                                         d("  /AttractorStopped");
 }
 
@@ -508,7 +540,7 @@ void __fastcall TiFireflyAndPoints::StartCalibration()
 	iAttractor->fadeIn();
 
 	iCalibPoints->prepare();
-	iLastPointAborted = false;
+	iIsLastPointAborted = false;
 }
 
 //---------------------------------------------------------------------------
@@ -518,7 +550,7 @@ void __fastcall TiFireflyAndPoints::RestartCalibration(int aRecalibrationPointNu
 		FOnEvent(this, String().sprintf("restart\t%d", aRecalibrationPointNumber - 1));
 
 	iCalibPoints->prepare(aRecalibrationPointNumber);
-	iLastPointAborted = false;
+	iIsLastPointAborted = false;
 
 	bool isSinglePoint = aRecalibrationPointNumber > 0;
 	if (isSinglePoint)
@@ -538,17 +570,10 @@ void __fastcall TiFireflyAndPoints::RestartCalibration(int aRecalibrationPointNu
 void __fastcall TiFireflyAndPoints::PointDone(TObject* aSender)
 {
 	iIsWaitingToAcceptPoint = false;                             d("PointDone");
-	/*
-	if (!iPointAcceptTimeout)
-	{                                                            d("PointDone - OK");
-		TiTimeout::run(1000, PointDone, &iPointAcceptTimeout);
+
+	if (iPointAcceptTimeout) {                                   d("PointDone - abort timer killed");
+		iPointAcceptTimeout->kill();
 	}
-	else
-	{
-		if (FOnEvent)
-			FOnEvent(this, "no acceptance");
-		TiTimeout::run(1000, PointAbort, &iPointAcceptTimeout);
-	} */
 
 	if (iCalibPoints->CurrentPointIndex >= 0)
 	{                                                            d(String().sprintf("PointDone - CalibPoints %d", iCalibPoints->CurrentPointIndex));
@@ -556,6 +581,8 @@ void __fastcall TiFireflyAndPoints::PointDone(TObject* aSender)
 
 		if (iIsVerifying)
 			iCalibQualityEstimator->addSelection(iCalibPoints->Current->X, iCalibPoints->Current->Y);
+		else
+			TiTimeout::run(3000, PointAbort, &iPointHangTimeout);
 
 		if (!iIsVerifying && FOnPointAccepted) {                   d("PointDone - OnPointAccepted");
 			FOnPointAccepted(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
@@ -565,7 +592,7 @@ void __fastcall TiFireflyAndPoints::PointDone(TObject* aSender)
 			nextPoint(iCalibPoints->CurrentPointIndex + 2);
 		}
 	}                                                            else d("PointDone - CalibPoints -1");
-																															 d("  /PointDone");	
+																															 d("  /PointDone");
 }
 
 //---------------------------------------------------------------------------
@@ -579,17 +606,14 @@ void __fastcall TiFireflyAndPoints::ReportPointAcceptance()
 		TiCalibQualityEstimator::TiPointD pt = iCalibQualityEstimator->Point;
 		double dx = pt.X - iCalibPoints->Current->X;
 		double dy = pt.Y - iCalibPoints->Current->Y;
-		double distance = 9999999;
-		try {
-			distance = sqrt(dx * dx + dy * dy);
-		} catch (...) {
-			//MessageBox(NULL, "Oops1", "KC", MB_OK);
-		}
+		double distance = sqrt(dx * dx + dy * dy);
+
 		FOnEvent(this, String().sprintf("verification point\t%d %d\t%d %d\t%.2f",
 			iCalibPoints->Current->X, iCalibPoints->Current->Y, int(pt.X), int(pt.Y), distance ));
 	}
 	else
 	{
+		iCalibPoints->accept();
 		FOnEvent(this, String().sprintf("point accepted\t%d\t%d %d", iCalibPoints->CurrentPointIndex,
 				iCalibPoints->Current->X, iCalibPoints->Current->Y));
 	}
@@ -597,8 +621,8 @@ void __fastcall TiFireflyAndPoints::ReportPointAcceptance()
 
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::PointAbort(TObject* aSender)
-{
-	iLastPointAborted = true;
+{ 																																d("Point aborted");  if (aSender == iPointHangTimeout) d("  - FORCED!");
+	iIsLastPointAborted = true;
 	if (FOnEvent)
 		FOnEvent(this, String().sprintf("point aborted\t%d", iCalibPoints->CurrentPointIndex));
 	if (FOnPointAborted)
@@ -608,14 +632,13 @@ void __fastcall TiFireflyAndPoints::PointAbort(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiFireflyAndPoints::MoveToNextPoint(int aPointNumber)
 {                                                                   d("mtNextPoint");
-	if (iPointAcceptTimeout) {
-		iPointAcceptTimeout->kill();                                    d("mtNextPoint - OK");
-	}
-
-	if (!iLastPointAborted)
+	if (!iIsLastPointAborted)
 		iCalibPoints->lightOnCurrent();
 
-	iLastPointAborted = false;
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
+
+	iIsLastPointAborted = false;
 
 	TiLamp* calibPoint = iCalibPoints->next(aPointNumber);
 	if (calibPoint)
@@ -754,6 +777,8 @@ void __fastcall TiFireflyAndPoints::Abort()
 		iTimeout->kill();
 	if (iPointAcceptTimeout)
 		iPointAcceptTimeout->kill();
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
 
 	Finish();
 
@@ -885,7 +910,11 @@ void __fastcall TiFireflyAndPoints::FormDestroy(TObject *Sender)
 	delete iGraphics;
 
 	if (iTimeout)
-		delete iTimeout;
+		iTimeout->kill();
+	if (iPointAcceptTimeout)
+		iPointAcceptTimeout->kill();
+	if (iPointHangTimeout)
+		iPointHangTimeout->kill();
 }
 
 //---------------------------------------------------------------------------
@@ -992,16 +1021,13 @@ void __fastcall TiFireflyAndPoints::FormKeyUp(TObject *Sender, WORD &Key,
 		else if (Key == VK_F2 && OnEvent)
 			OnEvent(this, "CMD_SHOW_ERROR");
 	}
+#else
+	if (Key == VK_ESCAPE)
+	{
+		if (iCalibPoints->Current)
+			Abort();
+	}
 #endif
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TiFireflyAndPoints::tmrKostylTimer(TObject *Sender)
-{
-	tmrKostyl->Enabled = false;
-																											 d("OnFinished");
-	if (FOnFinished)
-		FOnFinished(this);
 }
 
 //---------------------------------------------------------------------------
@@ -1013,6 +1039,15 @@ void __fastcall TiFireflyAndPoints::FormMouseMove(TObject *Sender,
 		iMouseInitialPosition.x = Mouse->CursorPos.x;
 		iMouseInitialPosition.y = Mouse->CursorPos.y;
 	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiFireflyAndPoints::tmrKostylTimer(TObject *Sender)
+{
+	tmrKostyl->Enabled = false;
+																											 d("OnFinished");
+	if (FOnFinished)
+		FOnFinished(this);
 }
 
 //---------------------------------------------------------------------------

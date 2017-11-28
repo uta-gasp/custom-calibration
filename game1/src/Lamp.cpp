@@ -172,7 +172,8 @@ void __fastcall TiLamp::TiWorm::moveClose()
 __fastcall TiLamp::TiLamp(TiAnimationManager* aManager, int aX, int aY) :
 		iX(aX),
 		iY(aY),
-		iEnabled(true)
+		iEnabled(true),
+		iAcceptanceCount(0)
 {
 	iOlios.DeleteContent = false;
 
@@ -242,6 +243,12 @@ void __fastcall TiLamp::lightOff()
 		TiOlio* olio = iOlios[i];
 		olio->appear();
 	}
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiLamp::accept()
+{
+	iAcceptanceCount++;
 }
 
 //---------------------------------------------------------------------------

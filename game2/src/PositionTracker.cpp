@@ -9,8 +9,8 @@
 using namespace ProfiledGame;
 
 //---------------------------------------------------------------------------
-const int KThresholdZ = 80;
-const int KThresholdXY = 60;
+const int KThresholdZ = 100;
+const int KThresholdXY = 90;
 
 const int KEstimatesBufferSize = 6;
 const double KWrongPositionShareThreshold = 0.7;

@@ -24,7 +24,8 @@ const TPoint KButtonSize[] = {
 __fastcall TiCalibPoint::TiCalibPoint(TiAnimationManager* aManager, int aX, int aY, int aLevel) :
 		iX(aX),
 		iY(aY),
-		iEnabled(true)
+		iEnabled(true),
+		iAcceptanceCount(0)
 {
 	int levelOffset = IDR_CALIB_LEVEL + (1 << 8) * (aLevel + 1);
 	TPoint buttonSize = KButtonSize[aLevel];
@@ -64,7 +65,7 @@ void __fastcall TiCalibPoint::start()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiCalibPoint::stop()
+void __fastcall TiCalibPoint::stop(bool aIsAccepted)
 {
 	iCalibTarget->stopAnimation();
 }

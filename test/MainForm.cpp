@@ -171,7 +171,7 @@ void __fastcall TfrmMainForm::onCtrl_RecalibPoint(TObject* aSender, int aPointID
 
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCtrl_PointAborted(TObject* aSender, int aPointID, bool aIsRecalibrating)
-{
+{	// just same as onCtrl_PointAccepted
 	int nextPointID = -1;
 	if (!aIsRecalibrating)
 	{

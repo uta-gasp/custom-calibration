@@ -93,6 +93,9 @@ class TiProfiledGame : public TForm
 		TiAnimationManager* iObjects;
 
 		TiTimeout* iTimeout;
+		TiTimeout* iPointAcceptTimeout;
+		TiTimeout* iPointHangTimeout;
+
 		bool iIsVerifying;
 		bool iIsRecalibrating;
 		int iLastPointID;
@@ -112,6 +115,7 @@ class TiProfiledGame : public TForm
 		FiOnCalibrationPoint FOnRecalibratePoint;
 		FiOnCalibrationPoint FOnPointReady;
 		FiOnCalibrationPoint FOnPointAccepted;
+		FiOnCalibrationPoint FOnPointAborted;
 		TNotifyEvent FOnFinished;
 		TNotifyEvent FOnAborted;
 		TNotifyEvent FOnVerifStarted;
@@ -185,6 +189,7 @@ class TiProfiledGame : public TForm
 		__property FiOnCalibrationPoint OnRecalibratePoint = {read = FOnRecalibratePoint, write = FOnRecalibratePoint};
 		__property FiOnCalibrationPoint OnPointReady = {read = FOnPointReady, write = FOnPointReady};
 		__property FiOnCalibrationPoint OnPointAccepted = {read = FOnPointAccepted, write = FOnPointAccepted};
+		__property FiOnCalibrationPoint OnPointAborted = {read = FOnPointAborted, write = FOnPointAborted};
 		__property TNotifyEvent OnFinished = {read = FOnFinished, write = FOnFinished};
 		__property TNotifyEvent OnAborted = {read = FOnAborted, write = FOnAborted};
 		__property TNotifyEvent OnVerifStarted = {read = FOnVerifStarted, write = FOnVerifStarted};

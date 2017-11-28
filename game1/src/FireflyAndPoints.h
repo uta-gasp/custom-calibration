@@ -68,8 +68,9 @@ class TiFireflyAndPoints : public TForm
 
 		TiTimeout* iTimeout;
 		TiTimeout* iPointAcceptTimeout;
+		TiTimeout* iPointHangTimeout;
 		bool iIsWaitingToAcceptPoint;
-		bool iLastPointAborted;
+		bool iIsLastPointAborted;
 		bool iGameAfterCalibration;
 		bool iIsVerifying;
 		TPoint iMouseInitialPosition;

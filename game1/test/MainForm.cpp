@@ -44,7 +44,6 @@ void Log(String aMsg) {
 __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	: TForm(Owner),
 	iCustomCalibration(NULL),
-	iAnimationTimeout(NULL),
 	iTimestamp(NULL),
 	iEvents(NULL),
 	iSamples(NULL)
@@ -57,31 +56,7 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner)
 	iScaleX = double(Screen->Width) / 1377;
 	iScaleY = double(Screen->Height) / 768;
 
-	//loadBitmapFromPNG(IDR_BACKGROUND, &iBackground);
-
-	iCreatures = new TiAnimationManager();
-	iCreatures->OnPaint = onCreaturesPaint;
-
-	for (int i = 0; i < 2; i++)
-	{
-		TiAnimation* animation = new TiAnimation();
-		animation->addFrames(IDR_FIREFLY, 64);
-		animation->LoopAnimation = false;
-		animation->placeTo(32, 32 + 64*i);
-		iCreatures->add(animation);
-	}
-
-	iFly = (*iCreatures)[0];
-	iFly->OnAnimationFinished = onAnimationFinished;
-	iFly->OnMoveFinished = onMoveFinished;
-	iFly->OnRotationFinished = onRotationFinished;
-	iFly->OnFadingFinished = onFadingFinished;
-
 	Canvas->Brush->Color = this->Color;
-
-	TrackBar1->Position = iFly->AnimationSpeed;
-	TrackBar2->Position = iFly->MoveSpeed;
-	TrackBar3->Position = iFly->RotationSpeed;
 
 	cmbTarget->ItemIndex = 0;
 }
@@ -190,59 +165,6 @@ void __fastcall TfrmMainForm::VerifyCalibration()
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onCreaturesPaint(TObject* aSender, EiUpdateType aUpdateType)
-{
-	Gdiplus::Rect destRect(0, 0, Panel1->Width, Panel1->Height);
-
-	//Gdiplus::Bitmap* background = iBackground->Clone(destRect, iBackground->GetPixelFormat());
-	Gdiplus::Bitmap* background;
-	Utils::loadBitmapFromPNG(IDR_GAME_BACKGROUND, &background);
-
-	Gdiplus::Graphics g(background);
-	iCreatures->paintTo(&g);
-
-	iGraphics->DrawImage(background, destRect,
-			0, 0, Panel1->Width, Panel1->Height,
-			Gdiplus::UnitPixel);
-
-	delete background;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onAnimationFinished(TObject* aSender)
-{
-	Log("anim fisnihed");
-
-	TiTimeout::run(1000, onPostAnimation, &iAnimationTimeout);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onMoveFinished(TObject* aSender)
-{
-	Log("move fisnihed");
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onRotationFinished(TObject* aSender)
-{
-	Log("rotation fisnihed");
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onFadingFinished(TObject* aSender)
-{
-	Log("fade fisnihed");
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onPostAnimation(TObject* aSender)
-{
-	iFly->AnimationIndex = 1 - iFly->AnimationIndex;
-	iFly->toggleAnimation();
-	Log("post anim");
-}
-
-//---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::onCalibrationEvent(TObject* aSender, const String& aMsg)
 {
@@ -257,8 +179,8 @@ void __fastcall TfrmMainForm::onCalibrationSample(TObject* aSender, double aX, d
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::onCalibrationStart(TObject* aSender) {
-Log("START");
+void __fastcall TfrmMainForm::onCalibrationStart(TObject* aSender)
+{ Log("START");
 	iCustomCalibration->clearPoints();
 
 	for (int i = 0; i < ARRAYSIZE(KCalibPoints); i++)
@@ -273,43 +195,24 @@ Log("START");
 	}
 }
 
-void __fastcall TfrmMainForm::onCalibrationReadyToCalibrate(TObject* aSender) {
-Log("READY_TO_CALIB");
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationReadyToCalibrate(TObject* aSender)
+{ Log("READY_TO_CALIB");
 	iCurrentCalibPointNumber = 1;
 	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 }
 
-void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode) {
-Log(String("RECALIB_PT_#")+(aPointNumber-1));
-
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onRecalibrateSinglePoint(TObject* aSender, int aPointNumber, bool aIsSinglePointMode)
+{ Log(String("RECALIB_PT_#")+(aPointNumber-1));
 	iCurrentCalibPointNumber = aPointNumber;
 	iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
 }
 
-void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
-Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
-}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode)
+{ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 
-void __fastcall TfrmMainForm::onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
-Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
-
-	iCalibPointStatus[aPointIndex] = calibrationPointUnusedBecauseOfTimeout;
-
-	if (!aIsSinglePointMode)
-	{
-		++iCurrentCalibPointNumber;
-		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
-			iCurrentCalibPointNumber = -1;
-		iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
-	}
-	else
-	{
-		iCustomCalibration->nextPoint(-1);
-	}
-}
-
-void __fastcall TfrmMainForm::onCalibrationPointAccepted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) {
-Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 	if (Mouse->CursorPos.x == 0)
 		return;
 
@@ -328,27 +231,43 @@ Log(String("PT_ACCEPT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
 	}
 }
 
-void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender) {
-Log("VERIFYING");
-VerifyCalibration();
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationPointAborted(TObject* aSender, int aPointIndex, bool aIsSinglePointMode)
+{ Log(String("PT_ABORT_")+aPointIndex+(aIsSinglePointMode?" [S]":""));
+
+	iCalibPointStatus[aPointIndex] = calibrationPointUnusedBecauseOfTimeout;
+
+	if (!aIsSinglePointMode)
+	{
+		++iCurrentCalibPointNumber;
+		if (iCurrentCalibPointNumber > ARRAYSIZE(KCalibPoints))
+			iCurrentCalibPointNumber = -1;
+		iCustomCalibration->nextPoint(iCurrentCalibPointNumber);
+	}
+	else
+	{
+		iCustomCalibration->nextPoint(-1);
+	}
 }
 
-void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) {
-Log("ABORTED");
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationFinished(TObject* aSender)
+{ Log("VERIFYING");
+	VerifyCalibration();
 }
 
-void __fastcall TfrmMainForm::onCalibrationGameStarted(TObject* aSender) {
-Log("GAME_STARTED");
-}
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationPointReady(TObject* aSender, int aPointIndex, bool aIsSinglePointMode) { Log(String("PT_READY_")+aPointIndex+(aIsSinglePointMode?" [S]":"")); }
+void __fastcall TfrmMainForm::onCalibrationAborted(TObject* aSender) { Log("ABORTED"); }
+void __fastcall TfrmMainForm::onCalibrationGameStarted(TObject* aSender) { Log("GAME_STARTED"); }
+void __fastcall TfrmMainForm::onCalibrationGameFinished(TObject* aSender) { Log("GAME_FINISHED"); }
 
-void __fastcall TfrmMainForm::onCalibrationGameFinished(TObject* aSender) {
-Log("GAME_FINISHED");
-}
-
-void __fastcall TfrmMainForm::onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y) {
-static double sLastEyeX = 0;
-static double sLastEyeY = 0;
-static double sLastDist = 500;
+//---------------------------------------------------------------------------
+void __fastcall TfrmMainForm::onCalibrationMouseMove(TObject* aSender, TShiftState Shift, int X, int Y)
+{
+	static double sLastEyeX = 0;
+	static double sLastEyeY = 0;
+	static double sLastDist = 500;
 
 	if (!Shift.Contains(ssShift))
 	{
@@ -376,85 +295,9 @@ static double sLastDist = 500;
 
 //---------------------------------------------------------------------------
 //---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::Button1Click(TObject *Sender)
-{
-	if (iAnimationTimeout)
-	{
-		iAnimationTimeout->kill();
-		Log("timeout killed");
-	}
-
-	iCreatures->toggleAnimation();
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::Button3Click(TObject *Sender)
-{
-	iFly->rotateBy(360);
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::TrackBar1Change(TObject *Sender)
-{
-	iCreatures->setAnimationSpeed(TrackBar1->Position);
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::TrackBar2Change(TObject *Sender)
-{
-	iCreatures->setMoveSpeed(TrackBar2->Position);
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::TrackBar3Change(TObject *Sender)
-{
-	iCreatures->setRotationSpeed(TrackBar3->Position);
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::CheckBox1Click(TObject *Sender)
-{
-	iCreatures->setLoopAnimation(CheckBox1->Checked);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::FormPaint(TObject *Sender)
-{
-	onCreaturesPaint(Sender, updAll);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::FormKeyUp(TObject *Sender, WORD &Key,
-			TShiftState Shift)
-{
-	if (Key == VK_SPACE)
-		iFly->moveTo(iFly->X + 100, iFly->Y);
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::Panel1MouseUp(TObject *Sender, TMouseButton Button,
-			TShiftState Shift, int X, int Y)
-{
-	if (Button ==  mbLeft)
-		iFly->moveTo(X, Y);
-	else if (Button ==  mbRight)
-		iFly->AnimationIndex = 1 - iFly->AnimationIndex;
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::FormCreate(TObject *Sender)
-{
-	iGraphics = new Gdiplus::Graphics(Panel1->Handle, false);
-}
-
-//---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::FormDestroy(TObject *Sender)
 {
 	DestroyCalibration();
-}
-
-//---------------------------------------------------------------------------
-void __fastcall TfrmMainForm::Button2Click(TObject *Sender)
-{
-	if (!iFly->IsVisible || iFly->FadingDirection < 0)
-		iFly->fadeIn();
-	else if (iFly->FadingDirection >= 0)
-		iFly->fadeOut();
 }
 
 //---------------------------------------------------------------------------

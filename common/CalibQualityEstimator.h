@@ -15,7 +15,6 @@ struct TiPoint
 	T X;
 	T Y;
 
-	TiPoint() {}
 	TiPoint(T aX, T aY) : X(aX), Y(aY) { }
 
 	TiPoint<T> operator -(const TiPoint<T>& aRef) const {
@@ -23,13 +22,7 @@ struct TiPoint
 	}
 
 	double length() const {
-		double result = 0;
-		try {
-			result = sqrt(X*X + Y*Y);
-		} catch (...) {
-			//MessageBox(NULL, "Oops3", "KC", MB_OK);
-		}
-		return result;
+		return sqrt(X*X + Y*Y);
 	}
 };
 

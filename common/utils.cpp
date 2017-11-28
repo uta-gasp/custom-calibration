@@ -199,7 +199,7 @@ double __fastcall TiTimestamp::sec()
 __fastcall TiLogger::TiLogger(String aName) :
 		iFileHandle(-1)
 {
-	String filePath = folder("CustomCalib");
+	String filePath = folder("KidCalib\\logs");
 	String date = TDateTime::CurrentDateTime().FormatString("yy-mm-dd_hh-nn-ss");
 	iFileName = filePath + "\\" + date + "_" + aName + ".log";
 }

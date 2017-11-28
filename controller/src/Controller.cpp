@@ -293,6 +293,7 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnRecalibratePoint = onCalib_RecalibPoint;
 		iProfiledGame->OnPointReady = onCalib_PointReady;
 		iProfiledGame->OnPointAccepted = onCalib_PointAccepted;
+		iProfiledGame->OnPointAborted = onCalib_PointAborted;
 		iProfiledGame->OnFinished = onCalib_Finished;
 		iProfiledGame->OnAborted = onCalib_Aborted;
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
@@ -418,9 +419,15 @@ TStrings* __fastcall TiController::GetUsers()
 //---------------------------------------------------------------------------
 void __fastcall TiController::onCalib_Event(TObject* aSender, const String& aMsg)
 {
-	if (OnDebug && aMsg.Pos("CMD_"))
-		OnDebug(this, aMsg);
-	iEvents->line( String().sprintf("%d\t%s", iTimestamp->ms(), aMsg.c_str()) );
+	if (aMsg.Pos("CMD_"))
+	{
+		if (OnDebug)
+			OnDebug(this, aMsg);
+	}
+	else
+	{
+		iEvents->line( String().sprintf("%d\t%s", iTimestamp->ms(), aMsg.c_str()) );
+	}
 }
 
 //---------------------------------------------------------------------------

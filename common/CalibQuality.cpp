@@ -47,16 +47,49 @@ void __fastcall TiCalibQuality::log(TStrings* aList)
 	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
 	{
 		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
-		aList->Add(String().sprintf("%d\t%d %d\t%d %d\t%d %d\t%d\t%.2f",
+		aList->Add(String().sprintf("%d\t%d %d\t%.0f %.0f\t%.1f %.1f\t%d\t%.3f",
 			point->number - 1, point->positionX, point->positionY,
-			int(point->correctedPorX), int(point->correctedPorY),
-			int(point->standardDeviationX), int(point->standardDeviationY),
-			int(point->usageStatus), point->qualityIndex));
+			point->correctedPorX, point->correctedPorY,
+			point->standardDeviationX, point->standardDeviationY,
+			point->usageStatus, point->qualityIndex));
 	}
 }
 
 //---------------------------------------------------------------------------
+TiCalibQuality::Point __fastcall TiCalibQuality::getPointQuality(int aID)
+{
+	Point result;
+	for (int i = 0; i < iCalibQualityDataLeft.Count; i++)
+	{
+		CalibrationPointQualityStruct* point = iCalibQualityDataLeft[i];
+		if (point->number == aID)
+		{
+			result.X = point->positionX;
+			result.Y = point->positionY;
+			result.ID = point->number;
+			result.Quality = point->qualityIndex;
+
+			if (point->usageStatus == calibrationPointUsed)
+			{
+				double dx = point->positionX - point->correctedPorX;
+				double dy = point->positionY - point->correctedPorY;
+				result.Offset = sqrt(dx * dx + dy * dy);
+			}
+			else
+			{
+				result.Offset = 10000;
+			}
+
+			break;
+		}
+	}
+
+	return result;
+}
+
 //---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/*
 TiCalibQuality::Point __fastcall TiCalibQuality::GetWorstPoint()
 {
 	TiCalibQuality::Point result;
@@ -68,12 +101,7 @@ TiCalibQuality::Point __fastcall TiCalibQuality::GetWorstPoint()
 		{
 			double dx = point->positionX - point->correctedPorX;
 			double dy = point->positionY - point->correctedPorY;
-			double offset = 999999999;
-			try {
-				offset = sqrt(dx * dx + dy * dy);
-			} catch (...) {
-				//MessageBox(NULL, "Oops1", "KC", MB_OK);
-			}
+			double offset = sqrt(dx * dx + dy * dy);
 
 			if (offset > result.Offset)
 			{
@@ -97,4 +125,4 @@ TiCalibQuality::Point __fastcall TiCalibQuality::GetWorstPoint()
 
 	return result;
 }
-
+*/

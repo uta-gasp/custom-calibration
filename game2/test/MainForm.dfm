@@ -42,4 +42,11 @@ object frmMainForm: TfrmMainForm
     TabOrder = 1
     OnClick = btnStartClick
   end
+  object tmrMouse: TTimer
+    Enabled = False
+    Interval = 30
+    OnTimer = tmrMouseTimer
+    Left = 12
+    Top = 44
+  end
 end

@@ -12,6 +12,8 @@ using namespace ProfiledGame;
 //---------------------------------------------------------------------------
 const int KExpectedPointCount = 11;
 
+const int KMaxPointCalibrationCount = 3;
+
 //---------------------------------------------------------------------------
 __fastcall TiCalibPoints::TiCalibPoints(TiAnimationManager* aManager,
 		TiSize aScreenSize, TiSize aViewport) :
@@ -179,7 +181,7 @@ int __fastcall TiCalibPoints::accept()
 	iIsWaitingToAcceptPoint = false;
 	int duration = iTimestamp->ms();
 
-	Current->stop();
+	Current->stop(true);
 
 	return duration;
 }
@@ -232,9 +234,15 @@ void __fastcall TiCalibPoints::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateTyp
 }
 
 //---------------------------------------------------------------------------
-TiCalibPoint* TiCalibPoints::operator[](int aIndex)
+bool __fastcall TiCalibPoints::canRecalibratePoint(int aIndex)
 {
-	return aIndex < 0 || aIndex >= iPoints.Count ? NULL : iPoints[aIndex];
+	return aIndex < 0 || aIndex >= iPoints.Count ? false : iPoints[aIndex]->AcceptanceCount < KMaxPointCalibrationCount;
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TiCalibPoints::pointRecalibrationCount(int aIndex)
+{
+	return aIndex < 0 || aIndex >= iPoints.Count ? 0 : iPoints[aIndex]->AcceptanceCount - 1;
 }
 
 //---------------------------------------------------------------------------

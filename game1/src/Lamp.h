@@ -51,6 +51,8 @@ class TiLamp
 		TiAnimation* iLamp;
 		TiOlios iOlios;
 
+		int iAcceptanceCount;
+
 		//void __fastcall onOlioHideRequest(TObject* aSender);
 		//void __fastcall onOlioFadingFinished(TObject* aSender);
 
@@ -62,12 +64,15 @@ class TiLamp
 		void __fastcall lightOn();
 		void __fastcall lightOff();
 
+		void __fastcall accept();
+
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
 		__property int X = {read = iX};
 		__property int Y = {read = iY};
 		__property TiAnimation* Lamp = {read = iLamp};
 		__property bool Enabled = {read = iEnabled, write = iEnabled};
+		__property int AcceptanceCount = {read = iAcceptanceCount};
 };
 
 //---------------------------------------------------------------------------

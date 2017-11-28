@@ -25,7 +25,7 @@ class TiCalibQuality : public TObject
 			int Y;
 			int ID;
 
-			Point() : Offset(0), Quality(1) { }
+			Point() : Offset(0), Quality(1), ID(-1) { }
 		};
 
 	private:
@@ -44,8 +44,9 @@ class TiCalibQuality : public TObject
 				CalibrationPointQualityStruct& aRight);
 
 		void __fastcall log(TStrings* aList);
+		Point __fastcall getPointQuality(int aIndex);
 
-		__property TiCalibQuality::Point WorstPoint = {read = GetWorstPoint};
+		//__property TiCalibQuality::Point WorstPoint = {read = GetWorstPoint};
 };
 
 //---------------------------------------------------------------------------

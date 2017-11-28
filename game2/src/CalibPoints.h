@@ -88,7 +88,8 @@ class TiCalibPoints : public TiScene
 
 		virtual void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
-		TiCalibPoint* operator[](int aIndex);
+		bool __fastcall canRecalibratePoint(int aIndex);
+		int __fastcall pointRecalibrationCount(int aIndex);
 
 		__property int Count = {read = GetCount};
 		__property TiCalibPoint* Current = {read = GetCurrent};

@@ -44,11 +44,13 @@ class TiLamps
 		void __fastcall add(CalibrationPointStruct& aPoint);
 		void __fastcall prepare(int aCalibPointNumber = -1);
 
+    void __fastcall accept();
 		TiLamp* __fastcall next(int aPointNumber = 0);
 
 		void __fastcall paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUpdateType);
 
-		TiLamp* operator[](int aIndex);
+		bool __fastcall canRecalibratePoint(int aIndex);
+		int __fastcall pointRecalibrationCount(int aIndex);
 
 		__property int Count = {read = GetCount};
 		__property TiLamp* Current = {read = GetCurrent};
