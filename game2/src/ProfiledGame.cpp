@@ -20,6 +20,27 @@ using namespace ProfiledGame;
 static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 static ULONG_PTR m_gdiplusToken = NULL;
 
+static bool sIsDebug =
+#ifdef _DEBUG
+	true;
+#else
+	false;
+#endif
+
+static TStringList* sLog = new TStringList();
+void d(String s) { if (sIsDebug) sLog->Add(s); }
+void ShowLog() {
+	TForm* f = new TForm((TComponent*)NULL);
+	f->FormStyle = fsStayOnTop;
+	TMemo* m = new TMemo(f);
+	m->Align = alClient;
+	m->ScrollBars = ssVertical;
+	m->Parent = f;
+	m->Lines->AddStrings(sLog);
+	f->ShowModal();
+	delete f;
+}
+
 //---------------------------------------------------------------------------
 const int KViewportWidth = 1366;
 const int KViewportHeight = 768;
@@ -65,8 +86,6 @@ __fastcall TiProfiledGame::TiProfiledGame(TComponent* aOwner) :
 {
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
-	//Cursor = crNone;
-
 	randomize();
 
 	iCalibQualityEstimator = new TiCalibQualityEstimator();
@@ -100,9 +119,11 @@ void __fastcall TiProfiledGame::setSample(SampleStruct& aSample)
 	TiCalibQualityEstimator::TiPointI cqePoint(aSample.leftEye.gazeX, aSample.leftEye.gazeY);
 	iCalibQualityEstimator->addSample(cqePoint);
 
+	/*
 	if (iPositionTracker)
 		if (iPositionTracker->isPositionWrong(aSample) && iCalibPoints->IsVisible)
 			iCalibPoints->pause();
+	*/
 
 	if (FOnSample)
 		FOnSample(this, aSample.leftEye.gazeX, aSample.leftEye.gazeY);
@@ -148,11 +169,14 @@ void __fastcall TiProfiledGame::addPoint(CalibrationPointStruct& aPoint)
 void __fastcall TiProfiledGame::nextPoint(int aPointID)
 {
 	iNextPointID = aPointID;
-	if (!iIsRecalibrating || iLastPointID == aPointID)
+	if (!iIsRecalibrating || iLastPointID == aPointID) {     d("::nextPoint - kostyl");
 		tmrKostyl2->Enabled = true;
 		//TiTimeout::run(1000, AfterPointDone, &iTimeout);        // GT-driven
-	else
-		AfterPointDone();
+	}
+	else {                                                   d("::nextPoint - AfterPointDone");
+		tmrKostyl4->Enabled = true;
+		//AfterPointDone();
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -308,21 +332,22 @@ void __fastcall TiProfiledGame::onObjectPaint(TObject* aSender, EiUpdateType aUp
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::onCalibPointReady(TObject* aSender)
-{
-	if (!iCalibPoints->Current)
+{                                                d("calibPointReady");
+	if (!iCalibPoints->Current) {                  d("  /calibPointReady - ???");
 		return;
+	}
 
 	if (FOnEvent && !iIsVerifying)
 		FOnEvent(this, String().sprintf("ready to %s\t%d\t%d %d",
 				iIsVerifying ? "verify" : "accept",
 				iCalibPoints->CurrentPointIndex,
 				iCalibPoints->Current->X, iCalibPoints->Current->Y));
-
+																								 d("calibPointReady - ready");
 	if (!iIsVerifying && FOnPointReady)
 		FOnPointReady(this, iCalibPoints->CurrentPointIndex, iCalibPoints->IsSinglePointMode);
-
+																								 d("calibPointReady - waiting for acceptance...");
 	iCalibPoints->waitAcceptance();
-
+																								 d("  /calibPointReady");
 	//TiTimeout::run(3000, PointAbort, &iPointAcceptTimeout);
 }
 
@@ -481,6 +506,8 @@ void __fastcall TiProfiledGame::onInstructionCalibrateDone(TObject* aSender)
 	StartCalibration();
 	iLevelLegend = NULL;
 
+	Cursor = crNone;
+
 	if (FOnEvent)
 		FOnEvent(this, "scene appeared");
 
@@ -493,6 +520,8 @@ void __fastcall TiProfiledGame::onInstructionCalibrateDone(TObject* aSender)
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::onCalibPointsDone(TObject* aSender)
 {
+	Cursor = crDefault;
+
 	iPositionTracker->Enabled = false;
 
 	iCalibPoints->hide();
@@ -591,7 +620,7 @@ void __fastcall TiProfiledGame::StartCalibration(TObject* aSender)
 		FOnStart(this);
 
 	iCalibPoints->show();
-	iPositionTracker->Enabled = true;
+	//iPositionTracker->Enabled = true;
 
 	iCalibPoints->prepare();
 }
@@ -614,7 +643,7 @@ void __fastcall TiProfiledGame::StartVerification(TObject* aSender)
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
-{
+{                                                      d(String().sprintf("nextPoint - %d", aPointNumber));
 	if (iCalibPoints->Current)
 		iCalibPoints->Current->hide();
 
@@ -630,8 +659,8 @@ void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
 		if (FOnEvent && !iIsVerifying)
 			FOnEvent(this, "move to next point");
 
-		calibPoint->show();
-		TiTimeout::run(800, onCalibPointReady, &iTimeout);
+		calibPoint->show();                                d("nextPoint - will be acceptable soon");
+		TiTimeout::run(800, onCalibPointReady, &iTimeout); d("nextPoint - ....");
 	}
 	else
 	{
@@ -646,12 +675,12 @@ void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
 		if (!iIsVerifying)
 		{
 			iCalibQuality->reset();
-
+																											 d("nextPoint - finished");
 			if (FOnFinished)
 				FOnFinished(this);
 		}
 		else
-		{
+		{                                                  d("nextPoint - estimate verification quality");
 			EstimateVerificationQuality();
 
 			if (FOnVerifFinished)
@@ -659,35 +688,36 @@ void __fastcall TiProfiledGame::NextPoint(int aPointNumber)
 
 			onCalibPointsDone();
 		}
-	}
+	}                                                    d(String().sprintf("  /nextPoint - %d", aPointNumber));
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::RecalibratePoint(int aPointNumber)
-{
+{                                                                          d(String().sprintf("recalib - %d", aPointNumber));
 	if (FOnEvent)
 		FOnEvent(this, String().sprintf("restart\t%d", aPointNumber - 1));
-
+																																					 
 	iCalibPoints->prepare(aPointNumber);
 
 	if (FOnRecalibratePoint)
 		FOnRecalibratePoint(this, aPointNumber, true);
-
+																																					 d("  /recalib");
 	//NextPoint(aPointNumber); // GT-driven
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::PointDone(TObject* aSender)
 {
-	if (!iCalibPoints->IsWaitingToAcceptPoint)
+	if (!iCalibPoints->IsWaitingToAcceptPoint) {              d("pointDone - NOT WAITING");
 		return;
-
+	}
+																														d("pointDone");
 	if (iPointAcceptTimeout)
 		iPointAcceptTimeout->kill();
 
 	iIsRecalibrating = false;
 	ReportPointAcceptance();
-
+																														d("pointDone - accept");
 	int duration = iCalibPoints->accept();
 
 	TiCalibPoints::EiItemResultType itemResultType = iCalibPoints->showItemResult(iTargetID);
@@ -709,7 +739,7 @@ void __fastcall TiProfiledGame::PointDone(TObject* aSender)
 	{
 		iNextPointID = -1;
 		TiTimeout::run(1000, AfterPointDone, &iTimeout);
-	}
+	}                                                         d("  /pointDone");
 }
 
 //---------------------------------------------------------------------------
@@ -926,7 +956,7 @@ void __fastcall TiProfiledGame::FormDestroy(TObject *Sender)
 	delete iGraphics;
 
 	if (iTimeout)
-		iPointAcceptTimeout->kill();
+		iTimeout->kill();
 	if (iPointAcceptTimeout)
 		iPointAcceptTimeout->kill();
 	if (iPointHangTimeout)
@@ -964,7 +994,11 @@ void __fastcall TiProfiledGame::FormKeyUp(TObject *Sender, WORD &Key,
 			TShiftState Shift)
 {
 #ifdef _DEBUG
-	if (iLogin->IsVisible)
+	if (Key == VK_F1)
+		ShowLog();
+	else if (Key == VK_F2 && OnEvent)
+		OnEvent(this, "CMD_SHOW_ERROR");
+	else if (iLogin->IsVisible)
 	{
 	}
 	else if (iProfileEditor && iProfileEditor->IsVisible)
@@ -1080,6 +1114,12 @@ void __fastcall TiProfiledGame::FormKeyDown(TObject *Sender,
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::FormPaint(TObject *Sender)
+{
+	onObjectPaint(this, updAll);
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiProfiledGame::memNameKeyDown(TObject *Sender,
 			WORD &Key, TShiftState Shift)
 {
@@ -1120,6 +1160,13 @@ void __fastcall TiProfiledGame::tmrKostyl3Timer(TObject *Sender)
 {
 	tmrKostyl3->Enabled = false;
 	StartVerification();
+}
+
+//---------------------------------------------------------------------------
+void __fastcall TiProfiledGame::tmrKostyl4Timer(TObject *Sender)
+{
+	tmrKostyl4->Enabled = false;
+	AfterPointDone();
 }
 
 //---------------------------------------------------------------------------

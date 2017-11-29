@@ -67,6 +67,9 @@ void __fastcall TiCalibPoint::start()
 //---------------------------------------------------------------------------
 void __fastcall TiCalibPoint::stop(bool aIsAccepted)
 {
+	if (aIsAccepted)
+		iAcceptanceCount++;
+		
 	iCalibTarget->stopAnimation();
 }
 

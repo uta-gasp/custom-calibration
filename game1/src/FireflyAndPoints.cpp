@@ -16,7 +16,13 @@
 //---------------------------------------------------------------------------
 using namespace FireflyAndPoints;
 
-static bool sIsDebug = true;
+static bool sIsDebug =
+#ifdef _DEBUG
+	true;
+#else
+	false;
+#endif
+
 static TStringList* sLog = new TStringList();
 void d(String s) { if (sIsDebug) sLog->Add(s); }
 void ShowLog() {

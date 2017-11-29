@@ -44,6 +44,7 @@ class TiProfiledGame : public TForm
 	TTimer *tmrKostyl1;
 	TTimer *tmrKostyl2;
 	TTimer *tmrKostyl3;
+	TTimer *tmrKostyl4;
 		void __fastcall FormCreate(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 		void __fastcall FormMouseUp(TObject *Sender, TMouseButton Button,
@@ -57,6 +58,8 @@ class TiProfiledGame : public TForm
 	void __fastcall tmrKostyl1Timer(TObject *Sender);
 	void __fastcall tmrKostyl2Timer(TObject *Sender);
 	void __fastcall tmrKostyl3Timer(TObject *Sender);
+	void __fastcall tmrKostyl4Timer(TObject *Sender);
+	void __fastcall FormPaint(TObject *Sender);
 
 	public:
 		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);

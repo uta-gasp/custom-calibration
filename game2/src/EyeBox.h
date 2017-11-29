@@ -27,6 +27,9 @@ class TiEyeBox : public TiScene
 		TiAnimation* iLeft;
 		TiAnimation* iRight;
 
+		EyeDataStruct iLastLeftEye;
+		EyeDataStruct iLastRightEye;
+
 		TiProfile* iProfile;
 
 		TiUserPositionQualityEstimator* iUserPositionQualityEstimatorLeft;
@@ -36,6 +39,8 @@ class TiEyeBox : public TiScene
 		void __fastcall SetEyeLocation(TiAnimation* aEye, double aX, double aY);
 		void __fastcall SetEyeScale(TiAnimation* aEye, double aDist);
 		double __fastcall GetScale(double aDist);
+
+		void __fastcall DrawDebugInfo(Gdiplus::Graphics* aGraphics, const EyeDataStruct& aEyeData, int aOffsetY);
 
 	public:
 		__fastcall TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport);

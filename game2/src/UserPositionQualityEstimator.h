@@ -30,8 +30,12 @@ class TiUserPositionQualityEstimator
 		{
 			pqUndefined = -1,
 			pqOK = 0,
-			pqWrongZ = 1,
-			pqWrongXY = 2
+			pqTooClose = 1,
+			pqTooFar = 2,
+			pqTooLeft = 4,
+			pqTooRight = 8,
+			pqTooUp = 16,
+			pqTooDown = 32
 		};
 
 	private:

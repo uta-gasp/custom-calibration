@@ -24,8 +24,12 @@ const int KEyeCircleWidth = 8;
 const int KEyeBoxWidth = 800;
 const int KEyeBoxHeight = 600;
 
-const int KThresholdZ = 100;
-const int KThresholdXY = 10;
+const int KThresholdZ = 80;
+const int KThresholdXY = 30;
+
+const double KIdealDistance = 480.0;    // mm
+const double KIdealEyeX 		= -28.0;    // px, left eye
+const double KIdealEyeY 		=   2.0;    // px, left eye
 
 //---------------------------------------------------------------------------
 __fastcall TiEyeBox::TiEyeBox(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aViewport) :
@@ -97,6 +101,8 @@ void __fastcall TiEyeBox::left(EyeDataStruct& aEyeData)
 	if (!iIsVisible)
 		return;
 
+	iLastLeftEye = aEyeData;
+
 	SetEyeLocation(iLeft, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iLeft, aEyeData.eyePositionZ);
 
@@ -118,9 +124,11 @@ void __fastcall TiEyeBox::right(EyeDataStruct& aEyeData)
 	if (!iIsVisible)
 		return;
 
+	iLastRightEye = aEyeData;
+
 	SetEyeLocation(iRight, aEyeData.eyePositionX, aEyeData.eyePositionY);
 	SetEyeScale(iRight, aEyeData.eyePositionZ);
-
+/*
 	if (!iEstimateUserPositionQuality)
 		return;
 
@@ -131,6 +139,7 @@ void __fastcall TiEyeBox::right(EyeDataStruct& aEyeData)
 		if (FOnDone)
 			FOnDone(this);
 	}
+	*/
 }
 
 //---------------------------------------------------------------------------
@@ -154,6 +163,10 @@ void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUp
 
 		if (iLeft->IsVisible)
 		{
+#ifdef _DEBUG
+			DrawDebugInfo(aGraphics, iLastLeftEye, 0);
+#endif
+
 			double size = iLeft->Scale * KEyeSize;
 			Gdiplus::Rect idealSizeLeft(iLeft->X - (size - KEyeCircleWidth/2)/2, iLeft->Y - (size - KEyeCircleWidth/2)/2, size, size);
 			aGraphics->DrawEllipse(&idealSizePen, idealSizeLeft);
@@ -161,6 +174,10 @@ void __fastcall TiEyeBox::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateType aUp
 
 		if (iRight->IsVisible)
 		{
+#ifdef _DEBUG
+			DrawDebugInfo(aGraphics, iLastRightEye, iScreenSize.Height / 2);
+#endif
+
 			double size = iRight->Scale * KEyeSize;
 			Gdiplus::Rect idealSizeRight(iRight->X - (size - KEyeCircleWidth/2)/2, iRight->Y - (size - KEyeCircleWidth/2)/2, size, size);
 			aGraphics->DrawEllipse(&idealSizePen, idealSizeRight);
@@ -208,3 +225,20 @@ double __fastcall TiEyeBox::GetScale(double aDist)
 	return sqrt(max(KMinEyeScale, 3.0 - 2*(aDist - KMinEyeDistance)/(TiUserPositionQualityEstimator::getIdealUserDistance() - KMinEyeDistance)));
 }
 
+//---------------------------------------------------------------------------
+void __fastcall TiEyeBox::DrawDebugInfo(Gdiplus::Graphics* aGraphics, const EyeDataStruct& aEyeData, int aOffsetY)
+{
+	float fontSize = 28;
+	WideString text;
+	Gdiplus::Font font(L"Arial", fontSize);
+	Gdiplus::PointF origin(10.0f, aOffsetY + 10.0f);
+	Gdiplus::SolidBrush textBrush(Gdiplus::Color(255, 255, 255, 255));
+
+	aGraphics->DrawString(text.c_bstr(), text.Length(), &font, origin, &textBrush); origin.Y += 1.25 * fontSize;
+	double dx = aEyeData.eyePositionX - KIdealEyeX;
+	double dy = aEyeData.eyePositionY - KIdealEyeY;
+	text = String().sprintf("%.0f", sqrt(dx*dx + dy*dy));
+	aGraphics->DrawString(text.c_bstr(), text.Length(), &font, origin, &textBrush); origin.Y += 1.25 * fontSize;
+	text = String().sprintf("%.0f", aEyeData.eyePositionZ - KIdealDistance);
+	aGraphics->DrawString(text.c_bstr(), text.Length(), &font, origin, &textBrush); origin.Y += 1.25 * fontSize;
+}

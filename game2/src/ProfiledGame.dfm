@@ -17,6 +17,7 @@ object iProfiledGame: TiProfiledGame
   OnKeyDown = FormKeyDown
   OnKeyUp = FormKeyUp
   OnMouseUp = FormMouseUp
+  OnPaint = FormPaint
   PixelsPerInch = 96
   TextHeight = 13
   object pnlNameContainer: TPanel
@@ -69,6 +70,13 @@ object iProfiledGame: TiProfiledGame
     Interval = 10
     OnTimer = tmrKostyl3Timer
     Left = 80
+    Top = 12
+  end
+  object tmrKostyl4: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = tmrKostyl4Timer
+    Left = 116
     Top = 12
   end
 end

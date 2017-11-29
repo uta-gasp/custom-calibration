@@ -29,6 +29,7 @@ __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 		iCurrentDaySessions(NULL),
 		iCurrentSessionIndex(-1),
 		iPreInstructionForm(NULL),
+		iMouseTimer(NULL),
 		FOnCalibrationStarted(NULL),
 		FOnCalibrationDisplayReady(NULL),
 		FOnPointAccepted(NULL),
@@ -44,12 +45,23 @@ __fastcall TiController::TiController(bool aDebug, String& aSettingsFileName) :
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
 	iUsers = new TiUsers(true);
+
+	if (sMouseInput)
+	{
+		iMouseTimer = new TTimer(NULL);
+		iMouseTimer->Interval = 30;
+		iMouseTimer->Enabled = true;
+		iMouseTimer->OnTimer = onMouseTimer;
+	}
 }
 
 //---------------------------------------------------------------------------
 __fastcall TiController::~TiController()
 {
 	DestroyCalibration();
+
+	if (iMouseTimer)
+		delete iMouseTimer;
 
 	delete iUsers;
 
@@ -67,7 +79,7 @@ void __fastcall TiController::loadInstructions(String& aFile)
 {
 	if (!FileExists(aFile))
 		return;
-		
+
 	TStringList* lines = new TStringList();
 	lines->LoadFromFile(aFile);
 
@@ -278,8 +290,8 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 		iFireflyAndPoints->GameAfterCalibration = true;
 
-		if (sMouseInput)
-			iFireflyAndPoints->OnMouseMove = onCalib_MouseMove;
+		//if (sMouseInput)
+		//	iFireflyAndPoints->OnMouseMove = onCalib_MouseMove;
 
 		iCalibrationForm = iFireflyAndPoints;
 	}
@@ -299,8 +311,8 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
 		iProfiledGame->OnVerifFinished = onCalib_VerifFinished;
 
-		if (sMouseInput)
-			iProfiledGame->OnMouseMove = onCalib_MouseMove;
+		//if (sMouseInput)
+		//	iProfiledGame->OnMouseMove = onCalib_MouseMove;
 
 		iCalibrationForm = iProfiledGame;
 	}
@@ -537,20 +549,24 @@ void __fastcall TiController::onCalib_MouseMove(TObject* aSender, TShiftState aS
 {
 	static double sLastEyeX = 0;
 	static double sLastEyeY = 0;
-	static double sLastDist = 530;
+	static double sLastDist = 480;
+	static double sPrevDist = 0;
 
 	if (!iCalibrationForm)
 		return;
 
-	if (!aShift.Contains(ssShift))
+	if (!aShift.Contains(ssLeft))
 	{
 		sLastEyeX = (double(aX) / iCalibrationForm->Width - 0.5) * 320;
 		sLastEyeY = (0.5 - double(aY) / iCalibrationForm->Height) * 240;
+		sPrevDist = 0;
 	}
 	else
 	{
+		if (!sPrevDist)
+			sPrevDist = sLastDist;
 		double x = (double(aX) / iCalibrationForm->Width - 0.5) * 320;
-		sLastDist = 500 + (x - sLastEyeX);
+		sLastDist = sPrevDist + (x - sLastEyeX);
 	}
 
 	SampleStruct sample = {__int64(0),
@@ -579,4 +595,15 @@ void __fastcall TiController::onCalibForm_Closed(TObject* aSender, TCloseAction&
 		TiTimeout::run(1000, RunNextSession);
 	}
 }
+
+//---------------------------------------------------------------------------
+void __fastcall TiController::onMouseTimer(TObject* aSender)
+{
+	Byte states[256];
+	::GetKeyboardState(states);
+	TShiftState ss = KeyboardStateToShiftState(states);
+
+	onCalib_MouseMove(aSender, ss, Mouse->CursorPos.x, Mouse->CursorPos.y);
+}
+
 

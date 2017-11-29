@@ -61,6 +61,7 @@ class TiController : public TObject
 		TForm* iCalibrationForm;
 		TiUsers* iUsers;
 
+		TTimer* iMouseTimer;
 		TiTimestamp* iTimestamp;
 		TiLogger* iEvents;
 		TiLogger* iSamples;
@@ -109,6 +110,8 @@ class TiController : public TObject
 		void __fastcall onCalib_MouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 
 		void __fastcall onCalibForm_Closed(TObject* aSender, TCloseAction& Action);
+
+		void __fastcall onMouseTimer(TObject* aSender);
 
 	public:
 		__fastcall TiController(bool aDebug, String& aSettingsFileName);

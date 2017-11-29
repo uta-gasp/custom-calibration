@@ -13,8 +13,8 @@ using namespace ProfiledGame;
 //---------------------------------------------------------------------------
 const int KProximityBufferSize = 20;
 
-const double KIdealDistance = 530.0;    // mm
-const double KIdealEyeX 		= -36.0;    // px, left eye
+const double KIdealDistance = 480.0;    // mm
+const double KIdealEyeX 		= -28.0;    // px, left eye
 const double KIdealEyeY 		=   2.0;    // px, left eye
 
 //---------------------------------------------------------------------------
@@ -45,7 +45,7 @@ TiUserPositionQualityEstimator::PositionQuality _fastcall TiUserPositionQualityE
 	double dx = aEyeData.eyePositionX - KIdealEyeX;
 	double dy = aEyeData.eyePositionY - KIdealEyeY;
 	proximity->XY = sqrt(dx*dx + dy*dy);
-	proximity->Z = fabs(KIdealDistance - aEyeData.eyePositionZ);
+	proximity->Z = aEyeData.eyePositionZ - KIdealDistance;
 
 	if (iProximities->Count == KProximityBufferSize)
 		iProximities->remove(0l);
@@ -56,6 +56,8 @@ TiUserPositionQualityEstimator::PositionQuality _fastcall TiUserPositionQualityE
 
 	if (iProximities->Count == KProximityBufferSize)
 	{
+		result = pqOK;
+
 		double avgZ  = 0;
 		double avgXY = 0;
 		double weights = 0;
@@ -72,13 +74,17 @@ TiUserPositionQualityEstimator::PositionQuality _fastcall TiUserPositionQualityE
 		avgProximity.XY = avgXY / weights;
 
 		if (avgProximity.Z > iThresholdZ)
-			result = pqWrongZ;
-		if (avgProximity.XY > iThresholdXY)
-			result = pqWrongXY;
+			result |= pqTooFar;
+		else if (avgProximity.Z < -iThresholdZ)
+			result |= pqTooClose;
 
-		if (result == pqUndefined)
-			result = pqOK;
-		else
+		if (avgProximity.XY > iThresholdXY)
+		{
+			result |= dx < 0 ? pqTooLeft : pqTooRight;
+			result |= dy < 0 ? pqTooUp : pqTooDown;
+		}
+
+		if (result != pqOK)
 			iProximities->clear();
 	}
 
