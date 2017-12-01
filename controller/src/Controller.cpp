@@ -147,8 +147,12 @@ void __fastcall TiController::run(String& aStudentName, int aDay)
 
 		while (iCurrentDaySessions)
 		{
+			bool wasAborted = false;
 			if (iCurrentSessionIndex < SESSION_COUNT)
-				ShowPreInstruction((TfrmPreInstruction::EiInstruction)iCurrentDaySessions[iCurrentSessionIndex]);
+				wasAborted = ShowPreInstruction((TfrmPreInstruction::EiInstruction)iCurrentDaySessions[iCurrentSessionIndex]);
+
+			if (wasAborted)
+				iCurrentSessionIndex = SESSION_COUNT;
 
 			RunNextSession();
 			iCurrentSessionIndex++;
@@ -290,9 +294,6 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 		iFireflyAndPoints->GameAfterCalibration = true;
 
-		//if (sMouseInput)
-		//	iFireflyAndPoints->OnMouseMove = onCalib_MouseMove;
-
 		iCalibrationForm = iFireflyAndPoints;
 	}
 	else if (aType == ctProfiledGame)
@@ -310,9 +311,6 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 		iProfiledGame->OnAborted = onCalib_Aborted;
 		iProfiledGame->OnVerifStarted = onCalib_VerifStarted;
 		iProfiledGame->OnVerifFinished = onCalib_VerifFinished;
-
-		//if (sMouseInput)
-		//	iProfiledGame->OnMouseMove = onCalib_MouseMove;
 
 		iCalibrationForm = iProfiledGame;
 	}
@@ -366,8 +364,11 @@ void __fastcall TiController::DestroyCalibration(TObject* aSender)
 		settings->save(false);
 		delete settings;
 
-		delete iCalibrationForm;
-		iCalibrationForm = NULL;
+		if (iCalibrationForm)
+		{
+			delete iCalibrationForm;
+			iCalibrationForm = NULL;
+		}
 	}
 
 	if (iEvents)
@@ -396,13 +397,7 @@ void __fastcall TiController::RunNextSession(TObject* aSender)
 
 	if (iCurrentSessionIndex >= SESSION_COUNT)
 	{
-		iCurrentUser = NULL;
-		iCurrentDaySessions = NULL;
-		iCurrentSessionIndex = -1;
-
-		if (FOnFinished)
-			FOnFinished(this);
-
+		FinilizeSessions();
 		return;
 	}
 
@@ -410,12 +405,27 @@ void __fastcall TiController::RunNextSession(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiController::ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction)
+void __fastcall TiController::FinilizeSessions()
+{
+	iCurrentUser = NULL;
+	iCurrentDaySessions = NULL;
+	iCurrentSessionIndex = -1;
+
+	if (FOnFinished)
+		FOnFinished(this);
+}
+
+//---------------------------------------------------------------------------
+bool __fastcall TiController::ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction)
 {
 	TfrmPreInstruction* kostyl = new TfrmPreInstruction(NULL);
 	kostyl->Instruction = aInstruction;
 	kostyl->ShowModal();
+
+	bool result = kostyl->WasAborted;
 	delete kostyl;
+
+	return result;
 }
 
 //---------------------------------------------------------------------------
@@ -545,42 +555,6 @@ void __fastcall TiController::onCalib_VerifFinished(TObject* aSender)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiController::onCalib_MouseMove(TObject* aSender, TShiftState aShift, int aX, int aY)
-{
-	static double sLastEyeX = 0;
-	static double sLastEyeY = 0;
-	static double sLastDist = 480;
-	static double sPrevDist = 0;
-
-	if (!iCalibrationForm)
-		return;
-
-	if (!aShift.Contains(ssLeft))
-	{
-		sLastEyeX = (double(aX) / iCalibrationForm->Width - 0.5) * 320;
-		sLastEyeY = (0.5 - double(aY) / iCalibrationForm->Height) * 240;
-		sPrevDist = 0;
-	}
-	else
-	{
-		if (!sPrevDist)
-			sPrevDist = sLastDist;
-		double x = (double(aX) / iCalibrationForm->Width - 0.5) * 320;
-		sLastDist = sPrevDist + (x - sLastEyeX);
-	}
-
-	SampleStruct sample = {__int64(0),
-			{double(aX), double(aY), 70.0, sLastEyeX - 27, sLastEyeY, sLastDist},
-			{double(aX), double(aY), 70.0, sLastEyeX + 27, sLastEyeY, sLastDist}
-	};
-
-	if (iFireflyAndPoints)
-		iFireflyAndPoints->setSample(sample);
-	else if (iProfiledGame)
-		iProfiledGame->setSample(sample);
-}
-
-//---------------------------------------------------------------------------
 void __fastcall TiController::onCalibForm_Closed(TObject* aSender, TCloseAction& Action)
 {
 	if (!iCurrentDaySessions)
@@ -599,11 +573,44 @@ void __fastcall TiController::onCalibForm_Closed(TObject* aSender, TCloseAction&
 //---------------------------------------------------------------------------
 void __fastcall TiController::onMouseTimer(TObject* aSender)
 {
-	Byte states[256];
-	::GetKeyboardState(states);
-	TShiftState ss = KeyboardStateToShiftState(states);
+	static double sLastEyeX = 0;
+	static double sLastEyeY = 0;
+	static double sLastDist = 480;
+	static double sPrevDist = 0;
 
-	onCalib_MouseMove(aSender, ss, Mouse->CursorPos.x, Mouse->CursorPos.y);
+	if (!iCalibrationForm)
+		return;
+
+	Byte keyStates[256];
+	::GetKeyboardState(keyStates);
+	TShiftState kbdState = KeyboardStateToShiftState(keyStates);
+
+	double x = Mouse->CursorPos.x;
+	double y = Mouse->CursorPos.y;
+
+	if (!kbdState.Contains(ssLeft))
+	{
+		sLastEyeX = (x / iCalibrationForm->Width - 0.5) * 320;
+		sLastEyeY = (0.5 - y / iCalibrationForm->Height) * 240;
+		sPrevDist = 0;
+	}
+	else
+	{
+		if (!sPrevDist)
+			sPrevDist = sLastDist;
+		double eyeX = (x / iCalibrationForm->Width - 0.5) * 320;
+		sLastDist = sPrevDist + (eyeX - sLastEyeX);
+	}
+
+	SampleStruct sample = {__int64(0),
+			{x, y, 70.0, sLastEyeX - 27, sLastEyeY, sLastDist},
+			{x, y, 70.0, sLastEyeX + 27, sLastEyeY, sLastDist}
+	};
+
+	if (iFireflyAndPoints)
+		iFireflyAndPoints->setSample(sample);
+	else if (iProfiledGame)
+		iProfiledGame->setSample(sample);
 }
 
 

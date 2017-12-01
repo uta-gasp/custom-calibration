@@ -29,6 +29,7 @@ TiProfile::TiProfile(TiAnimationManager* aManager, TiSize aScreenSize, TiSize aV
 		iScreenSize(aScreenSize),
 		iViewport(aViewport),
 		iStatus(psNoName),
+		iAvatar(NULL),
 		iSkinColorID(0),
 		iHairColorID(0),
 		iEyesColorID(0),
@@ -52,7 +53,9 @@ TiProfile::~TiProfile()
 {
 	delete iSavedData;
 	delete iTargetPoints;
-	delete iAvatar;
+
+	if (iAvatar)
+		delete iAvatar;
 }
 
 //---------------------------------------------------------------------------
@@ -248,28 +251,33 @@ void __fastcall TiProfile::SetName(WideString aValue)
 void __fastcall TiProfile::SetSkinColorID(int aValue)
 {
 	iSkinColorID = aValue;
-	iAvatar->setPartType(TiAvatar::apBody, iSkinColorID);
+
+	if (iAvatar)
+		iAvatar->setPartType(TiAvatar::apBody, iSkinColorID);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfile::SetHairColorID(int aValue)
 {
 	iHairColorID = aValue;
-	iAvatar->setPartType(TiAvatar::apHair, iHairColorID);
+	if (iAvatar)
+		iAvatar->setPartType(TiAvatar::apHair, iHairColorID);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfile::SetEyesColorID(int aValue)
 {
 	iEyesColorID = aValue;
-	iAvatar->setPartType(TiAvatar::apEyes, iEyesColorID);
+	if (iAvatar)
+		iAvatar->setPartType(TiAvatar::apEyes, iEyesColorID);
 }
 
 //---------------------------------------------------------------------------
 void __fastcall TiProfile::SetShirtColorID(int aValue)
 {
 	iShirtColorID = aValue;
-	iAvatar->setPartType(TiAvatar::apShirt, iShirtColorID);
+	if (iAvatar)
+		iAvatar->setPartType(TiAvatar::apShirt, iShirtColorID);
 }
 
 //---------------------------------------------------------------------------
@@ -294,7 +302,8 @@ bool __fastcall TiProfile::GetIsSucceeded()
 void __fastcall TiProfile::SetSelectedPrizes(int aValue)
 {
 	iSelectedPrizes = aValue;
-	iAvatar->setPrizes(iSelectedPrizes);
+	if (iAvatar)
+		iAvatar->setPrizes(iSelectedPrizes);
 }
 
 //---------------------------------------------------------------------------

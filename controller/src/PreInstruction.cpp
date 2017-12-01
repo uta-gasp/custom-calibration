@@ -13,7 +13,8 @@ const int KInstructionHeight = 170;
 //---------------------------------------------------------------------------
 __fastcall TfrmPreInstruction::TfrmPreInstruction(TComponent* aOwner) :
 		TForm(aOwner),
-		iHasInstruction(false)
+		iHasInstruction(false),
+		iWasAborted(false)
 {
 	iButtonContinue = TiRect(Width / 2, 2 * Height / 2, 200, 60);
 }
@@ -88,5 +89,15 @@ void __fastcall TfrmPreInstruction::FormClick(TObject *Sender)
 //	}
 }
 
+//---------------------------------------------------------------------------
+void __fastcall TfrmPreInstruction::FormKeyUp(TObject *Sender, WORD &Key,
+			TShiftState Shift)
+{
+	if (Key == VK_ESCAPE)
+	{
+		iWasAborted = true;
+		ModalResult = mrOk;
+	}
+}
 //---------------------------------------------------------------------------
 

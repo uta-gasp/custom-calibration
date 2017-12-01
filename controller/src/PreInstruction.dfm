@@ -15,6 +15,7 @@ object frmPreInstruction: TfrmPreInstruction
   OnClick = FormClick
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyUp = FormKeyUp
   OnPaint = FormPaint
   PixelsPerInch = 96
   TextHeight = 13

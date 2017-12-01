@@ -90,7 +90,8 @@ class TiController : public TObject
 		void __fastcall DestroyCalibration(TObject* aSender = NULL);
 
 		void __fastcall RunNextSession(TObject* aSender = NULL);
-		void __fastcall ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction);
+		void __fastcall FinilizeSessions();
+		bool __fastcall ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction);
 
 		TStrings* __fastcall GetUsers();
 
@@ -106,8 +107,6 @@ class TiController : public TObject
 		void __fastcall onCalib_Aborted(TObject* aSender);
 		void __fastcall onCalib_VerifStarted(TObject* aSender);
 		void __fastcall onCalib_VerifFinished(TObject* aSender);
-
-		void __fastcall onCalib_MouseMove(TObject* aSender, TShiftState Shift, int X, int Y);
 
 		void __fastcall onCalibForm_Closed(TObject* aSender, TCloseAction& Action);
 

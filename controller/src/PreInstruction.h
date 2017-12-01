@@ -21,6 +21,7 @@ class TfrmPreInstruction : public TForm
 		void __fastcall FormPaint(TObject *Sender);
 		void __fastcall FormDestroy(TObject *Sender);
 	void __fastcall FormClick(TObject *Sender);
+	void __fastcall FormKeyUp(TObject *Sender, WORD &Key, TShiftState Shift);
 
 	public:
 		enum EiInstruction
@@ -37,6 +38,7 @@ class TfrmPreInstruction : public TForm
 		TiAnimation* iInstruction;
 		TiRect iButtonContinue;
 		bool iHasInstruction;
+		bool iWasAborted;
 
 		EiInstruction __fastcall GetInstruction();
 		void __fastcall SetInstruction(EiInstruction aValue);
@@ -45,6 +47,7 @@ class TfrmPreInstruction : public TForm
 		__fastcall TfrmPreInstruction(TComponent* aOwner);
 
 		__property EiInstruction Instruction = {read = GetInstruction, write = SetInstruction};
+		__property bool WasAborted = {read = iWasAborted};
 };
 
 //---------------------------------------------------------------------------

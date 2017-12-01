@@ -27,12 +27,7 @@ const CalibrationPointStruct KCalibPoints[] = {
 const String KSettingsFileName = "settings.xml";
 const String KSessionsFileName = "sessions.txt";
 
-const bool KDebug =
-#ifdef _DEBUG
-	true;
-#else
-	false;
-#endif
+const bool KDebug =	false;
 
 //---------------------------------------------------------------------------
 void Log(String aMsg) {
