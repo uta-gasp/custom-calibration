@@ -262,12 +262,15 @@ void __fastcall TiController::CreateCalibration(EiCalibType aType)
 
 	iTimestamp = new TiTimestamp();
 
+	String fileNamePrefix;
+	fileNamePrefix.printf("%c_", aType);
+
 	String fileNameSuffix;
 	if (iCurrentUser)
 		fileNameSuffix.printf("-%s-day%d", iCurrentUser->Name.c_str(), iCurrentDayIndex + 1);
 
-	iEvents = new TiLogger(String("events") + fileNameSuffix);
-	iSamples = new TiLogger(String("samples") + fileNameSuffix);
+	iEvents = new TiLogger(fileNamePrefix + String("events") + fileNameSuffix);
+	iSamples = new TiLogger(fileNamePrefix + String("samples") + fileNameSuffix);
 
 	if (iCurrentUser)
 		iEvents->line(String().sprintf("user\t%s", iCurrentUser->Name.c_str()));
