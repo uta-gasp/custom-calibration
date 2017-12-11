@@ -117,7 +117,7 @@ class TiController : public TObject
 		virtual __fastcall ~TiController();
 
 		void __fastcall loadInstructions(String& aFile);
-		void __fastcall run(String& aStudentName, int aDay);
+		void __fastcall run(const String& aStudentName, int aDay = 0);
 		void __fastcall run(EiCalibType aCalibType);
 
 		void __fastcall setPoints(TiCalibrationPoints* aPoints);

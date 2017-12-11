@@ -3,6 +3,9 @@
 #include "assets_ffap.h"
 
 //---------------------------------------------------------------------------
+#include <math.h>
+
+//---------------------------------------------------------------------------
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
@@ -12,6 +15,8 @@ using namespace FireflyAndPoints;
 const int KWidth = 1377;
 const int KHeight = 768;
 const int KResultHeight = 200;
+
+const double KPointersDistance = 70;
 
 const TiOlioHunting::SiHidingOlio KHidingOlios[] = { // picture ID is olio's ID
 	TiOlioHunting::SiHidingOlio(1139.5, 71.5, 	51, 91, 	27, 27),
@@ -133,6 +138,8 @@ void __fastcall TiOlioHuntingTimer::SetTimeout(int aValue)
 //---------------------------------------------------------------------------
 __fastcall TiOlioHunting::TiOlioHunting(TiAnimationManager* aManager, TiSize aScreenSize) :
 		TObject(),
+		iPointerState(psDisabled),
+		iLastHoveringOlioIndex(-1),
 		iDuration(0.0),
 		iOliosFound(0),
 		iBestScore(0),
@@ -158,7 +165,7 @@ __fastcall TiOlioHunting::TiOlioHunting(TiAnimationManager* aManager, TiSize aSc
 		TiAnimation* olio = new TiAnimation();
 		//olio->Center = TPoint(0, 0);
 		olio->addFrames(IDR_HIDDEN_OLIOS + 1 + i, hidingOlio.Width, hidingOlio.Height);
-		olio->placeTo(offsetX + hidingOlio.X, offsetY + hidingOlio.Y);
+		olio->placeTo(offsetX + hidingOlio.X + 4, offsetY + hidingOlio.Y);
 		olio->hide();
 
 		iHidingOlios.add(olio);
@@ -198,11 +205,16 @@ __fastcall TiOlioHunting::TiOlioHunting(TiAnimationManager* aManager, TiSize aSc
 	aManager->add(iCountdown);
 
 	iPointerGaze = new TiAnimation(false, false);
-	//iPointerGaze->addFrames(IDR_GAME_POINTER, 48, 48);
-	//aManager->add(iPointerGaze);
+	iPointerGaze->addFrames(IDR_GAME_POINTER, 48, 48);
+	aManager->add(iPointerGaze);
 
 	iPointerMouse = new TiAnimation(false, false);
-	iPointerMouse->addFrames(IDR_GAME_POINTER, 48, 48);
+	iPointerMouse->addFrames(IDR_GAME_POINTER_DISABLED, 54, 54);
+	iPointerMouse->addFrames(IDR_GAME_POINTER_ENABLED, 54, 54);
+	iPointerMouse->addFrames(IDR_GAME_POINTER_DONE, 54, 54);
+	iPointerMouse->AnimationSpeed = 2;
+	iPointerMouse->LoopAnimation = true;
+	iPointerMouse->AnimationIndex = iPointerState;
 	aManager->add(iPointerMouse);
 
 	LARGE_INTEGER fr;
@@ -243,6 +255,7 @@ void __fastcall TiOlioHunting::ComputeAndShowScore()
 		iTimeoutRef->kill();
 
 	iCountdown->stop();
+	iPointerGaze->fadeOut();
 	iPointerMouse->fadeOut();
 
 	LARGE_INTEGER li;
@@ -272,10 +285,70 @@ void __fastcall TiOlioHunting::ComputeAndShowScore()
 }
 
 //---------------------------------------------------------------------------
+void __fastcall TiOlioHunting::ResetCursorState(TObject* aSender)
+{
+	iPointerMouse->AnimationIndex = psDisabled;
+}
+
+//---------------------------------------------------------------------------
 void __fastcall TiOlioHunting::ShowBestScoreLogos(TObject* aSender)
 {
 	iBestScoreLogo1->fadeIn();
 	iBestScoreLogo2->fadeIn();
+}
+
+//---------------------------------------------------------------------------
+TiAnimation* __fastcall TiOlioHunting::GetOlioFromPoint(int aX, int aY, int* aIndex)
+{
+	TiAnimation* result = NULL;
+
+	for (int i = 0; i < iHidingOlios.Count; i++)
+	{
+		TiAnimation* olio = iHidingOlios[i];
+		double distance = olio->distanceTo(aX, aY);
+		if (distance == 0.0)
+		{
+			result = olio;
+			if (aIndex)
+				*aIndex = i;
+			break;
+		}
+	}
+
+	return result;
+}
+
+//---------------------------------------------------------------------------
+TiOlioHunting::EiPointerState __fastcall TiOlioHunting::ComputePointerState()
+{
+	EiPointerState result = psDisabled;
+
+	if (iPointerGaze->X < 1 && iPointerGaze->Y < 1)
+		return result;
+
+	int mouseX = iPointerMouse->X;
+	int mouseY = iPointerMouse->Y;
+
+	int hitOlioIndex;
+	if (GetOlioFromPoint(mouseX, mouseY, &hitOlioIndex))
+	{
+		if (hitOlioIndex != iLastHoveringOlioIndex)
+		{
+			iGazePointOnOlioEnter = TPoint(iPointerGaze->X, iPointerGaze->Y);
+			result = psEnabled;
+		}
+		else
+		{
+			double dx = iGazePointOnOlioEnter.x - iPointerGaze->X;
+			double dy = iGazePointOnOlioEnter.y - iPointerGaze->Y;
+			double dist = sqrt(dx * dx + dy * dy);
+
+			result = dist > KPointersDistance ? psDisabled : psEnabled;
+		}
+	}
+
+	iLastHoveringOlioIndex = hitOlioIndex;
+	return result;
 }
 
 //---------------------------------------------------------------------------
@@ -317,6 +390,7 @@ void __fastcall TiOlioHunting::start(int aOliosToShow)
 	iOliosToFind = oliosToShow;
 
 	iCountdown->start();
+	//iPointerGaze->fadeIn();
 	iPointerMouse->fadeIn();
 
 	if (FOnEvent)
@@ -393,22 +467,13 @@ void __fastcall TiOlioHunting::click()
 //		FOnSelect(this, nearestOlio->X, nearestOlio->Y);
 	*/
 
+	if (iPointerState == psDisabled)
+		return;
 
 	int mouseX = iPointerMouse->X;
 	int mouseY = iPointerMouse->Y;
 
-	TiAnimation* hitOlio = NULL;
-
-	for (int i = 0; i < iHidingOlios.Count; i++)
-	{
-		TiAnimation* olio = iHidingOlios[i];
-		double distance = olio->distanceTo(mouseX, mouseY);
-		if (distance == 0.0)
-		{
-			hitOlio = olio;
-			break;
-		}
-	}
+	TiAnimation* hitOlio = GetOlioFromPoint(mouseX, mouseY);
 
 	bool finished = false;
 	if (hitOlio)
@@ -427,6 +492,9 @@ void __fastcall TiOlioHunting::click()
 			visibleCount += iHidingOlios[i]->IsVisible ? 1 : 0;
 
 		finished = visibleCount == 0;
+
+		iPointerMouse->AnimationIndex = psDone;
+		TiTimeout::run(500, ResetCursorState);
 	}
 
 	if (finished)
@@ -443,6 +511,20 @@ void __fastcall TiOlioHunting::placeGazePointer(int aX, int aY, int aCorrectionX
 void __fastcall TiOlioHunting::placeMousePointer(int aX, int aY)
 {
 	iPointerMouse->placeTo(aX, aY);
+
+	if (iPointerMouse->AnimationIndex == psDone)
+		return;
+
+	EiPointerState newPointerState = ComputePointerState();
+	if (newPointerState != iPointerState)
+	{
+		iPointerState = newPointerState;
+		iPointerMouse->AnimationIndex = iPointerState;
+		if (iPointerState == psEnabled)
+			iPointerMouse->startAnimation();
+		else
+			iPointerMouse->stopAnimation();
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -488,6 +570,7 @@ void __fastcall TiOlioHunting::paintTo(Gdiplus::Graphics* aGraphics, EiUpdateTyp
 	{
 		iInstruction->paintTo(aGraphics);
 		iCountdown->paintTo(aGraphics);
+		iPointerGaze->paintTo(aGraphics);
 		iPointerMouse->paintTo(aGraphics);
 	}
 }

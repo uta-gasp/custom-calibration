@@ -987,7 +987,12 @@ void __fastcall TiFireflyAndPoints::FormKeyUp(TObject *Sender, WORD &Key,
 	}
 	else if (iCalibrationInstruction->IsVisible)
 	{
-		if (Key == VK_SPACE)
+		if (Key == VK_ESCAPE)
+		{
+			iCalibrationInstruction->hide();
+			playGame(NULL);
+		}
+		else if (Key == VK_SPACE)
 		{
 			iCalibrationInstruction->hide();
 			StartCalibration();

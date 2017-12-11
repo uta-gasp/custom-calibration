@@ -58,6 +58,14 @@ class TiOlioHunting : public TObject
 					X(aX), Y(aY), Width(aW), Height(aH), GazeSpotX(aGSX), GazeSpotY(aGSY) { }
 		};
 
+	private:
+		enum EiPointerState	// corresponds to animations on the mouse pointer
+		{
+			psDisabled = 0,
+			psEnabled = 1,
+			psDone = 2
+		};
+
 	public:
 		typedef void __fastcall (__closure *FiOnEvent)(System::TObject* aSender, const String& aMsg);
 		typedef void __fastcall (__closure *FiOnSelect)(System::TObject* aSender, int aTargetX, int aTargetY);
@@ -71,6 +79,10 @@ class TiOlioHunting : public TObject
 		TiOlioHuntingTimer* iCountdown;
 		TiAnimation* iPointerGaze;
 		TiAnimation* iPointerMouse;
+
+		EiPointerState iPointerState;
+		int iLastHoveringOlioIndex;
+		TPoint iGazePointOnOlioEnter;
 
 		TiSize iScreenSize;
 		int iBestScore;
@@ -98,7 +110,11 @@ class TiOlioHunting : public TObject
 		int __fastcall ComputeScore(double aDuration, int aOliosFound);
 		void __fastcall ComputeAndShowScore();
 
+		void __fastcall ResetCursorState(TObject* aSender);
 		void __fastcall ShowBestScoreLogos(TObject* aSender);
+
+		TiAnimation* __fastcall GetOlioFromPoint(int aX, int aY, int* aIndex = NULL);
+		EiPointerState __fastcall ComputePointerState();
 
 	public:
 		__fastcall TiOlioHunting(TiAnimationManager* aManager, TiSize aScreenSize);

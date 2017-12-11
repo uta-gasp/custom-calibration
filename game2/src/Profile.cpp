@@ -2,6 +2,9 @@
 #include "Profile.h"
 
 //---------------------------------------------------------------------------
+#include <stdlib.h>
+
+//---------------------------------------------------------------------------
 #pragma package(smart_init)
 
 //---------------------------------------------------------------------------
@@ -200,7 +203,7 @@ void __fastcall TiProfile::updateScore()
 	iScore = min(9999, iScore + score);
 	iSaldo = min(9999, iSaldo + coins);
 
-	int nextLevelThreshold = (iLevel + 1) * KLevelScoreMax;
+	int nextLevelThreshold = (iLevel + 1) * LevelScoreMax;
 	if (iScore > nextLevelThreshold)
 	{
 		iIsGainedNewLevel = true;
@@ -245,6 +248,12 @@ void __fastcall TiProfile::SetName(WideString aValue)
 			break;
 		}
 	}
+
+	// KOSTYL
+	if (!iScore && rand() < RAND_MAX/2) {
+		iLevel = 1;
+		iScore = LevelScoreMax;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -283,7 +292,7 @@ void __fastcall TiProfile::SetShirtColorID(int aValue)
 //---------------------------------------------------------------------------
 int __fastcall TiProfile::GetLevelScore()
 {
-	return (iScore - iLevel * KLevelScoreMax);
+	return (iScore - iLevel * LevelScoreMax);
 }
 
 //---------------------------------------------------------------------------

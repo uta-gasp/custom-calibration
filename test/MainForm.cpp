@@ -242,7 +242,7 @@ void __fastcall TfrmMainForm::btnStartCalib3Click(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmMainForm::cmbUsersOrDaysChange(TObject *Sender)
 {
-	btnRunUserDay->Enabled = cmbUsers->ItemIndex >= 0 && cmbDays->ItemIndex >= 0;
+	btnRunUserDay->Enabled = cmbUsers->ItemIndex >= 0;
 }
 
 //---------------------------------------------------------------------------
@@ -251,7 +251,7 @@ void __fastcall TfrmMainForm::btnRunUserDayClick(TObject *Sender)
 	Visible = false;
 
 	iController->OnFinished = onCtrl_Finished;
-	iController->run(cmbUsers->Text, cmbDays->ItemIndex);
+	iController->run(cmbUsers->Text);
 }
 
 //---------------------------------------------------------------------------

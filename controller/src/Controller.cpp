@@ -112,7 +112,7 @@ void __fastcall TiController::loadInstructions(String& aFile)
 }
 
 //---------------------------------------------------------------------------
-void __fastcall TiController::run(String& aStudentName, int aDay)
+void __fastcall TiController::run(const String& aStudentName, int aDay)
 {
 	if (iCalibrationForm)
 		return;
@@ -194,6 +194,8 @@ void __fastcall TiController::run(EiCalibType aCalibType)
 			iFireflyAndPoints->showModal();
 		else if (iProfiledGame)
 			iProfiledGame->showModal(userName);
+
+		DestroyCalibration();
 	}
 }
 
@@ -580,6 +582,8 @@ void __fastcall TiController::onMouseTimer(TObject* aSender)
 	static double sLastEyeY = 0;
 	static double sLastDist = 480;
 	static double sPrevDist = 0;
+	static double sGazeDX = 0;
+	static double sGazeDY = 0;
 
 	if (!iCalibrationForm)
 		return;
@@ -605,9 +609,18 @@ void __fastcall TiController::onMouseTimer(TObject* aSender)
 		sLastDist = sPrevDist + (eyeX - sLastEyeX);
 	}
 
+	if (keyStates[VK_LEFT] & 0x80)
+		sGazeDX--;
+	if (keyStates[VK_RIGHT] & 0x80)
+		sGazeDX++;
+	if (keyStates[VK_UP] & 0x80)
+		sGazeDY--;
+	if (keyStates[VK_DOWN] & 0x80)
+		sGazeDY++;
+
 	SampleStruct sample = {__int64(0),
-			{x, y, 70.0, sLastEyeX - 27, sLastEyeY, sLastDist},
-			{x, y, 70.0, sLastEyeX + 27, sLastEyeY, sLastDist}
+			{x + sGazeDX, y + sGazeDY, 70.0, sLastEyeX - 27, sLastEyeY, sLastDist},
+			{x + sGazeDX, y + sGazeDY, 70.0, sLastEyeX + 27, sLastEyeY, sLastDist}
 	};
 
 	if (iFireflyAndPoints)
