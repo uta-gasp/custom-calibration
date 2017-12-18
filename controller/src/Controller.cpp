@@ -88,14 +88,18 @@ void __fastcall TiController::loadInstructions(String& aFile)
 		String line = lines->Strings[i];
 		TStrings* days = TiStrings::split(line, KDaySeparator);
 
-		if (days->Count != 1 + DAY_COUNT)
+		String userName = days->Strings[0];
+		days->Delete(0);
+
+		if (!days->Count)
 			continue;
 
-		SiUser* user = new SiUser(days->Strings[0]);
+		SiUser* user = new SiUser(userName);
 		iUsers->add(user);
-		for (int di = 0; di < DAY_COUNT; di++)
+
+		for (int di = 0; di < days->Count; di++)
 		{
-			TStrings* sessions = TiStrings::split(days->Strings[di+1], KSessionSeparator);
+			TStrings* sessions = TiStrings::split(days->Strings[di], KSessionSeparator);
 			if (sessions->Count != SESSION_COUNT)
 				continue;
 
@@ -439,6 +443,32 @@ TStrings* __fastcall TiController::GetUsers()
 	TStrings* result = new TStringList();
 	for (int i = 0; i < iUsers->Count; i++)
 		result->Add(iUsers->get(i)->Name);
+	return result;
+}
+
+//---------------------------------------------------------------------------
+int __fastcall TiController::GetDayCount()
+{
+	int result = 0;
+
+	for (int ui = 0; ui < iUsers->Count; ui++)
+	{
+		int userDays = 0;
+		for (int di = 0; di < MAX_DAY_COUNT; di++)
+			if (iUsers->get(ui)->Sessions[di][0] != ctNone)
+				userDays++;
+
+		if (!result)
+		{
+			result = userDays;
+		}
+		else if (result != userDays)
+		{
+			MessageBox(NULL, "Illegal session.txt [days count is not constant]", "KidCalib", MB_OK | MB_ICONERROR);
+			break;
+		}
+	}
+
 	return result;
 }
 

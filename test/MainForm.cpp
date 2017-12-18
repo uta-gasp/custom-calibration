@@ -49,9 +49,6 @@ __fastcall TfrmMainForm::TfrmMainForm(TComponent* Owner) :
 	String fileName = ExtractFilePath(Application->ExeName);
 	iSettingsFileName = fileName + "\\" + KSettingsFileName;
 
-	for (int i = 0; i < DAY_COUNT; i++)
-		cmbDays->Items->Add(String().sprintf("Day %d", i + 1));
-
 	CreateController();
 }
 
@@ -81,9 +78,13 @@ void __fastcall TfrmMainForm::CreateController()
 	iController->loadInstructions(fileName);
 
 	TStrings* users = iController->Users;
+
 	cmbUsers->Clear();
 	for (int i = 0; i < users->Count; i++)
 		cmbUsers->Items->Add(users->Strings[i]);
+
+	for (int i = 0; i < iController->DayCount; i++)
+		cmbDays->Items->Add(String().sprintf("Day %d", i + 1));
 }
 
 //---------------------------------------------------------------------------

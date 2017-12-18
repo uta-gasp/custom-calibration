@@ -11,7 +11,7 @@
 #include "PreInstruction.h"
 
 //---------------------------------------------------------------------------
-#define DAY_COUNT 6
+#define MAX_DAY_COUNT 6
 #define SESSION_COUNT 3
 
 //---------------------------------------------------------------------------
@@ -22,7 +22,8 @@ class TiController : public TObject
 		{
 			ctStandard = 's',
 			ctFirefly = 'f',
-			ctProfiledGame = 'p'
+			ctProfiledGame = 'p',
+			ctNone = ' '
 		};
 
 		struct SiCalibrationQualityPoint
@@ -47,9 +48,13 @@ class TiController : public TObject
 		struct SiUser
 		{
 			String Name;
-			EiCalibType Sessions[DAY_COUNT][SESSION_COUNT];
+			EiCalibType Sessions[MAX_DAY_COUNT][SESSION_COUNT];
 
-			SiUser(const String& aName) : Name(aName) { }
+			SiUser(const String& aName) : Name(aName) {
+				for (int i = 0; i < MAX_DAY_COUNT; i++)
+					for (int j = 0; j < SESSION_COUNT; j++)
+						Sessions[i][j] = ctNone;
+			}
 		};
 
 		typedef TiDynArray<SiUser> TiUsers;
@@ -94,6 +99,7 @@ class TiController : public TObject
 		bool __fastcall ShowPreInstruction(TfrmPreInstruction::EiInstruction aInstruction);
 
 		TStrings* __fastcall GetUsers();
+		int __fastcall GetDayCount();
 
 		void __fastcall onCalib_Event(TObject* aSender, const String& aMsg);
 		void __fastcall onCalib_Sample(TObject* aSender, double aX, double aY);
@@ -126,6 +132,7 @@ class TiController : public TObject
 		void __fastcall feedSample(SampleStruct& aSample);
 
 		__property TStrings* Users = {read = GetUsers};
+		__property int DayCount = {read = GetDayCount};
 
 		__property TNotifyEvent OnCalibrationStarted = {read = FOnCalibrationStarted, write = FOnCalibrationStarted};
 		__property TNotifyEvent OnCalibrationDisplayReady = {read = FOnCalibrationDisplayReady, write = FOnCalibrationDisplayReady};
